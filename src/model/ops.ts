@@ -13,7 +13,7 @@ import type { Est } from './assumptions';
 import { BOTTLING, FG_NORMS, RM_NORMS, ROUND, TANK_YARD, WAREHOUSE } from './rules';
 import { expectedAbove, expectedBelow } from './stats';
 import { activeSupplier, COMPONENTS, type ActiveSupplier } from './purchasing';
-import { componentFlows, fgTheoryUnits } from './supplyChain';
+import { componentFlows, componentRisk, fgTheoryUnits, type ComponentRisk } from './supplyChain';
 import { customerPicking, demandBySku, obsoleteBySku, SKUS, unitCostBySku } from './sales';
 import { baselineInputs } from './baseline';
 
@@ -41,6 +41,8 @@ const selfWeighted = (items: { size: number; perWeek: number }[]) => {
 };
 
 interface Core {
+  risk: Record<ComponentKey, ComponentRisk>;
+  componentAvailability: Record<ComponentKey, number>;
   production: SkuProduction[];
   line: OpsResults['line'];
   mixer: OpsResults['mixer'];
@@ -61,7 +63,8 @@ interface Core {
   fgLinesPerWeek: number;
 }
 
-function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est): Core {
+/** `baseShort`: tỷ lệ thiếu NL của baseline (bỏ trống khi đang tính chính baseline → availability = số R0). */
+function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, baseShort?: Record<ComponentKey, number>): Core {
   const o = inputs.ops;
   const line = data.ops.lines.find((l) => l.name === o.bottlingLine) ?? data.ops.lines[0];
   const lineR0 = data.ops.lines.find((l) => l.name === data.ops.decisions.bottlingLine)!;
@@ -114,6 +117,20 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est): 
   const unused = expectedBelow(needHours, sigmaHours, C);
   const outsourced = expectedAbove(needHours, sigmaHours, BOTTLING.maxHoursPerWeek);
   const overtime = Math.max(0, expectedAbove(needHours, sigmaHours, C) - outsourced);
+  // Availability NL theo quyết định SC (safety stock, lot size), NCC (lead time, reliability), intake time:
+  // dạng cộng thêm so với R0 nên baseline = đúng availability game in ra (Vitamin C 84,3%…)
+  const flows = componentFlows(inputs, data, cal, production, est);
+  const risk = componentRisk(inputs, data, cal, production, flows, sup);
+  const componentAvailability = {} as Record<ComponentKey, number>;
+  for (const c of COMPONENTS) {
+    const r0 = data.supplyChain.componentStock.find((x) => x.component === c)!.availability;
+    const delta = baseShort ? risk[c].shortRate - baseShort[c] : 0;
+    componentAvailability[c] = Math.min(1, Math.max(0, r0 - delta));
+  }
+  for (const p of production) {
+    const prod = data.products.find((x) => x.key === p.sku)!;
+    p.availability = COMPONENTS.filter((c) => prod.bom[c] > 0).reduce((acc, c) => acc * componentAvailability[c], 1);
+  }
   const capacityAdherence = Math.min(1, Math.max(0, 1 - cal.adherenceK * (breakdown + overtime + outsourced) / (C + overtime)));
   for (const p of production) p.adherence = capacityAdherence * p.availability;
   const wSum = production.reduce((s, p) => s + p.batchesPerWeek, 0);
@@ -127,7 +144,6 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est): 
   const mixerUtil = (mixHours + cleanHours) / (C + overtime);
 
   // ---------- Dòng NL & giờ công TB theo định mức ----------
-  const flows = componentFlows(inputs, data, cal, production, est);
   const rmMeanHours = { receiving: 0, inspection: 0, issuing: 0 };
   const rmTheory = {} as Record<ComponentKey, number>;
   const rmLot = {} as Record<ComponentKey, number>;
@@ -178,6 +194,8 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est): 
   }
 
   return {
+    risk,
+    componentAvailability,
     production,
     line: {
       name: line.name, speedLph: speed, regularHours: C, run, changeover, breakdown, maintenance, unused, overtime, outsourced,
@@ -334,8 +352,9 @@ function baselineCore(data: Round0Data, cal: Calibration, est: Est) {
 
 export function simulateOps(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est): OpsResults {
   const o = inputs.ops;
-  const core = opsCore(inputs, data, cal, est);
   const base = baselineCore(data, cal, est);
+  const baseShort = Object.fromEntries(COMPONENTS.map((c) => [c, base.core.risk[c].shortRate])) as Record<ComponentKey, number>;
+  const core = opsCore(inputs, data, cal, est, baseShort);
   const daily = stockDaily(inputs, data, cal, est, core, base.core);
 
   const intakeShape = Math.pow(data.ops.decisions.intakeDays / Math.max(1, o.intakeDays), est.intakeSmoothingExp);
@@ -418,6 +437,13 @@ export function simulateOps(inputs: Inputs, data: Round0Data, cal: Calibration, 
     productionCost,
     warehouseCost,
     machinesInvestment: mixer.investment + line.investment,
+    scLink: {
+      risk: core.risk,
+      componentAvailability: core.componentAvailability,
+      // tồn TB mô hình / tồn TB baseline (cùng cách tính) → dùng để co giãn giá trị tồn R0
+      rmStockRatio: Object.fromEntries(COMPONENTS.map((c) => [c, base.core.rmTheory[c] > 0 ? core.rmTheory[c] / base.core.rmTheory[c] : 1])) as Record<ComponentKey, number>,
+      fgStockRatio: Object.fromEntries(SKUS.map((k) => [k, base.core.fgTheory[k] > 0 ? core.fgTheory[k] / base.core.fgTheory[k] : 1])) as Record<SkuKey, number>,
+    },
   };
 }
 

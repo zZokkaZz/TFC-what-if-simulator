@@ -177,7 +177,7 @@ Nếu một chỉ số không hiệu chỉnh được trong sai số, **báo l�
 5. **M4 — Finance:** P&L + Investment + ROI đầy đủ; test hiệu chỉnh ROI.
 6. **M5:** kịch bản, so sánh, chia sẻ link; build 1 file; hướng dẫn deploy GitHub Pages.
 
-Đã làm thêm **M1.5 — đồng bộ realtime bằng Firebase** (trước M2). M2 làm kèm **bảng cảnh báo chéo phòng**.
+Đã làm thêm **M1.5 — đồng bộ realtime bằng Firebase** (trước M2). **M2 đã xong** kèm **bảng cảnh báo chéo phòng** (`src/model/warnings.ts`); doanh thu/penalty theo service level chờ M3.
 
 Sau mỗi mốc: chạy test, build, mở thử, báo ngắn gọn cái gì đã khớp và cái gì còn lệch.
 

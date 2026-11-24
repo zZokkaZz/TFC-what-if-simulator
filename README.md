@@ -3,7 +3,7 @@
 Web app để thử quyết định cho game **The Fresh Connection** (VSCC 2027, Challenge A) trước khi nhập vào game thật.
 Sửa một ô quyết định thì mọi chỉ số liên quan và ROI tính lại ngay trong trình duyệt. Không cần backend, tài khoản hay mạng.
 
-**Trạng thái: M0 + M1 (Operations) + M1.5 (đồng bộ nhóm realtime bằng Firebase).** Các tab Supply Chain, Purchasing, Sales hiện đang hiển thị dữ liệu Round 0 thô. Finance là P&L, trong đó các dòng Ops đã tính từ model.
+**Trạng thái: M0 + M1 (Operations) + M1.5 (đồng bộ nhóm realtime) + M2 (Supply Chain, cảnh báo liên phòng ban).** Các tab Purchasing, Sales hiện đang hiển thị dữ liệu Round 0 thô. Finance là P&L, trong đó các dòng Ops đã tính từ model.
 
 ## Mở app
 

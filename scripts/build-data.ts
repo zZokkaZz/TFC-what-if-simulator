@@ -168,6 +168,9 @@ const finDetail = finLines.filter((l) => !/^(TỔNG|Tổng|Tổng phụ)$/i.test
 // ================= 3_Sản phẩm =================
 const prodRows = sheet('3_Sản phẩm', /^3_/);
 const tProd = table(prodRows, 'Sản phẩm', [/^SKU$/, /^Bao bì$/, /Lít\/đơn vị/, /Đv\/pallet/]);
+// Hạn dùng sản phẩm ghi trong tiêu đề bảng, vd "SẢN PHẨM (hạn dùng 20 tuần tất cả)"
+const shelfTitle = prodRows.map((r) => String(r?.[0] ?? '')).find((t) => /hạn dùng\s*[\d.,]+\s*tuần/i.test(t.normalize('NFC')));
+const productShelfLifeWeeks = shelfTitle ? numIn(shelfTitle.normalize('NFC'), /hạn dùng\s*([\d.,]+)\s*tuần/i) : null;
 const products: Product[] = tProd.rows.map((r) => {
   const name = tProd.str(r, /^SKU$/);
   const packaging = /pet/i.test(tProd.str(r, /^Bao bì$/)) ? 'PET' : 'Pack';
@@ -658,6 +661,7 @@ const out: Round0Data = {
   issues,
   finance: { lines: finDetail, totals: financeTotals },
   products,
+  productShelfLifeWeeks,
   components,
   purchasing: { contracts, results: supplierResults, market, specs: supplierSpecs, negotiation: negotiationOptions, contractTransportChoice },
   ops: { decisions: opsDecisions, results: opsResults, mixers, lines, norms },

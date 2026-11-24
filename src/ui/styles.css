@@ -271,3 +271,16 @@ button.conn { border: 1px solid var(--border); background: var(--surface-2); bor
 .roi-formula { font-size: 15px; margin: 4px 0 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
 .roi-formula .big { font-size: 22px; font-weight: 700; }
 .pnl tr.sub td { font-weight: 600; }
+.sc-row { display: grid; grid-template-columns: 78px 1fr 1fr; gap: 0 6px; align-items: start; border-bottom: 1px dashed var(--grid); }
+.sc-row .sc-name { font-size: 12px; font-weight: 600; padding-top: 30px; }
+.sc-row .field { margin: 4px 0; padding: 2px 4px; }
+.sc-row .f-label { font-size: 12px; }
+.warns { display: flex; flex-direction: column; gap: 8px; }
+.warn { border-left: 4px solid var(--accent); background: var(--surface-2); border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+.warn-critical { border-left-color: var(--critical); background: var(--alert-bg); }
+.warn-warn { border-left-color: var(--s4); }
+.w-head { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.w-flow { margin-left: auto; font-size: 11px; color: var(--ink-2); border: 1px solid var(--border); border-radius: 8px; padding: 0 6px; }
+.w-detail { color: var(--ink-2); margin: 2px 0; }
+.w-roi { font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.w-line { white-space: nowrap; }

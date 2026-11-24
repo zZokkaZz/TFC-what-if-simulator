@@ -157,6 +157,12 @@ export interface OpsResults {
   productionCost: number;
   warehouseCost: number;
   machinesInvestment: number;
+  scLink: {
+    risk: Record<ComponentKey, import('./supplyChain').ComponentRisk>;
+    componentAvailability: Record<ComponentKey, number>;
+    rmStockRatio: Record<ComponentKey, number>;
+    fgStockRatio: Record<SkuKey, number>;
+  };
 }
 
 export interface FinanceRow {
@@ -202,5 +208,52 @@ export interface RoiBreakdown {
 
 export interface Results {
   ops: OpsResults;
+  sc: ScResults;
   finance: FinanceResults;
+}
+
+export interface ScComponentResult {
+  key: ComponentKey;
+  supplier: string;
+  safetyStockWeeks: number;
+  lotSizeWeeks: number;
+  orderUnits: number;
+  deliveriesPerRound: number;
+  avgStockWeeks: number;
+  avgLocations: number;
+  storage: 'pallet' | 'tank';
+  stockValue: number;
+  stockValueR0: number;
+  availability: number;
+  availabilityR0: number;
+  leadTimeWeeks: number;
+  reliability: number;
+  recommendedSsWeeks: number;
+  stockoutDaysR0: number | null;
+}
+
+export interface ScProductResult {
+  sku: SkuKey;
+  intervalDays: number;
+  safetyStockWeeks: number;
+  batchesPerRound: number;
+  avgStockWeeks: number;
+  theoryStockWeeks: number;
+  stockValue: number;
+  stockValueR0: number;
+  slPiecesR0: number;
+  slPiecesEst: number;
+  targetServiceLevel: number;
+  recommendedSsWeeks: number;
+  maxAgeWeeks: number;
+  allowedAgeWeeks: number | null;
+  obsoleteR0: number;
+  stockoutDaysR0: number | null;
+  componentAvailability: number;
+}
+
+export interface ScResults {
+  components: ScComponentResult[];
+  products: ScProductResult[];
+  stockValue: { components: number; products: number; total: number; componentsR0: number; productsR0: number };
 }

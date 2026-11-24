@@ -12,7 +12,9 @@ import { useSync } from './useSync';
 import { changedPaths } from './trace';
 import { eur, pct, signed } from './format';
 import { OpsTab } from './OpsTab';
-import { AssumptionsTab, FinanceTab, PurchasingTab, SalesTab, SupplyChainTab } from './OtherTabs';
+import { AssumptionsTab, FinanceTab, PurchasingTab, SalesTab } from './OtherTabs';
+import { SupplyChainTab } from './SupplyChainTab';
+import { crossWarnings } from '../model/warnings';
 import { TeamTab, statusText, ago } from './TeamTab';
 import { Gate } from './Gate';
 
@@ -64,6 +66,7 @@ export function App() {
   const inputs: Inputs = team ? team.state.local ?? team.state.shared : solo;
   const res = useMemo(() => simulate(inputs, data, est), [inputs, est]);
   const changed = useMemo(() => changedPaths(BASE, inputs), [inputs]);
+  const warnings = useMemo(() => crossWarnings(data, BASE, inputs, res, baseRes), [inputs, res, baseRes]);
 
   const isLocal = !!team?.state.local;
   const editable = (dept: Dept) => !team || isLocal || team.state.role === dept;
@@ -102,7 +105,7 @@ export function App() {
       <header class="topbar">
         <div class="brand">
           <b>TFC What-if</b>
-          <span>M1 (Ops) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
+          <span>M2 (Ops + SC) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
         <Kpi label="ROI (mô hình)" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 thật ${pct(data.finance.totals.roi, 2)} · baseline mô hình ${pct(fb.roi, 2)}`} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} />
@@ -175,8 +178,8 @@ export function App() {
         </div>
       )}
       <main>
-        {tab === 'ops' && <OpsTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setOps={setOps} resetOps={() => setDept('ops', structuredClone(BASE.ops))} editable={editable('ops')} lockReason={team && !editable('ops') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Ops chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} est={est} />}
-        {tab === 'sc' && <SupplyChainTab data={data} />}
+        {tab === 'ops' && <OpsTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setOps={setOps} resetOps={() => setDept('ops', structuredClone(BASE.ops))} editable={editable('ops')} lockReason={team && !editable('ops') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Ops chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} est={est} warnings={warnings} />}
+        {tab === 'sc' && <SupplyChainTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setSc={(v) => setDept('sc', v)} editable={editable('sc')} lockReason={team && !editable('sc') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Supply Chain chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} warnings={warnings} />}
         {tab === 'pur' && <PurchasingTab data={data} />}
         {tab === 'sales' && <SalesTab data={data} />}
         {tab === 'fin' && <FinanceTab res={res} baseRes={baseRes} roiR0={data.finance.totals.roi} />}

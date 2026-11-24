@@ -257,6 +257,8 @@ export interface Round0Data {
     totals: { roi: number; realizedRevenue: number; purchaseValue: number; productionCosts: number; cogs: number; grossMargin: number; indirectCost: number; operatingProfit: number; investment: number };
   };
   products: Product[];
+  /** Hạn dùng sản phẩm (tuần), đọc từ tiêu đề bảng tab 3; null = thiếu dữ liệu */
+  productShelfLifeWeeks: number | null;
   components: Component[];
   purchasing: { contracts: SupplierTerms[]; results: SupplierResult[]; market: SupplierTerms[]; specs: SupplierSpec[]; negotiation: NegotiationOption[]; contractTransportChoice: Record<string, string | null> };
   ops: { decisions: OpsDecisionsR0; results: OpsResultsR0; mixers: Mixer[]; lines: BottlingLine[]; norms: { area: string; task: string; norm: string }[] };

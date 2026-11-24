@@ -1,7 +1,7 @@
 // Finance — M1 (tạm thời): P&L R0, thay các dòng Ops bằng số model; các dòng khác GIỮ SỐ R0
 // (đánh dấu modeled=false) cho tới M2–M4. ROI = Operating profit / Investment.
 import type { Round0Data } from '../data/types';
-import type { FinanceResults, FinanceRow, OpsResults, RoiNode } from './types';
+import type { FinanceResults, FinanceRow, OpsResults, RoiNode, ScResults } from './types';
 
 /** Dòng P&L trong tab 2_Finance ↔ id chi phí trong model Ops */
 const OPS_LINE_MAP: { re: RegExp; ids: string[] }[] = [
@@ -21,7 +21,7 @@ const OPS_LINE_MAP: { re: RegExp; ids: string[] }[] = [
   { re: /^Outbound flexible/i, ids: ['outFlex'] },
 ];
 
-export function simulateFinance(data: Round0Data, ops: OpsResults): FinanceResults {
+export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResults): FinanceResults {
   const cost = (id: string) => ops.costs.find((c) => c.id === id)?.value ?? 0;
   const used = new Set<string>();
   const rows: FinanceRow[] = [];
@@ -37,6 +37,10 @@ export function simulateFinance(data: Round0Data, ops: OpsResults): FinanceResul
       modeled = true;
     }
     if (/^Machines$/i.test(l.label)) { value = ops.machinesInvestment; modeled = true; }
+    // M2: tồn kho & lãi tồn kho theo quyết định SC (giá trị tồn R0 × tỷ lệ tồn mô hình/baseline)
+    if (sc && /^Stock$/i.test(l.label)) { value = sc.stockValue.total + (l.value - sc.stockValue.componentsR0 - sc.stockValue.productsR0); modeled = true; }
+    if (sc && /^Interest on components$/i.test(l.label) && sc.stockValue.componentsR0 > 0) { value = l.value * (sc.stockValue.components / sc.stockValue.componentsR0); modeled = true; }
+    if (sc && /^Interest on products$/i.test(l.label) && sc.stockValue.productsR0 > 0) { value = l.value * (sc.stockValue.products / sc.stockValue.productsR0); modeled = true; }
     rows.push({ id: `r${i++}`, group: l.group, label: l.label, r0: l.value, value, modeled });
     // Dòng mới (chi phí Ops không có trong P&L R0) chèn ngay sau Mixer variable costs
     if (/^Mixer variable/i.test(l.label)) {
@@ -106,7 +110,7 @@ function buildBreakdown(rows: FinanceRow[], operatingProfit: number, investment:
   const opex = parent('opex', 'Operating expense = Indirect cost', indirectGroups.map((grp) => node(`ind-${grp}`, grp, rows.filter((r) => r.group === grp), undefined, -1)));
   const op: RoiNode = { ...parent('op', 'Operating profit', [gm, opex]), value: operatingProfit };
   const fixed = node('fixed', 'Fixed assets', [...lab(/^Fixed$/), ...lab(/^Machines$/)], 'Fixed (tòa nhà…) + Machines (máy trộn + dây chuyền)');
-  const stock = node('stock', 'Tồn kho (Stock)', lab(/^Stock$/), 'NL + TP; chưa đổi theo quyết định (M2/M4)');
+  const stock = node('stock', 'Tồn kho (Stock)', lab(/^Stock$/), 'NL + TP, theo quyết định SC (safety stock, lot size, production interval)');
   const pt = node('pt', 'Payment terms = Phải thu (AR) − Phải trả (AP)', lab(/^Payment terms$/), 'Game chỉ in số ròng');
   const ar: RoiNode = { id: 'ar', label: 'Phải thu khách (AR)', value: null, r0: null, status: 'missing', note: 'Thiếu dữ liệu: file chỉ có số ròng AR − AP' };
   const ap: RoiNode = { id: 'ap', label: 'Phải trả NCC (AP)', value: null, r0: null, status: 'missing', note: 'Thiếu dữ liệu: file chỉ có số ròng AR − AP' };

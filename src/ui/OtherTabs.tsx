@@ -9,39 +9,6 @@ import { eur, num, pct, signed } from './format';
 
 const Pending = ({ m }: { m: string }) => <p class="pending">Quyết định của phòng này sẽ sửa được ở <b>{m}</b>. Hiện hiển thị dữ liệu Round 0 thô từ file Excel.</p>;
 
-export function SupplyChainTab({ data }: { data: Round0Data }) {
-  const sc = data.supplyChain;
-  return (
-    <div class="single">
-      <Pending m="M2" />
-      <Card title="Quyết định nguyên liệu">
-        <Table head={['Component', 'Safety stock (tuần)', 'Lot size (tuần)']} rows={sc.components.map((c) => [c.component, c.safetyStockWeeks, c.lotSizeWeeks])} />
-      </Card>
-      <Card title="Quyết định thành phẩm (DC Netherlands)">
-        <Table head={['SKU', 'Production interval (ngày)', 'Safety stock (tuần)']} rows={sc.products.map((p) => [p.sku, p.productionIntervalDays, p.safetyStockWeeks])} />
-        <p class="muted">Frozen period of production: {sc.frozenPeriodWeeks} tuần.</p>
-      </Card>
-      <Card title="Tồn kho nguyên liệu R0">
-        <Table head={['Component', 'Reliability NCC', 'Tồn (tuần)', 'Giá trị tồn', 'Nhu cầu/tuần', 'Availability', 'Cỡ đơn', 'Ngày hết hàng']}
-          rows={sc.componentStock.map((c) => [c.component, pct(c.supplierReliability), num(c.stockWeeks, 1), eur(c.stockValue), num(c.demandPerWeek), pct(c.availability), num(c.orderSize), data.dailyStats.stockoutDays[c.component] ?? '—'])} />
-      </Card>
-      <Card title="Tồn kho thành phẩm R0">
-        <Table head={['SKU', 'SL pieces', 'SL order lines', 'Tồn (tuần)', 'Giá trị tồn', 'Obsolete', 'MAPE', 'Plan adherence', 'Ngày hết hàng']}
-          rows={sc.productStock.map((p) => [p.sku, pct(p.slPieces), pct(p.slOrderLines), num(p.stockWeeks, 1), eur(p.stockValue), pct(p.obsolete), pct(p.mape, 0), pct(p.planAdherence), data.dailyStats.stockoutDays[p.sku] ?? '—'])} />
-        <p class="muted">Tổng giá trị tồn NL + TP: {eur(sc.totalStockValue)}</p>
-      </Card>
-      <Card title="Nhu cầu theo tuần R0 (tuần 1–26)">
-        <Table head={['SKU', 'TB/tuần', 'Độ lệch chuẩn', 'CV', 'Thấp nhất', 'Cao nhất']}
-          rows={Object.keys(data.weekly.mean).map((k) => {
-            const s = k as keyof typeof data.weekly.mean;
-            const vals = data.weekly.weeks.filter((w) => w.week >= 1).map((w) => w.demand[s]);
-            return [k, num(data.weekly.mean[s]), num(data.weekly.std[s]), pct(data.weekly.cv[s], 0), num(Math.min(...vals)), num(Math.max(...vals))];
-          })} />
-      </Card>
-    </div>
-  );
-}
-
 export function PurchasingTab({ data }: { data: Round0Data }) {
   const p = data.purchasing;
   return (

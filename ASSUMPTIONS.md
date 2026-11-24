@@ -140,3 +140,29 @@ Tất cả 27 chỉ số trong bảng đối chiếu (mục 7 của CLAUDE.md v�
 - Tab 1, ô "Availability Vitamin C" = 0 ở bản mới: công thức `='7_Supply Chain'!H29` trỏ vào cột Obsoletes sau khi tab 7 đổi cột (đúng phải là cột I = 84,3%). Lỗi trong sheet; app không đọc ô này (đọc trực tiếp bảng tab 7).
 - Tab 13 (R-2 vs R0, 497 chỉ số): **thiếu dữ liệu quyết định Round -2** nên chưa dùng làm điểm hiệu chỉnh thứ hai; chỉ dùng để xem mức dao động giữa các round.
 - Bảng thông số 23 NCC (tab 4): lead time, phí mỗi chuyến, phí / pallet-drum-IBC, phí / FTL-tank theo Truck/Boat — đã đọc vào dữ liệu, **chưa dùng trong mô hình** (Purchasing chưa làm). Thử khớp nhanh phí vận chuyển R0: phí mỗi chuyến × số lần giao + phí đơn vị × số đơn vị (làm tròn lên mỗi chuyến) cho sai lệch −6% đến +3% (PET chưa rõ tính theo pallet hay FTL: +8% / −10%).
+
+## 11. M2 — Supply Chain
+
+Ô quyết định: safety stock & lot size từng NL, production interval & safety stock từng SKU, frozen period (giới hạn chống nhập nhầm ở mục 9).
+
+**Đã nối (theo luật/dữ liệu):** lot size, safety stock NL → cỡ đơn, số lần nhận, pallet & giờ công kho NL (dao động tab 11 co giãn theo cỡ lô), overflow; production interval → changeover, overtime, start-up loss, máy trộn (mẻ tối thiểu), đỉnh pallet & giờ nhập kho TP; safety stock TP → pallet kho TP.
+
+**Hiệu chỉnh tỷ lệ (baseline = đúng số game):**
+- Giá trị tồn từng NL/SKU = giá trị tồn R0 (tab 7) × (tồn TB mô hình ÷ tồn TB baseline) → Investment: Stock. Baseline €321.425 (tab 7) / €321.424 (tab 2).
+- Lãi tồn kho (Interest on components / products) = số P&L R0 × (giá trị tồn mới ÷ giá trị tồn R0).
+
+**Ước lượng (badge trên giao diện):**
+| Giả định | Đang dùng | Vì sao |
+|---|---|---|
+| Availability NL | = availability R0 − (tỷ lệ thiếu mới − tỷ lệ thiếu baseline). Tỷ lệ thiếu = số lần nhận × σ_P × G(z) ÷ lượng dùng; z = SS ÷ σ_P | Công thức chuẩn (mục 6); dạng cộng thêm để baseline đúng 84,3% Vitamin C |
+| σ nhu cầu NL | Từ σ nhu cầu SKU tuần 1–26 (tab 12) qua BOM, giả định SKU độc lập | Không có σ nhu cầu NL trực tiếp |
+| Giao trễ NCC | Độ lệch lead time = (1 − reliability thực tế R0) × lead time | Không có phân phối giao trễ trong file |
+| Lead time | Ngày (tab 4) ÷ 7 (ngày lịch) + intake time ÷ 5 | Không rõ game tính ngày lịch hay ngày làm việc. Intake time giờ đã ảnh hưởng availability (mục Ops cũ "chưa mô hình" → đã nối) |
+| SL pieces TP dự kiến | = SL R0 − (tỷ lệ thiếu mới − baseline); σ_P = σ tuần × √(interval + frozen period) | Chưa tính adherence/Vitamin C riêng; **chưa vào doanh thu/penalty (M3)** |
+| SS gợi ý | NL: z(99%) × σ_P ÷ nhu cầu; TP: z(SL hứa cao nhất của khách mua SKU) × σ_P ÷ nhu cầu | Tham khảo, không phải luật game |
+| Tuổi tồn | Lớn nhất ≈ SS + interval/5 tuần; cho phép = hạn dùng 20 tuần (tab 3) × (1 − shelf life khách đòi 75%, tab 6) = 5 tuần | Cảnh báo obsolete, chưa tính chi phí scrap theo tuổi |
+| Frozen period | Chỉ vào σ_P của TP (gợi ý SS, SL dự kiến) | Tác động lên giờ dây chuyền/overtime chưa mô hình |
+
+**Hệ quả cần nhớ:** vì doanh thu/penalty chưa mô hình (M3), giảm safety stock (NL hoặc TP) hiện chỉ làm ROI **tốt lên** (ít tồn, ít lãi, ít overflow) mà chưa trừ thiệt hại service level. Bảng cảnh báo nói rõ điều này ở từng trường hợp; dòng ROI chưa mô hình ghi "M3 — chưa tính".
+
+**Chờ dữ liệu / M3:** đổi NCC (lead time, reliability, trade unit, giá) → availability & SS gợi ý; hợp đồng Sales (SL hứa, shelf life) → z, tuổi tồn cho phép; obsolete theo tuổi tồn → Costs of scrap.

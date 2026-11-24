@@ -4,6 +4,8 @@ import type { Inputs, OpsInputs, Results, WarehouseResult } from '../model/types
 import type { Est } from '../model/assumptions';
 import { simulate } from '../model/simulate';
 import { useMemo } from 'preact/hooks';
+import type { Warning } from '../model/warnings';
+import { WarningsPanel } from './WarningsPanel';
 import { opsChecks } from '../model/acceptance';
 import { BOTTLING } from '../model/rules';
 import { COMPONENTS } from '../model/purchasing';
@@ -25,11 +27,12 @@ interface Props {
   editable: boolean;
   lockReason?: string;
   est: Est;
+  warnings: Warning[];
 }
 
 const COMP_LABEL: Record<ComponentKey, string> = { Pack: 'Pack 1L', PET: 'PET', Orange: 'Orange', Mango: 'Mango', 'Vitamin C': 'Vitamin C' };
 
-export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, resetOps, editable, lockReason, est }: Props) {
+export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, resetOps, editable, lockReason, est, warnings }: Props) {
   const o = inputs.ops, b = base.ops;
   const R = res.ops, B = baseRes.ops;
   const r0 = data.ops.results;
@@ -115,6 +118,7 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
 
       {/* ===== CỘT PHẢI: KẾT QUẢ ===== */}
       <div class="results">
+        <WarningsPanel warnings={warnings} filterTo="Ops" title="Cảnh báo liên quan Ops" />
         <Card title={`Dây chuyền đóng chai — ${R.line.name}`} alert={R.line.bottleneck}
           extra={<span class="muted">{num(R.line.speedLph)} L/giờ · {R.line.regularHours} giờ ca/tuần</span>}>
           <LineHoursChart bars={[
