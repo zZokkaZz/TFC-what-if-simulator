@@ -7,6 +7,7 @@ import { simulateOps } from './ops';
 import { simulateFinance } from './finance';
 import { simulateSupplyChain } from './supplyChain';
 import { baselineInputs } from './baseline';
+import { anchorOps } from './anchor';
 
 export { baselineInputs } from './baseline';
 
@@ -29,8 +30,11 @@ function baseOps(data: Round0Data, est: Est) {
 
 export function simulate(inputs: Inputs, data: Round0Data, est: Est = EST): Results {
   const cal = getCalibration(data);
-  const ops = simulateOps(inputs, data, cal, est);
-  const sc = simulateSupplyChain(inputs, data, ops, baseOps(data, est));
+  const opsRaw = simulateOps(inputs, data, cal, est);
+  const base = baseOps(data, est);
+  // Số hiển thị neo vào số đề bài: R0 + (mô hình − mô hình baseline)
+  const ops = anchorOps(opsRaw, base, data);
+  const sc = simulateSupplyChain(inputs, data, opsRaw, base);
   const finance = simulateFinance(data, ops, sc);
-  return { ops, sc, finance };
+  return { ops, opsRaw, sc, finance };
 }

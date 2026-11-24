@@ -173,3 +173,16 @@ Tất cả 27 chỉ số trong bảng đối chiếu (mục 7 của CLAUDE.md v�
 - **Lệch giữa các tab trong file:** Economic inventory tab 10 làm tròn (NL 9/8/11/8/18; TP 8/7/8/8/7/7) so với tab 7 (NL 8,7/7,7/10,8/7,7/18,4; TP 7,5/7,5/7,5/7,6/7,4/7,5). App dùng tab 7, hiện cả hai.
 
 **Số liệu Ops nguyên văn (bổ sung 25/11):** tab Ops có mục "Toàn bộ số liệu Ops trong sheet": tab 5 (quyết định kèm cột lựa chọn/chi phí, kết quả R0 đủ 29 dòng, máy trộn, dây chuyền, định mức), tab 10 (bottling line, mixers, warehouse, distributor), tab 11 (giờ công thật R0 theo ngày + thống kê), tab 2 (P&L), tab 13 (lịch sử dây chuyền/máy trộn/kho). Định dạng % lấy từ chính ô trong file (cellNF). Lệch giữa các tab trong file: breakdown tab 10 = 11,0 vs tab 5 = 10,8 (app dùng 10,8); tank yard tab 10 (capacity 20, usage 6) vs tab 5 (29 tank-days/tuần).
+
+## 12. Số hiển thị neo vào số đề bài (sửa 25/11)
+
+- **Số hiển thị = số R0 trong sheet × (mô hình kịch bản ÷ mô hình baseline)**; riêng plan adherence: R0 + (mới − baseline). Không đổi quyết định nào → ROI = **−7,6828% = ô ROI tab 2**, Operating profit −306.505, Investment 3.989.513, mọi dòng P&L, mọi chỉ số Ops (run, changeover, breakdown, unused, overtime, adherence, start-up loss, cleaning, lô TB, utilization, overflow, giờ công, thời vụ, ngày vượt, tank yard) = đúng sheet. Có test `tests/sheet-fidelity.test.ts`.
+- Trước đây app hiện số mô hình thô (ROI −7,64%, giờ kho NL 71,9…) — lệch đề bài. Số mô hình thô giờ chỉ dùng ở bảng "Độ chính xác của mô hình" (tab Ops) để biết phần thay đổi đáng tin tới đâu.
+- Lưu ý từ sheet: game in Operating profit −306.503 / Indirect 1.209.651; tổng các dòng trong sheet ra −306.505 / 1.209.653 (game làm tròn từng dòng — ghi chú có sẵn ở tab 2). App dùng số tính từ các dòng của sheet (giống ô ROI của sheet).
+
+## 13. Dashboard KPI từng phòng
+
+KPI giống dashboard game: Purchasing (rejection, raw material costs, delivery reliability), Operations (cube utilization kho NL/TP, plan adherence), Sales (gross margin, obsolete, SL outbound order lines), Supply Chain (availability, stock components, stock products), ROI chung. Nguồn: tab 7 dashboard, tab 1 KPI nhanh, tiêu đề tab 4 ("dashboard: rejection TB 2,9%…"), tab 5, tab 2, tab 13 (R-2). R-1 = R0 theo ghi chú tab 13.
+- **Thiếu trong sheet (app ghi "thiếu", không tự điền):** R-2 của rejection, raw material costs, delivery reliability (Purchasing); R-2 của gross margin tổng, obsolete, SL outbound (Sales); nhận xét game của Purchasing/Operations/Sales.
+- Điểm phòng theo tab luật: Purchasing = contract index TB (TB đơn giản — ước lượng trọng số); Ops = (production costs + dòng kho) ÷ doanh thu (ước lượng dòng nào là "kho"); Sales = realized revenue; SC = Investment: Stock.
+- Thay đổi KPI theo kịch bản: Ops & ROI & GM theo mô hình; SC (availability, stock weeks) ước lượng; Purchasing/Sales chưa mô hình (M3) nên đứng yên.

@@ -275,6 +275,8 @@ export interface Round0Data {
   };
   history: { group: string; object: string; metric: string; rMinus2: number | null; r0: number | null }[];
   /** Bảng nguyên văn từ sheet (để hiển thị đúng như file) */
+  kpiQuick: { label: string; value: number | null; source: string }[];
+  purchasingDashboard: { sourceText: string | null; rejection: number | null; reliability: number | null; rmCostShare: number | null };
   rawTables: { id: string; sheet: string; title: string; headers: string[]; rows: (string | number | null)[][]; pct?: boolean[][] }[];
   analysis: {
     components: { component: ComponentKey; orderLinesPerRound: number; obsoletes: number }[];

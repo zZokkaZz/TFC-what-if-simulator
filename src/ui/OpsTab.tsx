@@ -205,8 +205,8 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
           <HistoryTable data={data} groups={/Dây chuyền|Máy trộn|Kho/i} title="Lịch sử Round -2 so với Round 0 (dây chuyền, máy trộn, kho)" />
         </Card>
 
-        <Card title="Đối chiếu Round 0 (test hiệu chỉnh mục 7)">
-          <p class="muted">So sánh <b>baseline mô hình</b> (quyết định R0) với số game thật. Dòng "hiệu chỉnh" dùng để tính hệ số nên khớp do cấu tạo; các dòng còn lại là dự báo độc lập.</p>
+        <Card title="Độ chính xác của mô hình (số mô hình THÔ so với R0 — không phải số hiển thị)">
+          <p class="muted">Mọi số hiển thị ở trên = <b>số đề bài × (mô hình mới ÷ mô hình baseline)</b>, nên khi chưa đổi gì chúng bằng đúng số sheet. Bảng này cho biết bản thân mô hình (chưa neo) sát game tới đâu — để biết phần "thay đổi" đáng tin bao nhiêu. Dòng "hiệu chỉnh" khớp do cấu tạo.</p>
           <Table head={['Chỉ số', 'R0 thật', 'Mô hình', 'Lệch', 'Sai số cho phép', '']}
             rows={opsChecks(data, baseRes, est).map((k) => {
               const f = (x: number) => (k.unit === '%' ? pct(x, k.id === 'fgOverflow' ? 2 : 1) : k.unit === '€' ? eur(x) : num(x, k.unit === 'L' || k.unit === 'pallet' || k.unit === 'ngày' ? 0 : 1));

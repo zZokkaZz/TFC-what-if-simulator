@@ -207,7 +207,10 @@ export interface RoiBreakdown {
 }
 
 export interface Results {
+  /** Số hiển thị: neo vào số đề bài (R0 + thay đổi do quyết định) */
   ops: OpsResults;
+  /** Số mô hình thô (dùng đo độ chính xác của mô hình so với R0) */
+  opsRaw: OpsResults;
   sc: ScResults;
   finance: FinanceResults;
 }

@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-24T19:52:13.477Z",
+  "generatedAt": "2026-11-24T20:04:42.927Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -10173,6 +10173,79 @@
    ]
   }
  ],
+ "kpiQuick": [
+  {
+   "label": "ROI",
+   "value": -0.07682767295,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Realized revenue (€)",
+   "value": 2306255,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Tổng penalty service level (€)",
+   "value": -322708,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Gross margin (€)",
+   "value": 903148,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Indirect cost (€)",
+   "value": 1209653,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Operating profit (€)",
+   "value": -306505,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Investment (€)",
+   "value": 3989513,
+   "source": "2_Finance"
+  },
+  {
+   "label": "Service level outbound (order lines)",
+   "value": 0.92,
+   "source": "Sales dashboard"
+  },
+  {
+   "label": "Obsolete products",
+   "value": 0.081,
+   "source": "Sales dashboard"
+  },
+  {
+   "label": "Production plan adherence",
+   "value": 0.787,
+   "source": "5_Operations"
+  },
+  {
+   "label": "Utilization kho NL",
+   "value": 0.934,
+   "source": "5_Operations"
+  },
+  {
+   "label": "Utilization kho TP",
+   "value": 0.707,
+   "source": "5_Operations"
+  },
+  {
+   "label": "Availability Vitamin C",
+   "value": 0,
+   "source": "7_Supply Chain"
+  }
+ ],
+ "purchasingDashboard": {
+  "sourceText": "KẾT QUẢ THỰC TẾ ROUND 0 (dashboard: rejection TB 2,9%; reliability TB 92,1%; chi phí NL 39,5% doanh thu)",
+  "rejection": 0.028999999999999998,
+  "reliability": 0.9209999999999999,
+  "rmCostShare": 0.395
+ },
  "analysis": {
   "components": [
    {

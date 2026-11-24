@@ -701,6 +701,22 @@ captureRaw('week', '12_R0 Theo tuần', wkRows, 'Nhu cầu theo tuần', [/^Tu�
   if (rows11.length) rawTables.push({ id: 'daily-stats', sheet: '11_R0 Theo ngày', title: 'Thống kê 130 ngày (tồn: tuần nhu cầu; giờ công: giờ/ngày)', headers: hdr.map((h, k) => (k === 0 ? 'Chỉ số' : h)), rows: rows11.map((r) => hdr.map((_, k) => { const v = r[k]; return v === undefined || v === '' ? null : (v as string | number | null); })) });
 }
 
+// ================= KPI dashboard (chỉ lấy số có trong file) =================
+// Tab 1 "KPI NHANH ROUND 0"
+const kpiQuick = (() => {
+  if (!issuesRows.some((r) => (r ?? []).some((c) => /^Chỉ số$/.test(String(c ?? '').trim())) && (r ?? []).some((c) => /^Lấy từ$/.test(String(c ?? '').trim())))) return [];
+  const t = table(issuesRows, 'KPI nhanh R0', [/^Chỉ số$/, /^Giá trị$/, /^Lấy từ$/]);
+  return t.rows.map((r) => ({ label: t.str(r, /^Chỉ số$/), value: parseVN(r[t.col(/^Giá trị$/)]), source: t.str(r, /^Lấy từ$/) }));
+})();
+// Tab 4: số dashboard Purchasing R0 nằm trong tiêu đề bảng kết quả, vd "(dashboard: rejection TB 2,9%; reliability TB 92,1%; chi phí NL 39,5% doanh thu)"
+const purTitle = purRows.map((r) => String(r?.[0] ?? '')).find((t) => /dashboard:/i.test(t)) ?? '';
+const purchasingDashboard = {
+  sourceText: purTitle || null,
+  rejection: numIn(purTitle, /rejection TB\s*([\d.,]+)\s*%/i) !== null ? numIn(purTitle, /rejection TB\s*([\d.,]+)\s*%/i)! / 100 : null,
+  reliability: numIn(purTitle, /reliability TB\s*([\d.,]+)\s*%/i) !== null ? numIn(purTitle, /reliability TB\s*([\d.,]+)\s*%/i)! / 100 : null,
+  rmCostShare: numIn(purTitle, /chi phí NL\s*([\d.,]+)\s*%/i) !== null ? numIn(purTitle, /chi phí NL\s*([\d.,]+)\s*%/i)! / 100 : null,
+};
+
 // ================= kiểm tra chéo =================
 if (products.length !== 6) fail(`Cần 6 SKU, đọc được ${products.length}`);
 if (components.length !== 5) fail(`Cần 5 nguyên liệu, đọc được ${components.length}`);
@@ -721,6 +737,8 @@ const out: Round0Data = {
   supplyChain: { components: scComponents, products: scProducts, frozenPeriodWeeks: frozen, componentStock, productStock, totalStockValue, dashboard: dashTable },
   history,
   rawTables,
+  kpiQuick,
+  purchasingDashboard,
   analysis: { components: anComponents, products: anProducts, distributor },
   daily,
   dailyStats,

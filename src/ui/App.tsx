@@ -14,6 +14,7 @@ import { eur, pct, signed } from './format';
 import { OpsTab } from './OpsTab';
 import { AssumptionsTab, FinanceTab, PurchasingTab, SalesTab } from './OtherTabs';
 import { SupplyChainTab } from './SupplyChainTab';
+import { DashboardTab } from './DashboardTab';
 import { crossWarnings } from '../model/warnings';
 import { TeamTab, statusText, ago } from './TeamTab';
 import { Gate } from './Gate';
@@ -22,6 +23,7 @@ const data = rawData as unknown as Round0Data;
 const BASE = baselineInputs(data);
 
 const TABS = [
+  { id: 'dash', label: 'Dashboard KPI' },
   { id: 'ops', label: 'Ops' },
   { id: 'sc', label: 'Supply Chain' },
   { id: 'pur', label: 'Purchasing' },
@@ -105,9 +107,9 @@ export function App() {
       <header class="topbar">
         <div class="brand">
           <b>TFC What-if</b>
-          <span>M2 (Ops + SC) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
+          <span>Ops + SC · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
-        <Kpi label="ROI (mô hình)" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 thật ${pct(data.finance.totals.roi, 2)} · baseline mô hình ${pct(fb.roi, 2)}`} />
+        <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}`} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} />
         <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={cls(dInv, false)} />
         <div class="top-actions">
@@ -178,6 +180,7 @@ export function App() {
         </div>
       )}
       <main>
+        {tab === 'dash' && <DashboardTab data={data} res={res} baseRes={baseRes} />}
         {tab === 'ops' && <OpsTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setOps={setOps} resetOps={() => setDept('ops', structuredClone(BASE.ops))} editable={editable('ops')} lockReason={team && !editable('ops') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Ops chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} est={est} warnings={warnings} />}
         {tab === 'sc' && <SupplyChainTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setSc={(v) => setDept('sc', v)} editable={editable('sc')} lockReason={team && !editable('sc') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Supply Chain chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} warnings={warnings} />}
         {tab === 'pur' && <PurchasingTab data={data} />}

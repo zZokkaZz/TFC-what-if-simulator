@@ -84,7 +84,7 @@ export function RoiBreakdownCard({ res, baseRes, roiR0 }: { res: Results; baseRe
     <Card title="Phân rã ROI = Operating profit ÷ Investment">
       <div class="roi-formula">
         <span class="big">{pct(b.roi, 2)}</span> = <span>{eur(res.finance.operatingProfit)}</span> ÷ <span>{eur(res.finance.investment)}</span>
-        <span class="muted"> · baseline mô hình {pct(bb.roi, 2)} · R0 thật {pct(roiR0, 2)}</span>
+        <span class="muted"> · R0 đề bài {pct(roiR0, 2)}</span>
       </div>
       <div class="tbl-wrap">
         <table class="pnl">

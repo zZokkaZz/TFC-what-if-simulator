@@ -35,3 +35,48 @@ describe('Bảng nguyên văn = đúng từng ô trong file Excel', () => {
     }
   });
 });
+
+import { baselineInputs, simulate } from '../src/model/simulate';
+
+describe('Số HIỂN THỊ ở baseline = đúng số đề bài', () => {
+  const r = simulate(baselineInputs(d), d);
+  const R0 = d.ops.results;
+  const fin = (re: RegExp) => d.finance.lines.find((l) => re.test(l.label))!.value;
+  it('ROI = ô ROI tab 2 (−7,68%), OP, Investment, GM, Indirect = đúng tab 2', () => {
+    expect(r.finance.roi).toBeCloseTo(d.finance.totals.roi, 9); // ô ROI trong file lưu 11 chữ số
+    expect(r.finance.operatingProfit).toBeCloseTo(d.finance.totals.operatingProfit, 6);
+    expect(r.finance.investment).toBeCloseTo(d.finance.totals.investment, 6);
+    expect(r.finance.grossMargin).toBeCloseTo(d.finance.totals.grossMargin, 6);
+    expect(r.finance.indirectCost).toBeCloseTo(d.finance.totals.indirectCost, 6);
+    expect(r.finance.realizedRevenue).toBe(d.finance.totals.realizedRevenue);
+  });
+  it('mọi dòng P&L = đúng tab 2', () => {
+    for (const row of r.finance.rows.filter((x) => !x.isTotal && !x.isNew)) expect(row.value, row.label).toBeCloseTo(row.r0 as number, 6);
+  });
+  it('mọi chỉ số Ops hiển thị = đúng tab 5 / tab 11', () => {
+    const o = r.ops;
+    expect([o.line.run, o.line.changeover, o.line.breakdown, o.line.unused, o.line.overtime]).toEqual([R0.line.run, R0.line.changeover, R0.line.breakdown, R0.line.unused, R0.line.overtime].map((x) => expect.closeTo(x, 9)));
+    expect(o.line.planAdherence).toBeCloseTo(R0.line.planAdherence, 9);
+    expect(o.line.startupLossEur).toBeCloseTo(R0.line.startupLossEur, 6);
+    expect(o.mixer.cleaningShare).toBeCloseTo(R0.mixer.cleaningShare, 9);
+    expect(o.mixer.avgLotL).toBeCloseTo(R0.mixer.avgLotL, 6);
+    expect(o.rm.utilization).toBeCloseTo(R0.rm.utilization, 9);
+    expect(o.rm.overflowShare).toBeCloseTo(R0.rm.overflow, 9);
+    expect(o.rm.hoursPerWeek).toBeCloseTo(R0.rm.hoursPerWeek, 9);
+    expect(o.rm.overflowCost).toBeCloseTo(fin(/^Overflow raw/), 6);
+    expect(o.rm.flexCost).toBeCloseTo(fin(/^Inbound flexible/), 6);
+    expect(o.rm.daysAboveFixed).toBe(d.dailyStats.rmDaysAboveFixed);
+    expect(o.fg.utilization).toBeCloseTo(R0.fg.utilization, 9);
+    expect(o.fg.overflowShare).toBeCloseTo(R0.fg.overflow, 9);
+    expect(o.fg.hoursPerWeek).toBeCloseTo(R0.fg.hoursPerWeek, 9);
+    expect(o.fg.overflowCost).toBeCloseTo(fin(/^Overflow finished/), 6);
+    expect(o.fg.flexCost).toBeCloseTo(fin(/^Outbound flexible/), 6);
+    expect(o.fg.daysAboveFixed).toBe(d.dailyStats.fgDaysAboveFixed);
+    expect(o.tankYard.cost).toBeCloseTo(fin(/tank yard/i), 6);
+    for (const p of o.production) {
+      const st = d.supplyChain.productStock.find((x) => x.sku === p.sku)!;
+      expect(p.adherence).toBeCloseTo(st.planAdherence, 9);
+      expect(p.startupLossEur).toBeCloseTo(st.startupLossEur, 6);
+    }
+  });
+});

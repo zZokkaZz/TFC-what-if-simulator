@@ -24,7 +24,7 @@ export const allowed = (c: { r0: number; tol: { abs?: number; rel?: number } }) 
 
 export function opsChecks(data: Round0Data, res: Results, est: Est = EST): Check[] {
   const r = data.ops.results;
-  const o = res.ops;
+  const o = res.opsRaw; // đo độ chính xác của MÔ HÌNH THÔ (số hiển thị đã neo vào R0)
   const ovfR0 = data.finance.lines.find((l) => /^Overflow raw/i.test(l.label))?.value ?? 0;
   const ovfFgR0 = data.finance.lines.find((l) => /^Overflow finished/i.test(l.label))?.value ?? 0;
   const st = r0DailyStock(data, getCalibration(data), est);
