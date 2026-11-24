@@ -19,7 +19,10 @@ Sửa một ô quyết định thì mọi chỉ số liên quan và ROI tính l�
 
 Thiết lập Firebase một lần (người quản lý project): dán `firestore.rules` vào Firebase Console → Firestore Database → Rules → **Publish**. Giới hạn bảo mật xem `ASSUMPTIONS.md` mục 8.
 
-## Dành cho người phát triển
+## Dành cho người phát triển / phiên Claude mới
+
+Đọc theo thứ tự: `CLAUDE.md` (mục 0: KHÔNG BỊA SỐ, mục 0b: quy trình) → `PROGRESS.md` → `ROADMAP_M3_M4_M5.md` → `ASSUMPTIONS.md`. Chạy `npm install && npm run verify` trước khi sửa.
+
 
 ```bash
 npm install

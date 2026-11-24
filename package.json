@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node -e \"require('fs').copyFileSync('dist/index.html','docs/index.html')\"",
     "test": "vitest run",
-    "report": "tsx scripts/calibration-report.ts"
+    "report": "tsx scripts/calibration-report.ts",
+    "verify": "npm run data && npm test && npm run build"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

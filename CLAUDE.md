@@ -17,6 +17,27 @@
 6. Không chắc → **hỏi người dùng**, không tự quyết.
 7. Chỉ đọc dữ liệu từ file trong `data/`. Khi người dùng sửa Google Sheet, phải tải lại .xlsx vào repo rồi mới cập nhật app.
 
+## 0b. QUY TRÌNH BẮT BUỘC CHO MỌI PHIÊN MỚI (kể cả tài khoản Claude khác)
+
+**Trước khi làm gì:**
+1. Đọc lần lượt: `CLAUDE.md` → `PROGRESS.md` (đang ở đâu, quyết định đã chốt) → `ROADMAP_M3_M4_M5.md` (cách làm mốc tiếp theo, cái gì CHƯA biết) → `ASSUMPTIONS.md`.
+2. `git fetch` và kiểm tra `main` có file .xlsx mới không (người dùng upload tên "TFC Round Trial.xlsx"). Có → merge/copy vào `data/TFC_Round0.xlsx`.
+3. `npm install` rồi `npm run verify` (đọc Excel → toàn bộ test → build). **Phải xanh hết** trước khi sửa.
+4. Báo người dùng ngắn gọn: đang ở mốc nào, test bao nhiêu/bao nhiêu, việc tiếp theo — rồi **chờ lệnh**. Người dùng làm **từng mốc một**, không tự nhảy sang M3/M4/M5.
+
+**Trong khi làm:**
+- Không sửa số trong `data/`, không gõ tay số vào code. Số mới chỉ đến từ file Excel người dùng upload.
+- Không đổi hệ số hiệu chỉnh / neo số để "cho khớp". Không khớp → báo người dùng + ghi `ASSUMPTIONS.md`.
+- Không xóa/sửa test để cho xanh. Không giảm test trong `tests/sheet-fidelity.test.ts`.
+- Mỗi số mới mang tên cột/KPI của game: thêm test "baseline = đúng sheet".
+- Công thức chưa rõ → hỏi người dùng hoặc gắn "ước lượng"; KHÔNG trình bày như luật game.
+- Đổi `firestore.rules` → chạy `scripts/test-rules.mjs` (emulator) + nhắc người dùng Publish rules. Không ghi mã đội ở bất cứ đâu.
+- Làm trên nhánh riêng, mở PR nháp; không push thẳng `main` khi chưa được phép.
+
+**Xong việc:**
+- `npm run verify` xanh → commit → push → cập nhật `PROGRESS.md` (Đã xong / Việc tiếp theo / Nhật ký phiên) và `ASSUMPTIONS.md`.
+- Báo người dùng bằng tiếng Việt, ngắn: cái gì khớp sheet, cái gì là ước lượng, người dùng cần làm gì (upload file, publish rules, merge PR…).
+
 ## 1. Mục tiêu
 
 Build một **web app what-if cho game The Fresh Connection (TFC)** để team 4 người (VSCC 2027, Challenge A) thử quyết định **trước khi** nhập vào game thật.
