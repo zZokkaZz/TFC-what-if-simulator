@@ -235,6 +235,7 @@ export interface ProductStock {
   startupLossEur: number; // tổng cả round của SKU (cột ghi "per batch" nhưng cộng lại = tổng 8.435)
   planAdherence: number;
   demandPerWeek: number | null;
+  economicWeeks: number | null;
   floatingStockValue: number | null;
   obsoleteValuePerWeek: number | null;
   bias: number | null;

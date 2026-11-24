@@ -2,7 +2,7 @@
 // M1: quyết định SC giữ R0 (chưa sửa trên giao diện) nhưng mọi công thức đã nhận tham số,
 // nên M2 chỉ cần mở ô nhập.
 import type { ComponentKey, Round0Data, SkuKey } from '../data/types';
-import type { Inputs, ComponentFlow, SkuProduction, OpsResults, ScResults } from './types';
+import type { Inputs, ComponentFlow, SkuProduction, OpsResults, ScResults, SheetCell } from './types';
 import { baselineInputs as baselineInputsSc } from './baseline';
 import type { Calibration } from './calibration';
 import { activeSupplier, COMPONENTS } from './purchasing';
@@ -169,12 +169,35 @@ export function productRisk(inputs: Inputs, data: Round0Data, production: SkuPro
 export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsResults, baseOps: OpsResults | null): ScResults {
   const prisk = productRisk(inputs, data, ops.production);
   const pbase = baseOps ? productRisk(baselineFromOps(data), data, baseOps.production) : prisk;
+  // Ô hiển thị: số sheet × (mô hình kịch bản ÷ mô hình baseline) → không đổi gì thì đúng số sheet
+  const ratio = (x: number, xb: number | undefined) => (xb && Math.abs(xb) > 1e-12 ? x / xb : 1);
+  const cell = (r0: number | null, k: number, basis: SheetCell['basis'] = 'scaled'): SheetCell => ({ r0, value: r0 === null ? null : r0 * k, basis: Math.abs(k - 1) < 1e-9 ? 'sheet' : basis });
+  const keep = (r0: number | null): SheetCell => ({ r0, value: r0, basis: 'notModeled' });
   const components = COMPONENTS.map((c) => {
     const st = data.supplyChain.componentStock.find((x) => x.component === c)!;
     const flow = ops.components.find((f) => f.key === c)!;
+    const fb = baseOps?.components.find((f) => f.key === c);
     const r = ops.scLink.risk[c];
+    const kStock = ops.scLink.rmStockRatio[c];
+    const kUse = ratio(flow.usagePerWeek, fb?.usagePerWeek);
+    const avail = ops.scLink.componentAvailability[c];
+    const anRow = data.analysis.components.find((x) => x.component === c);
     return {
       key: c,
+      sheet: {
+        reliability: { r0: st.supplierReliability, value: r.reliability, basis: Math.abs(r.reliability - st.supplierReliability) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
+        stockUnits: cell(st.stockUnits, kStock),
+        stockWeeks: cell(st.stockWeeks, kStock / kUse),
+        stockValue: cell(st.stockValue, kStock),
+        economicWeeks: keep(st.economicWeeks),
+        demandPerWeek: cell(st.demandPerWeek, kUse),
+        obsoletes: keep(st.obsoletes),
+        availability: { r0: st.availability, value: avail, basis: Math.abs(avail - st.availability) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
+        bias: keep(st.bias),
+        amountPurchased: cell(st.purchasedInRound, ratio(flow.purchasedPerWeek, fb?.purchasedPerWeek)),
+        orderSize: cell(st.orderSize, ratio(flow.orderUnits, fb?.orderUnits)),
+      },
+      deliveries: cell(anRow?.orderLinesPerRound ?? null, ratio(flow.deliveriesPerRound, fb?.deliveriesPerRound)),
       supplier: flow.supplier,
       safetyStockWeeks: inputs.sc.components[c].safetyStockWeeks,
       lotSizeWeeks: inputs.sc.components[c].lotSizeWeeks,
@@ -197,8 +220,29 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
     const st = data.supplyChain.productStock.find((x) => x.sku === p.sku)!;
     const r = prisk[p.sku], b = pbase[p.sku];
     const theoryWeeks = (inputs.sc.products[p.sku].safetyStockWeeks + p.intervalDays / ROUND.daysPerWeek / 2);
+    const pb = baseOps?.production.find((x) => x.sku === p.sku);
+    const kFg = ops.scLink.fgStockRatio[p.sku];
+    const slEst = Math.min(1, Math.max(0, st.slPieces - (r.shortRate - b.shortRate)));
+    const batches = ROUND.days / p.intervalDays;
     return {
       sku: p.sku,
+      sheet: {
+        demandPerWeek: keep(st.demandPerWeek ?? p.demandUnits),
+        slPieces: { r0: st.slPieces, value: slEst, basis: Math.abs(slEst - st.slPieces) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
+        slOrderLines: keep(st.slOrderLines),
+        stockWeeks: cell(st.stockWeeks, kFg),
+        stockValue: cell(st.stockValue, kFg),
+        economicWeeks: keep(st.economicWeeks),
+        floatingStock: keep(st.floatingStockValue),
+        obsoletes: keep(st.obsolete),
+        obsoleteValuePerWeek: keep(st.obsoleteValuePerWeek),
+        mape: keep(st.mape),
+        bias: keep(st.bias),
+        batches: { r0: st.batches, value: batches, basis: Math.abs(batches - st.batches) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
+        startupLoss: cell(st.startupLossEur, ratio(p.startupLossEur, pb?.startupLossEur)),
+        rejects: keep(st.rejectsEur),
+        planAdherence: cell(st.planAdherence, ratio(p.adherence, pb?.adherence)),
+      },
       intervalDays: p.intervalDays,
       safetyStockWeeks: inputs.sc.products[p.sku].safetyStockWeeks,
       batchesPerRound: ROUND.days / p.intervalDays,

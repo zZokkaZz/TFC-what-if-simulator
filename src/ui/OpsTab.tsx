@@ -158,8 +158,13 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
         <WarehouseCard title="Kho nguyên liệu (NL)" w={R.rm} wb={B.rm} fte={o.rmFte} r0={{ util: r0.rm.utilization, overflow: r0.rm.overflow, hours: r0.rm.hoursPerWeek, usage: r0.rm.usage, daysAbove: data.dailyStats.rmDaysAboveFixed, peak: Math.max(...data.daily.map((d) => d.rmHours)), flexEur: finR0(data, /^Inbound flexible/), ovfEur: finR0(data, /^Overflow raw/) }} causes={{ stock: c('rmStock'), hours: c('rmHours'), flex: c('rmFlex') }} labels={{ fixed: 'Việc cố định', receiving: 'Nhận hàng', inspection: 'RM inspection', issuing: 'Cấp cho sản xuất', overflowMoves: 'Chuyển overflow' }}>
           <details>
             <summary>Dòng nguyên liệu (từ quyết định SC + NCC)</summary>
-            <Table head={['NL', 'NCC', 'Trade unit', 'Dùng/tuần', 'Cỡ đơn', 'Lần nhận/round', 'Tồn TB (tuần)', 'Chỗ chứa TB']}
-              rows={R.components.map((f) => [COMP_LABEL[f.key], f.supplier, f.tradeUnit, num(f.usagePerWeek), num(f.orderUnits), num(f.deliveriesPerRound, 1), num(f.avgStockWeeks, 2), `${num(f.avgLocations, 1)} ${f.storage === 'tank' ? 'tank' : 'pallet'}`])} />
+            <Table head={['NL', 'NCC', 'Trade unit', 'Demand per week', 'Order size', 'Lần nhận/round', 'Stock (weeks)', 'Chỗ chứa TB (mô hình)']}
+              rows={res.sc.components.map((x) => {
+                const f = R.components.find((y) => y.key === x.key)!;
+                const v = (c: { value: number | null }, d = 0) => (c.value === null ? '—' : num(c.value, d));
+                return [COMP_LABEL[x.key], f.supplier, f.tradeUnit, v(x.sheet.demandPerWeek), v(x.sheet.orderSize), v(x.deliveries, 1), v(x.sheet.stockWeeks, 1), `${num(f.avgLocations, 1)} ${f.storage === 'tank' ? 'tank' : 'pallet'}`];
+              })} />
+            <p class="muted">Số theo tab 7 / tab 10; đổi quyết định thì = số sheet × (mô hình mới ÷ mô hình baseline). Chỗ chứa TB là số mô hình (pallet/tank).</p>
           </details>
         </WarehouseCard>
 

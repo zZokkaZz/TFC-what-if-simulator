@@ -554,6 +554,7 @@ const productStock = tPS.rows.map((r) => ({
   startupLossEur: tPS.num(r, /(Start-up loss|Start up productivity loss)/i),
   planAdherence: tPS.num(r, /plan adherence/i),
   demandPerWeek: tPS.numOpt(r, /^Demand per week/),
+  economicWeeks: tPS.numOpt(r, /Economic inventory/),
   floatingStockValue: tPS.numOpt(r, /^Floating Stock value/),
   obsoleteValuePerWeek: tPS.numOpt(r, /^(Obsolete\/tuần|Obsoletes value per week)/),
   bias: tPS.numOpt(r, /^Bias$/),

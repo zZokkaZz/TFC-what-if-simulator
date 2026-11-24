@@ -212,8 +212,21 @@ export interface Results {
   finance: FinanceResults;
 }
 
+/** Một ô hiển thị: số sheet R0, số kịch bản (= R0 khi không đổi gì), và cách ra số kịch bản. */
+export interface SheetCell {
+  r0: number | null;
+  value: number | null;
+  basis: 'sheet' | 'scaled' | 'model' | 'notModeled';
+}
+
 export interface ScComponentResult {
   key: ComponentKey;
+  /** Các cột tab 7 theo đúng thứ tự sheet */
+  sheet: {
+    reliability: SheetCell; stockUnits: SheetCell; stockWeeks: SheetCell; stockValue: SheetCell; economicWeeks: SheetCell;
+    demandPerWeek: SheetCell; obsoletes: SheetCell; availability: SheetCell; bias: SheetCell; amountPurchased: SheetCell; orderSize: SheetCell;
+  };
+  deliveries: SheetCell;
   supplier: string;
   safetyStockWeeks: number;
   lotSizeWeeks: number;
@@ -234,6 +247,11 @@ export interface ScComponentResult {
 
 export interface ScProductResult {
   sku: SkuKey;
+  sheet: {
+    demandPerWeek: SheetCell; slPieces: SheetCell; slOrderLines: SheetCell; stockWeeks: SheetCell; stockValue: SheetCell; economicWeeks: SheetCell;
+    floatingStock: SheetCell; obsoletes: SheetCell; obsoleteValuePerWeek: SheetCell; mape: SheetCell; bias: SheetCell; batches: SheetCell;
+    startupLoss: SheetCell; rejects: SheetCell; planAdherence: SheetCell;
+  };
   intervalDays: number;
   safetyStockWeeks: number;
   batchesPerRound: number;

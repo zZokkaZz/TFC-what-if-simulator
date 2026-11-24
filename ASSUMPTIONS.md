@@ -166,3 +166,5 @@ Tất cả 27 chỉ số trong bảng đối chiếu (mục 7 của CLAUDE.md v�
 **Hệ quả cần nhớ:** vì doanh thu/penalty chưa mô hình (M3), giảm safety stock (NL hoặc TP) hiện chỉ làm ROI **tốt lên** (ít tồn, ít lãi, ít overflow) mà chưa trừ thiệt hại service level. Bảng cảnh báo nói rõ điều này ở từng trường hợp; dòng ROI chưa mô hình ghi "M3 — chưa tính".
 
 **Chờ dữ liệu / M3:** đổi NCC (lead time, reliability, trade unit, giá) → availability & SS gợi ý; hợp đồng Sales (SL hứa, shelf life) → z, tuổi tồn cho phép; obsolete theo tuổi tồn → Costs of scrap.
+
+**Hiển thị bảng SC (sửa 25/11):** bảng nguyên liệu và thành phẩm ở tab Supply Chain giờ theo **đúng thứ tự cột tab 7** và hiện **đúng số sheet** khi chưa đổi quyết định (có test kiểm từng ô). Khi đổi quyết định: số kịch bản = số sheet × (mô hình mới ÷ mô hình baseline), in đậm kèm "R0 …" bên dưới. Cột chưa mô hình (economic inventory, obsoletes, bias, MAPE, floating stock, rejects, demand, SL order lines) giữ số R0, in nghiêng xám. Bản trước hiện số mô hình tự tính (vd order size 620.814, Vitamin C 4,77 tuần) dưới tên cột của sheet — gây hiểu nhầm là sai số liệu.

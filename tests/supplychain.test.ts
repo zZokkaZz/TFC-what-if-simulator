@@ -96,3 +96,39 @@ describe('SC → Ops / Finance / cảnh báo', () => {
     expect(validateDept('sc', base.sc)).toHaveLength(0);
   });
 });
+
+describe('Bảng SC hiển thị đúng số tab 7 ở baseline', () => {
+  it('mọi ô nguyên liệu = đúng số sheet', () => {
+    for (const x of b.sc.components) {
+      const st = d.supplyChain.componentStock.find((y) => y.component === x.key)!;
+      expect(x.sheet.orderSize.value).toBe(st.orderSize);
+      expect(x.sheet.stockWeeks.value).toBe(st.stockWeeks);
+      expect(x.sheet.stockUnits.value).toBe(st.stockUnits);
+      expect(x.sheet.stockValue.value).toBe(st.stockValue);
+      expect(x.sheet.amountPurchased.value).toBe(st.purchasedInRound);
+      expect(x.sheet.demandPerWeek.value).toBe(st.demandPerWeek);
+      expect(x.sheet.availability.value).toBe(st.availability);
+      expect(x.sheet.reliability.value).toBe(st.supplierReliability);
+      expect(['sheet', 'notModeled']).toContain(x.sheet.orderSize.basis);
+    }
+  });
+  it('mọi ô thành phẩm = đúng số sheet', () => {
+    for (const x of b.sc.products) {
+      const st = d.supplyChain.productStock.find((y) => y.sku === x.sku)!;
+      expect(x.sheet.stockWeeks.value).toBe(st.stockWeeks);
+      expect(x.sheet.stockValue.value).toBe(st.stockValue);
+      expect(x.sheet.slPieces.value).toBe(st.slPieces);
+      expect(x.sheet.planAdherence.value).toBe(st.planAdherence);
+      expect(x.sheet.startupLoss.value).toBe(st.startupLossEur);
+      expect(x.sheet.batches.value).toBe(st.batches);
+      expect(x.sheet.economicWeeks.value).toBe(st.economicWeeks);
+    }
+  });
+  it('đổi lot size → order size, lần nhận đổi theo tỷ lệ và ghi rõ là số kịch bản', () => {
+    const { r } = run((i) => allComp(i, { lotSizeWeeks: 2 }));
+    const pet = r.sc.components.find((x) => x.key === 'PET')!;
+    expect(pet.sheet.orderSize.basis).toBe('scaled');
+    expect(pet.sheet.orderSize.value!).toBeCloseTo(951612 / 2, -1);
+    expect(pet.deliveries.value!).toBeCloseTo(5.9 * 2, 1);
+  });
+});
