@@ -254,8 +254,66 @@ const supplierResults: SupplierResult[] = tSupRes.rows.map((r) => {
     demandPerWeek: tSupRes.num(r, /Nhu cầu\/tuần/),
     pricePaid: tSupRes.num(r, /Giá thực trả/),
     orderSize: tSupRes.num(r, /Cỡ đơn hàng/),
+    // Cột mới (bản 25/11). Tiêu đề ghi "/tuần" nhưng giá trị (5,7…) trùng "Deliveries/round" ở tab 10 → lưu nguyên số, ghi chú ở ASSUMPTIONS
+    deliveriesCol: tSupRes.numOpt(r, /Số lần giao/),
+    orderLinesCol: tSupRes.numOpt(r, /^Order lines/),
+    purchasedInRound: tSupRes.numOpt(r, /Đã mua trong round/),
   };
 });
+
+// Thông số chi tiết 23 NCC (popup Specifications) — chỉ có ở bản mới. Ô dạng "Truck 10 · Boat 25" tách theo phương tiện.
+const byTransport = (v: unknown, modes: string[]): Record<string, number> | null => {
+  if (v === null || v === undefined || v === '') return null;
+  const n = parseVN(v);
+  if (n !== null) return Object.fromEntries(modes.map((m) => [m, n]));
+  const out: Record<string, number> = {};
+  for (const part of String(v).split(/[·|,;]/)) {
+    const m = part.trim().match(/^(Truck|Boat)\s+([\d.,]+)$/i);
+    if (!m) fail(`4_Purchasing thông số NCC: không đọc được "${v}"`);
+    out[m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()] = parseVN(m[2]) ?? fail(`số lỗi trong "${v}"`);
+  }
+  return out;
+};
+const hasSpecs = purRows.some((r) => (r ?? []).some((c) => /^Basic contract index$/.test(String(c ?? '').trim())));
+const supplierSpecs = hasSpecs ? (() => {
+  const t = table(purRows, 'Thông số chi tiết NCC', [/^Component$/, /^Nhà cung cấp$/, /^Basic contract index$/, /Phí mỗi chuyến/]);
+  return t.rows.map((r) => {
+    const modes = t.str(r, /^Vận chuyển$/).split('/').map((x) => x.trim()).filter(Boolean);
+    return {
+      component: compKey(t.str(r, /^Component$/)),
+      supplier: t.str(r, /^Nhà cung cấp$/),
+      inUse: yes(t.str(r, /^Đang dùng$/)),
+      basicContractIndex: t.num(r, /^Basic contract index$/),
+      marketContractIndex: t.num(r, /^Contract index \(thị trường/),
+      basePrice: t.num(r, /^Giá cơ bản/),
+      transportModes: modes,
+      leadTimeDays: byTransport(r[t.col(/^Lead time/)], modes) ?? fail(`Thiếu lead time NCC ${t.str(r, /^Nhà cung cấp$/)}`),
+      costPerShipment: byTransport(r[t.col(/Phí mỗi chuyến/)], modes) ?? fail('Thiếu phí mỗi chuyến'),
+      costPerSmallUnit: byTransport(r[t.col(/Pallet-Drum-IBC/)], modes) ?? fail('Thiếu phí vận chuyển / pallet-drum-IBC'),
+      costPerFull: byTransport(r[t.col(/FTL-Tank/)], modes) ?? fail('Thiếu phí vận chuyển / FTL-tank'),
+      freeCapacityExclTfc: t.num(r, /Free capacity \(không tính/),
+      freeCapacityInclTfc: t.num(r, /Free capacity \(tính cả/),
+      startPaymentTerm: t.str(r, /Start payment term/),
+      worldShare: t.num(r, /Thị phần thế giới/),
+      certified: yes(t.str(r, /^Certification$/)),
+    };
+  });
+})() : [];
+const hasNeg = purRows.some((r) => (r ?? []).some((c) => /^Trade unit chọn được$/.test(String(c ?? '').trim())));
+const negotiationOptions = hasNeg ? (() => {
+  const t = table(purRows, 'Lựa chọn khi đàm phán', [/^Component$/, /^Trade unit chọn được$/]);
+  // Bỏ dòng ghi chú cuối bảng ("Đọc nhanh"…): chỉ giữ dòng có tên nguyên liệu
+  return t.rows.filter((r) => /pack|pet|orange|mango|vitamin/i.test(String(r[0] ?? ''))).map((r) => ({
+    component: compKey(t.str(r, /^Component$/)),
+    tradeUnits: t.str(r, /^Trade unit chọn được$/).split('/').map((x) => x.trim()).filter(Boolean),
+    qualities: t.str(r, /^Quality$/).split('/').map((x) => x.trim()).filter(Boolean),
+    deliveryWindows: t.str(r, /^Delivery window$/).split('/').map((x) => x.trim()).filter(Boolean),
+    paymentTerm: t.str(r, /^Payment term/),
+    reliability: t.str(r, /reliability/i),
+    transport: t.str(r, /^Vận chuyển$/),
+  }));
+})() : [];
+const contractTransportChoice = Object.fromEntries(tContracts.rows.map((r) => [compKey(tContracts.str(r, /^Component$/)), tContracts.col(/Vận chuyển chọn được/, false) >= 0 ? tContracts.str(r, /Vận chuyển chọn được/) : null]));
 
 // ================= 5_Operations =================
 const opsRows = sheet('5_Operations', /^5_/);
@@ -463,32 +521,48 @@ const scProducts = tSCp.rows.map((r) => ({
 }));
 const tPlan = table(scRows, 'Lập kế hoạch', [/^Thông số$/, /^Giá trị$/]);
 const frozen = parseVN(tPlan.find(/^Thông số$/, /Frozen period/i)[tPlan.col(/^Giá trị$/)]) ?? fail('Thiếu frozen period');
-const tCS = table(scRows, 'Tồn kho NL', [/^Component$/, /Reliability NCC/, /Tồn \(tuần\)/]);
+// Tiêu đề tab 7 có 2 kiểu: bản cũ tiếng Việt, bản mới tên gốc tiếng Anh của game → nhận cả hai.
+const tCS = table(scRows, 'Tồn kho NL', [/^Component$/, /^(Reliability NCC|Delivery reliability)/, /^(Tồn|Stock) \((tuần|weeks)\)$/]);
 const componentStock = tCS.rows.map((r) => ({
   component: compKey(tCS.str(r, /^Component$/)),
-  supplierReliability: tCS.num(r, /Reliability NCC/),
-  stockUnits: tCS.num(r, /Tồn \(cái hoặc L\)/),
-  stockWeeks: tCS.num(r, /Tồn \(tuần\)/),
-  stockValue: tCS.num(r, /Giá trị tồn/),
+  supplierReliability: tCS.num(r, /^(Reliability NCC|Delivery reliability)/),
+  stockUnits: tCS.num(r, /^(Tồn \(cái hoặc L\)|Stock \(pieces)/),
+  stockWeeks: tCS.num(r, /^(Tồn|Stock) \((tuần|weeks)\)$/),
+  stockValue: tCS.num(r, /^(Giá trị tồn|Stock value)/),
   economicWeeks: tCS.num(r, /Economic inventory/),
-  demandPerWeek: tCS.num(r, /Nhu cầu\/tuần/),
-  availability: tCS.num(r, /^Availability$/),
-  purchasedInRound: tCS.num(r, /Đã mua/),
-  orderSize: tCS.num(r, /Cỡ đơn hàng/),
+  demandPerWeek: tCS.num(r, /^(Nhu cầu\/tuần|Demand per week)/),
+  availability: tCS.num(r, /^(Availability|Component availability)/),
+  purchasedInRound: tCS.num(r, /^(Đã mua|Amount purchased)/),
+  orderSize: tCS.num(r, /^(Cỡ đơn hàng|Order size)/),
+  obsoletes: tCS.numOpt(r, /^Obsoletes/),
+  bias: tCS.numOpt(r, /^Bias$/),
 }));
-const tPS = table(scRows, 'Tồn kho TP', [/^SKU$/, /SL pieces/, /Tồn \(tuần\)/, /Plan adherence/]);
+const tPS = table(scRows, 'Tồn kho TP', [/^(SKU|Product)$/, /^(SL pieces|Service level \(pieces\))/, /^(Tồn|Stock) \((tuần|weeks)\)$/, /plan adherence/i]);
 const productStock = tPS.rows.map((r) => ({
-  sku: skuKey(tPS.str(r, /^SKU$/)),
-  slPieces: tPS.num(r, /SL pieces/),
-  slOrderLines: tPS.num(r, /SL order lines/),
-  stockWeeks: tPS.num(r, /Tồn \(tuần\)/),
-  stockValue: tPS.num(r, /Giá trị tồn/),
-  obsolete: tPS.num(r, /^Obsolete$/),
+  sku: skuKey(tPS.str(r, /^(SKU|Product)$/)),
+  slPieces: tPS.num(r, /^(SL pieces|Service level \(pieces\))/),
+  slOrderLines: tPS.num(r, /^(SL order lines|Service level \(order lines\))/),
+  stockWeeks: tPS.num(r, /^(Tồn|Stock) \((tuần|weeks)\)$/),
+  stockValue: tPS.num(r, /^(Giá trị tồn|Stock value)/),
+  obsolete: tPS.num(r, /^Obsolete(s)?( \(%\))?$/),
   mape: tPS.num(r, /MAPE/),
-  batches: tPS.num(r, /Số mẻ/),
-  startupLossEur: tPS.num(r, /Start-up loss/),
-  planAdherence: tPS.num(r, /Plan adherence/),
+  batches: tPS.num(r, /^(Số mẻ|Production batches)/),
+  // Game ghi "per batch" nhưng 6 SKU cộng lại = 8.434 ≈ tổng start-up loss cả round → là TỔNG/SKU
+  startupLossEur: tPS.num(r, /(Start-up loss|Start up productivity loss)/i),
+  planAdherence: tPS.num(r, /plan adherence/i),
+  demandPerWeek: tPS.numOpt(r, /^Demand per week/),
+  floatingStockValue: tPS.numOpt(r, /^Floating Stock value/),
+  obsoleteValuePerWeek: tPS.numOpt(r, /^(Obsolete\/tuần|Obsoletes value per week)/),
+  bias: tPS.numOpt(r, /^Bias$/),
+  rejectsEur: tPS.numOpt(r, /^Rejects/),
 }));
+// Dashboard SC (R-2 / R-1 / R0) — chỉ có ở bản mới
+const dashTable = (() => {
+  const found = scRows.some((r) => (r ?? []).some((c) => /^Round -2$/.test(String(c ?? ''))));
+  if (!found) return [] as { kpi: string; rMinus2: number | null; rMinus1: number | null; r0: number | null; comment: string | null }[];
+  const t = table(scRows, 'Dashboard SC', [/^KPI$/, /^Round -2$/, /^Round 0$/]);
+  return t.rows.map((r) => ({ kpi: t.str(r, /^KPI$/), rMinus2: t.numOpt(r, /^Round -2$/), rMinus1: t.numOpt(r, /^Round -1$/), r0: t.numOpt(r, /^Round 0$/), comment: t.str(r, /Nhận xét/) || null }));
+})();
 const tChk = table(scRows, 'Kiểm tra', [/^Mục$/, /Giá trị \(€\)/]);
 const totalStockValue = parseVN(tChk.find(/^Mục$/, /Tổng giá trị tồn/i)[tChk.col(/Giá trị \(€\)/)]) ?? fail('Thiếu tổng giá trị tồn');
 
@@ -564,6 +638,14 @@ const glRows = sheet('9_Viết tắt', /^9_/);
 const tGl = table(glRows, 'Viết tắt', [/Viết tắt/, /^Đầy đủ$/]);
 const glossary = tGl.rows.map((r) => ({ term: tGl.str(r, /Viết tắt/), full: tGl.str(r, /^Đầy đủ$/), explain: tGl.str(r, /Giải thích/) }));
 
+// ================= 13_Lịch sử R-2 vs R0 (chỉ bản mới) =================
+const histName = sheetNames.find((n) => /^13_/.test(n.normalize('NFC')));
+const history = histName ? (() => {
+  const rows = sheet('13_Lịch sử', /^13_/);
+  const t = table(rows, 'Lịch sử R-2 vs R0', [/^Nhóm$/, /^Đối tượng$/, /^Chỉ số/, /^Round -2$/, /^Round 0$/]);
+  return t.rows.map((r) => ({ group: t.str(r, /^Nhóm$/), object: t.str(r, /^Đối tượng$/), metric: t.str(r, /^Chỉ số/), rMinus2: t.numOpt(r, /^Round -2$/), r0: t.numOpt(r, /^Round 0$/) }));
+})() : [];
+
 // ================= kiểm tra chéo =================
 if (products.length !== 6) fail(`Cần 6 SKU, đọc được ${products.length}`);
 if (components.length !== 5) fail(`Cần 5 nguyên liệu, đọc được ${components.length}`);
@@ -577,10 +659,11 @@ const out: Round0Data = {
   finance: { lines: finDetail, totals: financeTotals },
   products,
   components,
-  purchasing: { contracts, results: supplierResults, market },
+  purchasing: { contracts, results: supplierResults, market, specs: supplierSpecs, negotiation: negotiationOptions, contractTransportChoice },
   ops: { decisions: opsDecisions, results: opsResults, mixers, lines, norms },
   sales: { contracts: customerContracts, customerResults, productResults, customerProduct, notes: salesNotes },
-  supplyChain: { components: scComponents, products: scProducts, frozenPeriodWeeks: frozen, componentStock, productStock, totalStockValue },
+  supplyChain: { components: scComponents, products: scProducts, frozenPeriodWeeks: frozen, componentStock, productStock, totalStockValue, dashboard: dashTable },
+  history,
   analysis: { components: anComponents, products: anProducts, distributor },
   daily,
   dailyStats,

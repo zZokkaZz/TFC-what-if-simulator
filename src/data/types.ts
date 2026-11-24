@@ -65,6 +65,38 @@ export interface SupplierResult {
   demandPerWeek: number;
   pricePaid: number;
   orderSize: number;
+  deliveriesCol: number | null;
+  orderLinesCol: number | null;
+  purchasedInRound: number | null;
+}
+
+export interface SupplierSpec {
+  component: ComponentKey;
+  supplier: string;
+  inUse: boolean;
+  basicContractIndex: number;
+  marketContractIndex: number;
+  basePrice: number;
+  transportModes: string[];
+  leadTimeDays: Record<string, number>;
+  costPerShipment: Record<string, number>;
+  costPerSmallUnit: Record<string, number>; // € / pallet, drum hoặc IBC
+  costPerFull: Record<string, number>; // € / FTL hoặc tank
+  freeCapacityExclTfc: number;
+  freeCapacityInclTfc: number;
+  startPaymentTerm: string;
+  worldShare: number;
+  certified: boolean;
+}
+
+export interface NegotiationOption {
+  component: ComponentKey;
+  tradeUnits: string[];
+  qualities: string[];
+  deliveryWindows: string[];
+  paymentTerm: string;
+  reliability: string;
+  transport: string;
 }
 
 export interface Mixer {
@@ -187,6 +219,8 @@ export interface ComponentStock {
   availability: number;
   purchasedInRound: number;
   orderSize: number;
+  obsoletes: number | null;
+  bias: number | null;
 }
 
 export interface ProductStock {
@@ -198,8 +232,13 @@ export interface ProductStock {
   obsolete: number;
   mape: number;
   batches: number;
-  startupLossEur: number; // tổng cả round của SKU (cột ghi "Start-up loss/mẻ" nhưng cộng lại = tổng 8.435)
+  startupLossEur: number; // tổng cả round của SKU (cột ghi "per batch" nhưng cộng lại = tổng 8.435)
   planAdherence: number;
+  demandPerWeek: number | null;
+  floatingStockValue: number | null;
+  obsoleteValuePerWeek: number | null;
+  bias: number | null;
+  rejectsEur: number | null;
 }
 
 export interface DailyRow {
@@ -219,7 +258,7 @@ export interface Round0Data {
   };
   products: Product[];
   components: Component[];
-  purchasing: { contracts: SupplierTerms[]; results: SupplierResult[]; market: SupplierTerms[] };
+  purchasing: { contracts: SupplierTerms[]; results: SupplierResult[]; market: SupplierTerms[]; specs: SupplierSpec[]; negotiation: NegotiationOption[]; contractTransportChoice: Record<string, string | null> };
   ops: { decisions: OpsDecisionsR0; results: OpsResultsR0; mixers: Mixer[]; lines: BottlingLine[]; norms: { area: string; task: string; norm: string }[] };
   sales: { contracts: CustomerContract[]; customerResults: CustomerResult[]; productResults: ProductResult[]; customerProduct: CustomerProduct[]; notes: string[] };
   supplyChain: {
@@ -229,7 +268,9 @@ export interface Round0Data {
     componentStock: ComponentStock[];
     productStock: ProductStock[];
     totalStockValue: number;
+    dashboard: { kpi: string; rMinus2: number | null; rMinus1: number | null; r0: number | null; comment: string | null }[];
   };
+  history: { group: string; object: string; metric: string; rMinus2: number | null; r0: number | null }[];
   analysis: {
     components: { component: ComponentKey; orderLinesPerRound: number; obsoletes: number }[];
     products: { sku: SkuKey; rejectsEur: number; gmPerWeek: number }[];

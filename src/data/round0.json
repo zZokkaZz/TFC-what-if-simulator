@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-24T13:21:14.986Z",
+  "generatedAt": "2026-11-24T18:40:37.524Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -11,10 +11,11 @@
    "5_Operations",
    "6_Sales",
    "7_Supply Chain",
+   "9_Viết tắt",
    "10_R0 Analysis",
    "11_R0 Theo ngày",
    "12_R0 Theo tuần",
-   "9_Viết tắt",
+   "13_Lịch sử R-2 vs R0",
    "Luật for ops and others phòng b"
   ]
  },
@@ -636,7 +637,10 @@
     "transportCost": 4552,
     "demandPerWeek": 132257,
     "pricePaid": 0.0311,
-    "orderSize": 619636
+    "orderSize": 619636,
+    "deliveriesCol": 5.7,
+    "orderLinesCol": 5.7,
+    "purchasedInRound": 3559348
    },
    {
     "supplier": "Trio PET PLC",
@@ -647,7 +651,10 @@
     "transportCost": 145393,
     "demandPerWeek": 204297,
     "pricePaid": 0.0547,
-    "orderSize": 951612
+    "orderSize": 951612,
+    "deliveriesCol": 5.9,
+    "orderLinesCol": 5.9,
+    "purchasedInRound": 5631948
    },
    {
     "supplier": "Miami Oranges",
@@ -658,7 +665,10 @@
     "transportCost": 35046,
     "demandPerWeek": 35360,
     "pricePaid": 0.4392,
-    "orderSize": 172581
+    "orderSize": 172581,
+    "deliveriesCol": 5.4,
+    "orderLinesCol": 5.4,
+    "purchasedInRound": 931265
    },
    {
     "supplier": "NO8DO Mango",
@@ -669,7 +679,10 @@
     "transportCost": 3314,
     "demandPerWeek": 3165,
     "pricePaid": 0.9925,
-    "orderSize": 15497
+    "orderSize": 15497,
+    "deliveriesCol": 5.3,
+    "orderLinesCol": 5.3,
+    "purchasedInRound": 82276
    },
    {
     "supplier": "Seitan Vitamins",
@@ -680,7 +693,10 @@
     "transportCost": 1592,
     "demandPerWeek": 184,
     "pricePaid": 0.4729,
-    "orderSize": 1032
+    "orderSize": 1032,
+    "deliveriesCol": 4.7,
+    "orderLinesCol": 4.7,
+    "purchasedInRound": 4852
    }
   ],
   "market": [
@@ -1052,7 +1068,796 @@
     "agreedReliability": 0.98,
     "deliveryWindow": "4 hours"
    }
-  ]
+  ],
+  "specs": [
+   {
+    "component": "Pack",
+    "supplier": "Brit Pack",
+    "inUse": false,
+    "basicContractIndex": 1,
+    "marketContractIndex": 1.014,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 5
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 18
+    },
+    "costPerFull": {
+     "Truck": 400
+    },
+    "freeCapacityExclTfc": 0.25,
+    "freeCapacityInclTfc": 0.2,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.02,
+    "certified": true
+   },
+   {
+    "component": "Pack",
+    "supplier": "Mono Packaging Materials",
+    "inUse": true,
+    "basicContractIndex": 0.98,
+    "marketContractIndex": 0.994,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 15
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 20
+    },
+    "costPerFull": {
+     "Truck": 500
+    },
+    "freeCapacityExclTfc": 0.26,
+    "freeCapacityInclTfc": 0.18,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.01,
+    "certified": false
+   },
+   {
+    "component": "Pack",
+    "supplier": "Smurfat Kippa Cartons",
+    "inUse": false,
+    "basicContractIndex": 1.01,
+    "marketContractIndex": 1.02,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 10
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 19
+    },
+    "costPerFull": {
+     "Truck": 450
+    },
+    "freeCapacityExclTfc": 0.31,
+    "freeCapacityInclTfc": 0.21,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.01,
+    "certified": true
+   },
+   {
+    "component": "Pack",
+    "supplier": "Wimberley-Park Packaging",
+    "inUse": false,
+    "basicContractIndex": 0.98,
+    "marketContractIndex": 0.9904,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 15
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 18
+    },
+    "costPerFull": {
+     "Truck": 400
+    },
+    "freeCapacityExclTfc": 0.15,
+    "freeCapacityInclTfc": 0.08,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.01,
+    "certified": false
+   },
+   {
+    "component": "Pack",
+    "supplier": "Swenska Cartons",
+    "inUse": false,
+    "basicContractIndex": 0.98,
+    "marketContractIndex": 0.988,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 10
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 19
+    },
+    "costPerFull": {
+     "Truck": 450
+    },
+    "freeCapacityExclTfc": 0.12,
+    "freeCapacityInclTfc": 0.04,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.01,
+    "certified": false
+   },
+   {
+    "component": "PET",
+    "supplier": "Plantin PET",
+    "inUse": false,
+    "basicContractIndex": 0.98,
+    "marketContractIndex": 0.988,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 15
+    },
+    "costPerShipment": {
+     "Truck": 125
+    },
+    "costPerSmallUnit": {
+     "Truck": 25
+    },
+    "costPerFull": {
+     "Truck": 625
+    },
+    "freeCapacityExclTfc": 0.12,
+    "freeCapacityInclTfc": 0.06,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.01,
+    "certified": true
+   },
+   {
+    "component": "PET",
+    "supplier": "Philyp Jones Plastics",
+    "inUse": false,
+    "basicContractIndex": 1.01,
+    "marketContractIndex": 1.024,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 5
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 20
+    },
+    "costPerFull": {
+     "Truck": 500
+    },
+    "freeCapacityExclTfc": 0.08,
+    "freeCapacityInclTfc": 0.05,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.01,
+    "certified": true
+   },
+   {
+    "component": "PET",
+    "supplier": "Trio PET PLC",
+    "inUse": true,
+    "basicContractIndex": 0.95,
+    "marketContractIndex": 0.962,
+    "basePrice": 0.03,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 10
+    },
+    "costPerShipment": {
+     "Truck": 150
+    },
+    "costPerSmallUnit": {
+     "Truck": 30
+    },
+    "costPerFull": {
+     "Truck": 750
+    },
+    "freeCapacityExclTfc": 0.1,
+    "freeCapacityInclTfc": 0.03,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.01,
+    "certified": false
+   },
+   {
+    "component": "Orange",
+    "supplier": "Aranzon Export",
+    "inUse": false,
+    "basicContractIndex": 0.97,
+    "marketContractIndex": 0.958,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 60
+    },
+    "costPerShipment": {
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Boat": 50
+    },
+    "costPerFull": {
+     "Boat": 1250
+    },
+    "freeCapacityExclTfc": 0.25,
+    "freeCapacityInclTfc": 0.14,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.3,
+    "certified": false
+   },
+   {
+    "component": "Orange",
+    "supplier": "Cabana International",
+    "inUse": false,
+    "basicContractIndex": 0.95,
+    "marketContractIndex": 0.928,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 50
+    },
+    "costPerShipment": {
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Boat": 50
+    },
+    "costPerFull": {
+     "Boat": 1250
+    },
+    "freeCapacityExclTfc": 0.18,
+    "freeCapacityInclTfc": 0.11,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.25,
+    "certified": false
+   },
+   {
+    "component": "Orange",
+    "supplier": "Arancia d'Espana",
+    "inUse": false,
+    "basicContractIndex": 1.06,
+    "marketContractIndex": 1.07,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Truck",
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Truck": 10,
+     "Boat": 25
+    },
+    "costPerShipment": {
+     "Truck": 125,
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Truck": 30,
+     "Boat": 20
+    },
+    "costPerFull": {
+     "Truck": 750,
+     "Boat": 500
+    },
+    "freeCapacityExclTfc": 0.3,
+    "freeCapacityInclTfc": 0.22,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.28,
+    "certified": true
+   },
+   {
+    "component": "Orange",
+    "supplier": "Miami Oranges",
+    "inUse": true,
+    "basicContractIndex": 1,
+    "marketContractIndex": 1.004,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 30
+    },
+    "costPerShipment": {
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Boat": 40
+    },
+    "costPerFull": {
+     "Boat": 1000
+    },
+    "freeCapacityExclTfc": 0.4,
+    "freeCapacityInclTfc": 0.38,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.08,
+    "certified": true
+   },
+   {
+    "component": "Orange",
+    "supplier": "Esferico y Naranjado",
+    "inUse": false,
+    "basicContractIndex": 1.04,
+    "marketContractIndex": 1.0515,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Truck",
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Truck": 15,
+     "Boat": 30
+    },
+    "costPerShipment": {
+     "Truck": 125,
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Truck": 30,
+     "Boat": 20
+    },
+    "costPerFull": {
+     "Truck": 750,
+     "Boat": 500
+    },
+    "freeCapacityExclTfc": 0.21,
+    "freeCapacityInclTfc": 0.17,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.08,
+    "certified": false
+   },
+   {
+    "component": "Orange",
+    "supplier": "Jugo Puro",
+    "inUse": false,
+    "basicContractIndex": 0.96,
+    "marketContractIndex": 0.957,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 40
+    },
+    "costPerShipment": {
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Boat": 40
+    },
+    "costPerFull": {
+     "Boat": 1000
+    },
+    "freeCapacityExclTfc": 0.17,
+    "freeCapacityInclTfc": 0.09,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.08,
+    "certified": false
+   },
+   {
+    "component": "Orange",
+    "supplier": "Medina Portogal",
+    "inUse": false,
+    "basicContractIndex": 1.03,
+    "marketContractIndex": 1.03,
+    "basePrice": 0.4,
+    "transportModes": [
+     "Truck",
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Truck": 15,
+     "Boat": 30
+    },
+    "costPerShipment": {
+     "Truck": 125,
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Truck": 30,
+     "Boat": 20
+    },
+    "costPerFull": {
+     "Truck": 750,
+     "Boat": 500
+    },
+    "freeCapacityExclTfc": 0.28,
+    "freeCapacityInclTfc": 0.2,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.08,
+    "certified": true
+   },
+   {
+    "component": "Mango",
+    "supplier": "Mossi Mango",
+    "inUse": false,
+    "basicContractIndex": 0.96,
+    "marketContractIndex": 0.943,
+    "basePrice": 0.9,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 40
+    },
+    "costPerShipment": {
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Boat": 50
+    },
+    "costPerFull": {
+     "Boat": 1250
+    },
+    "freeCapacityExclTfc": 0.05,
+    "freeCapacityInclTfc": 0.03,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.1,
+    "certified": false
+   },
+   {
+    "component": "Mango",
+    "supplier": "NO8DO Mango",
+    "inUse": true,
+    "basicContractIndex": 1.05,
+    "marketContractIndex": 1.058,
+    "basePrice": 0.9,
+    "transportModes": [
+     "Truck",
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Truck": 10,
+     "Boat": 25
+    },
+    "costPerShipment": {
+     "Truck": 100,
+     "Boat": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 30,
+     "Boat": 20
+    },
+    "costPerFull": {
+     "Truck": 750,
+     "Boat": 500
+    },
+    "freeCapacityExclTfc": 0.09,
+    "freeCapacityInclTfc": 0.04,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.08,
+    "certified": true
+   },
+   {
+    "component": "Mango",
+    "supplier": "Tampa Fruits",
+    "inUse": false,
+    "basicContractIndex": 0.98,
+    "marketContractIndex": 0.9587,
+    "basePrice": 0.9,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 25
+    },
+    "costPerShipment": {
+     "Boat": 125
+    },
+    "costPerSmallUnit": {
+     "Boat": 40
+    },
+    "costPerFull": {
+     "Boat": 1000
+    },
+    "freeCapacityExclTfc": 0.05,
+    "freeCapacityInclTfc": 0.02,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.06,
+    "certified": false
+   },
+   {
+    "component": "Mango",
+    "supplier": "Dalima Mango",
+    "inUse": false,
+    "basicContractIndex": 1.02,
+    "marketContractIndex": 1.0205,
+    "basePrice": 0.9,
+    "transportModes": [
+     "Truck",
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Truck": 15,
+     "Boat": 30
+    },
+    "costPerShipment": {
+     "Truck": 125,
+     "Boat": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 50,
+     "Boat": 20
+    },
+    "costPerFull": {
+     "Truck": 1250,
+     "Boat": 500
+    },
+    "freeCapacityExclTfc": 0.08,
+    "freeCapacityInclTfc": 0.04,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.1,
+    "certified": true
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "AIL Vitamins",
+    "inUse": false,
+    "basicContractIndex": 1,
+    "marketContractIndex": 1.023,
+    "basePrice": 0.15,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 20
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 24
+    },
+    "costPerFull": {
+     "Truck": 600
+    },
+    "freeCapacityExclTfc": 0.5,
+    "freeCapacityInclTfc": 0.45,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.2,
+    "certified": true
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "YoBoMa",
+    "inUse": false,
+    "basicContractIndex": 0.97,
+    "marketContractIndex": 0.984,
+    "basePrice": 0.15,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 40
+    },
+    "costPerShipment": {
+     "Boat": 100
+    },
+    "costPerSmallUnit": {
+     "Boat": 50
+    },
+    "costPerFull": {
+     "Boat": 1250
+    },
+    "freeCapacityExclTfc": 0.28,
+    "freeCapacityInclTfc": 0.25,
+    "startPaymentTerm": "At delivery",
+    "worldShare": 0.25,
+    "certified": true
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "Seitan Vitamins",
+    "inUse": true,
+    "basicContractIndex": 0.93,
+    "marketContractIndex": 0.9658,
+    "basePrice": 0.15,
+    "transportModes": [
+     "Boat"
+    ],
+    "leadTimeDays": {
+     "Boat": 60
+    },
+    "costPerShipment": {
+     "Boat": 100
+    },
+    "costPerSmallUnit": {
+     "Boat": 50
+    },
+    "costPerFull": {
+     "Boat": 1250
+    },
+    "freeCapacityExclTfc": 0.52,
+    "freeCapacityInclTfc": 0.5,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.18,
+    "certified": false
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "SYI",
+    "inUse": false,
+    "basicContractIndex": 1.02,
+    "marketContractIndex": 1.0518,
+    "basePrice": 0.15,
+    "transportModes": [
+     "Truck"
+    ],
+    "leadTimeDays": {
+     "Truck": 4
+    },
+    "costPerShipment": {
+     "Truck": 100
+    },
+    "costPerSmallUnit": {
+     "Truck": 20
+    },
+    "costPerFull": {
+     "Truck": 500
+    },
+    "freeCapacityExclTfc": 0.3,
+    "freeCapacityInclTfc": 0.29,
+    "startPaymentTerm": "When ordering",
+    "worldShare": 0.05,
+    "certified": false
+   }
+  ],
+  "negotiation": [
+   {
+    "component": "Pack",
+    "tradeUnits": [
+     "Pallet",
+     "FTL"
+    ],
+    "qualities": [
+     "High",
+     "Middle",
+     "Poor"
+    ],
+    "deliveryWindows": [
+     "4 hours",
+     "1 day",
+     "2 days",
+     "1 week"
+    ],
+    "paymentTerm": "Nhập số",
+    "reliability": "Nhập số",
+    "transport": "Cố định theo NCC (Truck)"
+   },
+   {
+    "component": "PET",
+    "tradeUnits": [
+     "Pallet layer",
+     "Pallet",
+     "FTL"
+    ],
+    "qualities": [
+     "High",
+     "Middle",
+     "Poor"
+    ],
+    "deliveryWindows": [
+     "4 hours",
+     "1 day",
+     "2 days",
+     "1 week"
+    ],
+    "paymentTerm": "Nhập số",
+    "reliability": "Nhập số",
+    "transport": "Cố định theo NCC (Truck)"
+   },
+   {
+    "component": "Orange",
+    "tradeUnits": [
+     "Drum",
+     "IBC",
+     "Tank"
+    ],
+    "qualities": [
+     "High",
+     "Middle",
+     "Poor"
+    ],
+    "deliveryWindows": [
+     "4 hours",
+     "1 day",
+     "2 days",
+     "1 week"
+    ],
+    "paymentTerm": "Nhập số",
+    "reliability": "Nhập số",
+    "transport": "Truck hoặc Boat với Arancia d'Espana, Esferico y Naranjado, Medina Portogal; NCC khác cố định"
+   },
+   {
+    "component": "Mango",
+    "tradeUnits": [
+     "Drum",
+     "IBC",
+     "Tank"
+    ],
+    "qualities": [
+     "High",
+     "Middle",
+     "Poor"
+    ],
+    "deliveryWindows": [
+     "4 hours",
+     "1 day",
+     "2 days",
+     "1 week"
+    ],
+    "paymentTerm": "Nhập số",
+    "reliability": "Nhập số",
+    "transport": "Truck hoặc Boat với NO8DO Mango, Dalima Mango; NCC khác cố định"
+   },
+   {
+    "component": "Vitamin C",
+    "tradeUnits": [
+     "Drum",
+     "IBC",
+     "Tank"
+    ],
+    "qualities": [
+     "High",
+     "Middle",
+     "Poor"
+    ],
+    "deliveryWindows": [
+     "4 hours",
+     "1 day",
+     "2 days",
+     "1 week"
+    ],
+    "paymentTerm": "Nhập số",
+    "reliability": "Nhập số",
+    "transport": "Cố định theo NCC"
+   }
+  ],
+  "contractTransportChoice": {
+   "Pack": "Truck",
+   "PET": "Truck",
+   "Orange": "Boat",
+   "Mango": "Truck / Boat",
+   "Vitamin C": "Boat"
+  }
  },
  "ops": {
   "decisions": {
@@ -1727,7 +2532,9 @@
     "demandPerWeek": 132257,
     "availability": 0.995,
     "purchasedInRound": 3559348,
-    "orderSize": 619636
+    "orderSize": 619636,
+    "obsoletes": 0,
+    "bias": 0.001
    },
    {
     "component": "PET",
@@ -1739,7 +2546,9 @@
     "demandPerWeek": 204297,
     "availability": 0.995,
     "purchasedInRound": 5631948,
-    "orderSize": 951612
+    "orderSize": 951612,
+    "obsoletes": 0,
+    "bias": 0
    },
    {
     "component": "Orange",
@@ -1751,7 +2560,9 @@
     "demandPerWeek": 35360,
     "availability": 0.993,
     "purchasedInRound": 931265,
-    "orderSize": 172581
+    "orderSize": 172581,
+    "obsoletes": 0,
+    "bias": 0
    },
    {
     "component": "Mango",
@@ -1763,7 +2574,9 @@
     "demandPerWeek": 3165,
     "availability": 1,
     "purchasedInRound": 82276,
-    "orderSize": 15497
+    "orderSize": 15497,
+    "obsoletes": 0,
+    "bias": 0
    },
    {
     "component": "Vitamin C",
@@ -1775,7 +2588,9 @@
     "demandPerWeek": 184,
     "availability": 0.843,
     "purchasedInRound": 4852,
-    "orderSize": 1032
+    "orderSize": 1032,
+    "obsoletes": 0,
+    "bias": 0.002
    }
   ],
   "productStock": [
@@ -1789,7 +2604,12 @@
     "mape": 0.49,
     "batches": 13,
     "startupLossEur": 934,
-    "planAdherence": 0.829
+    "planAdherence": 0.829,
+    "demandPerWeek": 67394,
+    "floatingStockValue": 0,
+    "obsoleteValuePerWeek": 1319,
+    "bias": 0,
+    "rejectsEur": 646
    },
    {
     "sku": "C-power 1L",
@@ -1801,7 +2621,12 @@
     "mape": 0.606,
     "batches": 13,
     "startupLossEur": 1043,
-    "planAdherence": 0.698
+    "planAdherence": 0.698,
+    "demandPerWeek": 11361,
+    "floatingStockValue": 0,
+    "obsoleteValuePerWeek": 210,
+    "bias": 0.003,
+    "rejectsEur": 1021
    },
    {
     "sku": "Mango 1L",
@@ -1813,7 +2638,12 @@
     "mape": 0.509,
     "batches": 13,
     "startupLossEur": 1075,
-    "planAdherence": 0.829
+    "planAdherence": 0.829,
+    "demandPerWeek": 42162,
+    "floatingStockValue": 0,
+    "obsoleteValuePerWeek": 993,
+    "bias": 0.001,
+    "rejectsEur": 1424
    },
    {
     "sku": "Orange PET",
@@ -1825,7 +2655,12 @@
     "mape": 0.471,
     "batches": 13,
     "startupLossEur": 1663,
-    "planAdherence": 0.833
+    "planAdherence": 0.833,
+    "demandPerWeek": 118084,
+    "floatingStockValue": 0,
+    "obsoleteValuePerWeek": 1201,
+    "bias": 0,
+    "rejectsEur": 1056
    },
    {
     "sku": "C-power PET",
@@ -1837,7 +2672,12 @@
     "mape": 0.584,
     "batches": 13,
     "startupLossEur": 1876,
-    "planAdherence": 0.701
+    "planAdherence": 0.701,
+    "demandPerWeek": 17741,
+    "floatingStockValue": 0,
+    "obsoleteValuePerWeek": 137,
+    "bias": -0.002,
+    "rejectsEur": 1829
    },
    {
     "sku": "Mango PET",
@@ -1849,11 +2689,3527 @@
     "mape": 0.517,
     "batches": 13,
     "startupLossEur": 1843,
-    "planAdherence": 0.833
+    "planAdherence": 0.833,
+    "demandPerWeek": 51040,
+    "floatingStockValue": 0,
+    "obsoleteValuePerWeek": 561,
+    "bias": -0.001,
+    "rejectsEur": 2336
    }
   ],
-  "totalStockValue": 321425
+  "totalStockValue": 321425,
+  "dashboard": [
+   {
+    "kpi": "ROI (%)",
+    "rMinus2": -0.0667,
+    "rMinus1": -0.0768,
+    "r0": -0.0768,
+    "comment": "The company is making a loss. Measures must quickly be taken."
+   },
+   {
+    "kpi": "Availability components (%)",
+    "rMinus2": 0.9951,
+    "rMinus1": 0.9941,
+    "r0": 0.9941,
+    "comment": "There is a low level of availability for component Vitamin C for production."
+   },
+   {
+    "kpi": "Stock components (weeks)",
+    "rMinus2": 4.5,
+    "rMinus1": 4.36,
+    "r0": 4.36,
+    "comment": "Pack 1 liter and PET have a high level of stock."
+   },
+   {
+    "kpi": "Stock products (weeks)",
+    "rMinus2": 3.27,
+    "rMinus1": 3.18,
+    "r0": 3.18,
+    "comment": null
+   }
+  ]
  },
+ "history": [
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.926,
+   "r0": 0.923
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.036,
+   "r0": 0.036
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Order lines previous round",
+   "rMinus2": 5.6,
+   "r0": 5.7
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Purchase value previous round",
+   "rMinus2": 112251,
+   "r0": 110692
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Transport costs previous round",
+   "rMinus2": 4616,
+   "r0": 4552
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Demand per week (piece or liter)",
+   "rMinus2": 134135,
+   "r0": 132257
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Purchase price",
+   "rMinus2": 0.0311,
+   "r0": 0.0311
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Order size",
+   "rMinus2": 648000,
+   "r0": 619636
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Stock (pieces or liters)",
+   "rMinus2": 587734,
+   "r0": 564440
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Stock (weeks)",
+   "rMinus2": 4.4,
+   "r0": 4.3
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Stock value",
+   "rMinus2": 18278,
+   "r0": 17553
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 9,
+   "r0": 9
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Component availability (%)",
+   "rMinus2": 0.995,
+   "r0": 0.995
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Bias",
+   "rMinus2": 0.027,
+   "r0": 0.001
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Pack 1 liter",
+   "metric": "Amount purchased previous round (piece or liters)",
+   "rMinus2": 3609480,
+   "r0": 3559348
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.838,
+   "r0": 0.841
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.058,
+   "r0": 0.059
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Order lines previous round",
+   "rMinus2": 5.9,
+   "r0": 5.9
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Purchase value previous round",
+   "rMinus2": 309591,
+   "r0": 307931
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Transport costs previous round",
+   "rMinus2": 146193,
+   "r0": 145393
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Demand per week (piece or liter)",
+   "rMinus2": 204841,
+   "r0": 204297
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Purchase price",
+   "rMinus2": 0.0547,
+   "r0": 0.0547
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Order size",
+   "rMinus2": 966119,
+   "r0": 951612
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Stock (pieces or liters)",
+   "rMinus2": 869171,
+   "r0": 851667
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Stock (weeks)",
+   "rMinus2": 4.2,
+   "r0": 4.2
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Stock value",
+   "rMinus2": 47527,
+   "r0": 46566
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 8
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Component availability (%)",
+   "rMinus2": 0.997,
+   "r0": 0.995
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Bias",
+   "rMinus2": 0.007,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "PET",
+   "metric": "Amount purchased previous round (piece or liters)",
+   "rMinus2": 5661745,
+   "r0": 5631948
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.983,
+   "r0": 0.978
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.011,
+   "r0": 0.01
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Order lines previous round",
+   "rMinus2": 5.1,
+   "r0": 5.4
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Purchase value previous round",
+   "rMinus2": 412440,
+   "r0": 409042
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Transport costs previous round",
+   "rMinus2": 35299,
+   "r0": 35046
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Demand per week (piece or liter)",
+   "rMinus2": 35725,
+   "r0": 35360
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Purchase price",
+   "rMinus2": 0.4392,
+   "r0": 0.4392
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Order size",
+   "rMinus2": 182881,
+   "r0": 172581
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Stock (pieces or liters)",
+   "rMinus2": 169153,
+   "r0": 160757
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Stock (weeks)",
+   "rMinus2": 4.7,
+   "r0": 4.5
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Stock value",
+   "rMinus2": 74290,
+   "r0": 70610
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 11,
+   "r0": 11
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Component availability (%)",
+   "rMinus2": 0.993,
+   "r0": 0.993
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Bias",
+   "rMinus2": 0.02,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Orange",
+   "metric": "Amount purchased previous round (piece or liters)",
+   "rMinus2": 939098,
+   "r0": 931265
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.938,
+   "r0": 0.937
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.005,
+   "r0": 0.005
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Order lines previous round",
+   "rMinus2": 5.3,
+   "r0": 5.3
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Purchase value previous round",
+   "rMinus2": 83026,
+   "r0": 81658
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Transport costs previous round",
+   "rMinus2": 3357,
+   "r0": 3314
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Demand per week (piece or liter)",
+   "rMinus2": 3207,
+   "r0": 3165
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Purchase price",
+   "rMinus2": 0.9923,
+   "r0": 0.9925
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Order size",
+   "rMinus2": 15846,
+   "r0": 15497
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Stock (pieces or liters)",
+   "rMinus2": 14774,
+   "r0": 14089
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Stock (weeks)",
+   "rMinus2": 4.6,
+   "r0": 4.4
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Stock value",
+   "rMinus2": 14661,
+   "r0": 13983
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 8
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Component availability (%)",
+   "rMinus2": 0.999,
+   "r0": 1
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Bias",
+   "rMinus2": 0.025,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Mango",
+   "metric": "Amount purchased previous round (piece or liters)",
+   "rMinus2": 83669,
+   "r0": 82276
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.821,
+   "r0": 0.815
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.012,
+   "r0": 0.012
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Order lines previous round",
+   "rMinus2": 4.7,
+   "r0": 4.7
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Purchase value previous round",
+   "rMinus2": 2310,
+   "r0": 2295
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Transport costs previous round",
+   "rMinus2": 1601,
+   "r0": 1592
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Demand per week (piece or liter)",
+   "rMinus2": 186,
+   "r0": 184
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Purchase price",
+   "rMinus2": 0.4719,
+   "r0": 0.4729
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Order size",
+   "rMinus2": 1042,
+   "r0": 1032
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Stock (pieces or liters)",
+   "rMinus2": 825,
+   "r0": 769
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Stock (weeks)",
+   "rMinus2": 4.4,
+   "r0": 4.2
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Stock value",
+   "rMinus2": 389,
+   "r0": 364
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 19,
+   "r0": 18
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Component availability (%)",
+   "rMinus2": 0.851,
+   "r0": 0.843
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Bias",
+   "rMinus2": 0.025,
+   "r0": 0.002
+  },
+  {
+   "group": "Nguyên liệu",
+   "object": "Vitamin C",
+   "metric": "Amount purchased previous round (piece or liters)",
+   "rMinus2": 4896,
+   "r0": 4852
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Run time per week (hours)",
+   "rMinus2": 63.3,
+   "r0": 62.6
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Changeover time per week (hours)",
+   "rMinus2": 12.1,
+   "r0": 12.1
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Breakdown time per week (hours)",
+   "rMinus2": 11,
+   "r0": 11
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Unused capacity per week (hours)",
+   "rMinus2": 3.8,
+   "r0": 3.9
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Overtime per week (hours)",
+   "rMinus2": 10,
+   "r0": 9.4
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Run time (%)",
+   "rMinus2": 0.791,
+   "r0": 0.782
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Changeover time (%)",
+   "rMinus2": 0.151,
+   "r0": 0.151
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Breakdown time (%)",
+   "rMinus2": 0.137,
+   "r0": 0.136
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Unused capacity (%)",
+   "rMinus2": 0.047,
+   "r0": 0.049
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Overtime (%)",
+   "rMinus2": 0.125,
+   "r0": 0.117
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 8504,
+   "r0": 8435
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.783,
+   "r0": 0.787
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Outsourced (hours)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Dây chuyền",
+   "object": "Swiss Fill 2",
+   "metric": "Outsourced (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Máy trộn",
+   "object": "Fruitmix MQ",
+   "metric": "Cleaning time (%)",
+   "rMinus2": 0.144,
+   "r0": 0.145
+  },
+  {
+   "group": "Máy trộn",
+   "object": "Fruitmix MQ",
+   "metric": "Average lot size",
+   "rMinus2": 11015,
+   "r0": 11022
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Attained contract index",
+   "rMinus2": 0.853,
+   "r0": 0.812
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.949,
+   "r0": 0.948
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.918,
+   "r0": 0.912
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Service level (orders)",
+   "rMinus2": 0.865,
+   "r0": 0.855
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Revenue per week",
+   "rMinus2": 42216,
+   "r0": 40198
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Gross margin per week",
+   "rMinus2": 15684,
+   "r0": 13963
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Shipments per week",
+   "rMinus2": 7.7,
+   "r0": 7.7
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Order lines per week",
+   "rMinus2": 7,
+   "r0": 7
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Pallets per week",
+   "rMinus2": 168.7,
+   "r0": 168.7
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Days in warehouse",
+   "rMinus2": 14.9,
+   "r0": 14.7
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.857,
+   "r0": 0.859
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "OSA",
+   "rMinus2": 0.916,
+   "r0": 0.912
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.18,
+   "r0": 1.16
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Food & Groceries",
+   "metric": "Distribution costs",
+   "rMinus2": 94368,
+   "r0": 94368
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Attained contract index",
+   "rMinus2": 0.902,
+   "r0": 0.891
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.946,
+   "r0": 0.944
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.924,
+   "r0": 0.921
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Service level (orders)",
+   "rMinus2": 0.875,
+   "r0": 0.869
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Revenue per week",
+   "rMinus2": 22840,
+   "r0": 22556
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Gross margin per week",
+   "rMinus2": 9309,
+   "r0": 9188
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Shipments per week",
+   "rMinus2": 5.2,
+   "r0": 5.2
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Order lines per week",
+   "rMinus2": 6.9,
+   "r0": 6.9
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Pallets per week",
+   "rMinus2": 88.6,
+   "r0": 88.6
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Days in warehouse",
+   "rMinus2": 15.3,
+   "r0": 15.1
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.851,
+   "r0": 0.853
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "OSA",
+   "rMinus2": 0.909,
+   "r0": 0.907
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.14,
+   "r0": 1.11
+  },
+  {
+   "group": "Khách hàng",
+   "object": "LAND Market",
+   "metric": "Distribution costs",
+   "rMinus2": 52623,
+   "r0": 52623
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Attained contract index",
+   "rMinus2": 0.992,
+   "r0": 0.982
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.969,
+   "r0": 0.968
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.937,
+   "r0": 0.932
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Service level (orders)",
+   "rMinus2": 0.918,
+   "r0": 0.912
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Revenue per week",
+   "rMinus2": 26207,
+   "r0": 25948
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Gross margin per week",
+   "rMinus2": 11779,
+   "r0": 11585
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Shipments per week",
+   "rMinus2": 4.1,
+   "r0": 4.1
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Order lines per week",
+   "rMinus2": 3.9,
+   "r0": 3.9
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Pallets per week",
+   "rMinus2": 77.2,
+   "r0": 77.2
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Days in warehouse",
+   "rMinus2": 14.4,
+   "r0": 14.3
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.865,
+   "r0": 0.866
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "OSA",
+   "rMinus2": 0.971,
+   "r0": 0.97
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.57,
+   "r0": 1.56
+  },
+  {
+   "group": "Khách hàng",
+   "object": "Dominick's",
+   "metric": "Distribution costs",
+   "rMinus2": 45124,
+   "r0": 45124
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 42637,
+   "r0": 42637
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 16364,
+   "r0": 15582
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Sales price",
+   "rMinus2": 0.38,
+   "r0": 0.37
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 6343,
+   "r0": 5692
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.1488,
+   "r0": 0.1335
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.851,
+   "r0": 0.853
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.942,
+   "r0": 0.938
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.926,
+   "r0": 0.919
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.033,
+   "r0": 0.033
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "OSA",
+   "rMinus2": 0.877,
+   "r0": 0.871
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.07,
+   "r0": 1.04
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange 1L",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 7182,
+   "r0": 7182
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 3369,
+   "r0": 3208
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Sales price",
+   "rMinus2": 0.47,
+   "r0": 0.45
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 1491,
+   "r0": 1349
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.2077,
+   "r0": 0.1878
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.874,
+   "r0": 0.877
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.852,
+   "r0": 0.839
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.809,
+   "r0": 0.787
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.037,
+   "r0": 0.037
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "OSA",
+   "rMinus2": 0.83,
+   "r0": 0.808
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.22,
+   "r0": 1.2
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power 1L",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 26777,
+   "r0": 26777
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 10962,
+   "r0": 10438
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Sales price",
+   "rMinus2": 0.41,
+   "r0": 0.39
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 3705,
+   "r0": 3295
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.1384,
+   "r0": 0.123
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.851,
+   "r0": 0.855
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.972,
+   "r0": 0.972
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.968,
+   "r0": 0.965
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.035,
+   "r0": 0.035
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "OSA",
+   "rMinus2": 0.914,
+   "r0": 0.914
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.1,
+   "r0": 1.07
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango 1L",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 35873,
+   "r0": 35873
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 6731,
+   "r0": 6409
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Sales price",
+   "rMinus2": 0.19,
+   "r0": 0.18
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 2266,
+   "r0": 1956
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.0632,
+   "r0": 0.0545
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.846,
+   "r0": 0.846
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.966,
+   "r0": 0.975
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.964,
+   "r0": 0.969
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.033,
+   "r0": 0.033
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "OSA",
+   "rMinus2": 0.966,
+   "r0": 0.966
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.5,
+   "r0": 1.5
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Orange PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 5412,
+   "r0": 5412
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 1477,
+   "r0": 1406
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Sales price",
+   "rMinus2": 0.27,
+   "r0": 0.26
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 715,
+   "r0": 649
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.1322,
+   "r0": 0.1199
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.869,
+   "r0": 0.874
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.828,
+   "r0": 0.819
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.816,
+   "r0": 0.806
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.034,
+   "r0": 0.034
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "OSA",
+   "rMinus2": 0.837,
+   "r0": 0.827
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.84,
+   "r0": 1.83
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – C-power PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 15539,
+   "r0": 15539
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 3313,
+   "r0": 3155
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Sales price",
+   "rMinus2": 0.21,
+   "r0": 0.2
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 1163,
+   "r0": 1022
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.0749,
+   "r0": 0.0658
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.851,
+   "r0": 0.852
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.975,
+   "r0": 0.971
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.964,
+   "r0": 0.958
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.035,
+   "r0": 0.035
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "OSA",
+   "rMinus2": 0.975,
+   "r0": 0.975
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.6,
+   "r0": 1.58
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Food & Groceries – Mango PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 24756,
+   "r0": 24756
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 10052,
+   "r0": 9927
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Sales price",
+   "rMinus2": 0.41,
+   "r0": 0.4
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 4234,
+   "r0": 4185
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.171,
+   "r0": 0.169
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.849,
+   "r0": 0.851
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.929,
+   "r0": 0.927
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.926,
+   "r0": 0.924
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.03,
+   "r0": 0.03
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "OSA",
+   "rMinus2": 0.877,
+   "r0": 0.875
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.06,
+   "r0": 1.03
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange 1L",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 4179,
+   "r0": 4179
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 2074,
+   "r0": 2048
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Sales price",
+   "rMinus2": 0.5,
+   "r0": 0.49
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 981,
+   "r0": 966
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.2348,
+   "r0": 0.2313
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.866,
+   "r0": 0.87
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.853,
+   "r0": 0.837
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.835,
+   "r0": 0.819
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.036,
+   "r0": 0.036
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "OSA",
+   "rMinus2": 0.857,
+   "r0": 0.84
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.21,
+   "r0": 1.19
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power 1L",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 15385,
+   "r0": 15385
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 6663,
+   "r0": 6580
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Sales price",
+   "rMinus2": 0.43,
+   "r0": 0.43
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 2494,
+   "r0": 2476
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.1621,
+   "r0": 0.1609
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.847,
+   "r0": 0.851
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.981,
+   "r0": 0.978
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.977,
+   "r0": 0.975
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.033,
+   "r0": 0.033
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "OSA",
+   "rMinus2": 0.907,
+   "r0": 0.907
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.09,
+   "r0": 1.06
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango 1L",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 11935,
+   "r0": 11935
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 2369,
+   "r0": 2340
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Sales price",
+   "rMinus2": 0.2,
+   "r0": 0.2
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 884,
+   "r0": 858
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.074,
+   "r0": 0.0719
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.839,
+   "r0": 0.838
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.977,
+   "r0": 0.978
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.974,
+   "r0": 0.976
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.035,
+   "r0": 0.035
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "OSA",
+   "rMinus2": 0.975,
+   "r0": 0.975
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.49,
+   "r0": 1.49
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Orange PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 1818,
+   "r0": 1818
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 525,
+   "r0": 518
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Sales price",
+   "rMinus2": 0.29,
+   "r0": 0.29
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 269,
+   "r0": 264
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.148,
+   "r0": 0.1451
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.863,
+   "r0": 0.866
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.845,
+   "r0": 0.838
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.825,
+   "r0": 0.82
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.073,
+   "r0": 0.073
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "OSA",
+   "rMinus2": 0.847,
+   "r0": 0.842
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.83,
+   "r0": 1.82
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – C-power PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 5132,
+   "r0": 5132
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 1158,
+   "r0": 1143
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Sales price",
+   "rMinus2": 0.23,
+   "r0": 0.22
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 448,
+   "r0": 439
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.0872,
+   "r0": 0.0855
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.843,
+   "r0": 0.845
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.966,
+   "r0": 0.964
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.958,
+   "r0": 0.956
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.037,
+   "r0": 0.037
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "OSA",
+   "rMinus2": 0.975,
+   "r0": 0.975
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.59,
+   "r0": 1.57
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "LAND Market – Mango PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 70276,
+   "r0": 70276
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 15338,
+   "r0": 15187
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Sales price",
+   "rMinus2": 0.22,
+   "r0": 0.22
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 6592,
+   "r0": 6464
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.0938,
+   "r0": 0.092
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.852,
+   "r0": 0.851
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.984,
+   "r0": 0.984
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.978,
+   "r0": 0.979
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.018,
+   "r0": 0.018
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "OSA",
+   "rMinus2": 0.981,
+   "r0": 0.981
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.51,
+   "r0": 1.5
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Orange PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 10512,
+   "r0": 10512
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 3337,
+   "r0": 3304
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Sales price",
+   "rMinus2": 0.32,
+   "r0": 0.31
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 1858,
+   "r0": 1832
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.1767,
+   "r0": 0.1743
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.883,
+   "r0": 0.886
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.854,
+   "r0": 0.844
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.804,
+   "r0": 0.792
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.017,
+   "r0": 0.017
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "OSA",
+   "rMinus2": 0.842,
+   "r0": 0.83
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.84,
+   "r0": 1.83
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – C-power PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 30370,
+   "r0": 30370
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 7532,
+   "r0": 7458
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Sales price",
+   "rMinus2": 0.25,
+   "r0": 0.25
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 3330,
+   "r0": 3289
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.1097,
+   "r0": 0.1083
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Attained shelf life (%)",
+   "rMinus2": 0.859,
+   "r0": 0.86
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.976,
+   "r0": 0.972
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.974,
+   "r0": 0.967
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Additional sales as a result of promotions (%)",
+   "rMinus2": 0.018,
+   "r0": 0.018
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "OSA",
+   "rMinus2": 0.992,
+   "r0": 0.992
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.6,
+   "r0": 1.59
+  },
+  {
+   "group": "Khách × sản phẩm",
+   "object": "Dominick's – Mango PET",
+   "metric": "Additional sales next round as a result of webshop service level",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 67394,
+   "r0": 67394
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 26416,
+   "r0": 25508
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Unit price",
+   "rMinus2": 0.392,
+   "r0": 0.379
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.157,
+   "r0": 0.147
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 10577,
+   "r0": 9877
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.937,
+   "r0": 0.934
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.926,
+   "r0": 0.921
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "OSA",
+   "rMinus2": 0.877,
+   "r0": 0.872
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Order lines per week",
+   "rMinus2": 3.4,
+   "r0": 3.4
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0.099,
+   "r0": 0.084
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Obsoletes per week (value)",
+   "rMinus2": 1570,
+   "r0": 1319
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Stock (weeks)",
+   "rMinus2": 3.3,
+   "r0": 3.2
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Stock value",
+   "rMinus2": 52169.3,
+   "r0": 49522.5
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 8
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Forecast error (MAPE)",
+   "rMinus2": 0.496,
+   "r0": 0.49
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Bias",
+   "rMinus2": 0.025,
+   "r0": 0
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Production batches previous round",
+   "rMinus2": 13,
+   "r0": 13
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 947,
+   "r0": 934
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.826,
+   "r0": 0.829
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Assignable Contribution Rate",
+   "rMinus2": 602,
+   "r0": 569
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.07,
+   "r0": 1.04
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange 1L",
+   "metric": "Rejects (value)",
+   "rMinus2": 655,
+   "r0": 646
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 11361,
+   "r0": 11361
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 5443,
+   "r0": 5256
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Unit price",
+   "rMinus2": 0.479,
+   "r0": 0.463
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.218,
+   "r0": 0.204
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 2473,
+   "r0": 2315
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.852,
+   "r0": 0.838
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.822,
+   "r0": 0.803
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "OSA",
+   "rMinus2": 0.84,
+   "r0": 0.82
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Order lines per week",
+   "rMinus2": 1.7,
+   "r0": 1.7
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0.084,
+   "r0": 0.071
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Obsoletes per week (value)",
+   "rMinus2": 249,
+   "r0": 210
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Stock (weeks)",
+   "rMinus2": 2.7,
+   "r0": 2.5
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Stock value",
+   "rMinus2": 7985.1,
+   "r0": 7466
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 7
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Forecast error (MAPE)",
+   "rMinus2": 0.613,
+   "r0": 0.606
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Bias",
+   "rMinus2": 0.03,
+   "r0": 0.003
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Production batches previous round",
+   "rMinus2": 13,
+   "r0": 13
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 1053,
+   "r0": 1043
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.697,
+   "r0": 0.698
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Assignable Contribution Rate",
+   "rMinus2": 820,
+   "r0": 779
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.22,
+   "r0": 1.2
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power 1L",
+   "metric": "Rejects (value)",
+   "rMinus2": 1031,
+   "r0": 1021
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Demand per week (units)",
+   "rMinus2": 42162,
+   "r0": 42162
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Demand per week (value)",
+   "rMinus2": 17625,
+   "r0": 17018
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Unit price",
+   "rMinus2": 0.418,
+   "r0": 0.404
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.147,
+   "r0": 0.137
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Gross margin per week",
+   "rMinus2": 6198,
+   "r0": 5771
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.975,
+   "r0": 0.974
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.973,
+   "r0": 0.97
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "OSA",
+   "rMinus2": 0.912,
+   "r0": 0.912
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Order lines per week",
+   "rMinus2": 3.4,
+   "r0": 3.4
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0.106,
+   "r0": 0.088
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Obsoletes per week (value)",
+   "rMinus2": 1208,
+   "r0": 993
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Stock (weeks)",
+   "rMinus2": 3.5,
+   "r0": 3.3
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Stock value",
+   "rMinus2": 40050.3,
+   "r0": 37556.4
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 8
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Forecast error (MAPE)",
+   "rMinus2": 0.515,
+   "r0": 0.509
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Bias",
+   "rMinus2": 0.029,
+   "r0": 0.001
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Production batches previous round",
+   "rMinus2": 13,
+   "r0": 13
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 1092,
+   "r0": 1075
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.825,
+   "r0": 0.829
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Assignable Contribution Rate",
+   "rMinus2": 564,
+   "r0": 532
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.1,
+   "r0": 1.07
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango 1L",
+   "metric": "Rejects (value)",
+   "rMinus2": 1447,
+   "r0": 1424
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 118084,
+   "r0": 118084
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 24438,
+   "r0": 23935
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Unit price",
+   "rMinus2": 0.207,
+   "r0": 0.203
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.083,
+   "r0": 0.079
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 9741,
+   "r0": 9278
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.978,
+   "r0": 0.981
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.973,
+   "r0": 0.976
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "OSA",
+   "rMinus2": 0.976,
+   "r0": 0.976
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Order lines per week",
+   "rMinus2": 3.6,
+   "r0": 3.6
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0.084,
+   "r0": 0.082
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Obsoletes per week (value)",
+   "rMinus2": 1230,
+   "r0": 1201
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Stock (weeks)",
+   "rMinus2": 3.4,
+   "r0": 3.4
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Stock value",
+   "rMinus2": 49611.1,
+   "r0": 49504.8
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 8
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Forecast error (MAPE)",
+   "rMinus2": 0.472,
+   "r0": 0.471
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Bias",
+   "rMinus2": 0.004,
+   "r0": 0
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Production batches previous round",
+   "rMinus2": 13,
+   "r0": 13
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 1668,
+   "r0": 1663
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.826,
+   "r0": 0.833
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Assignable Contribution Rate",
+   "rMinus2": 434,
+   "r0": 399
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.5,
+   "r0": 1.5
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Orange PET",
+   "metric": "Rejects (value)",
+   "rMinus2": 1059,
+   "r0": 1056
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 17741,
+   "r0": 17741
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 5339,
+   "r0": 5229
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Unit price",
+   "rMinus2": 0.301,
+   "r0": 0.295
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.16,
+   "r0": 0.155
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 2842,
+   "r0": 2745
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.845,
+   "r0": 0.836
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.815,
+   "r0": 0.806
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "OSA",
+   "rMinus2": 0.841,
+   "r0": 0.83
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Order lines per week",
+   "rMinus2": 2.7,
+   "r0": 2.7
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0.06,
+   "r0": 0.055
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Obsoletes per week (value)",
+   "rMinus2": 149,
+   "r0": 137
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Stock (weeks)",
+   "rMinus2": 2.4,
+   "r0": 2.3
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Stock value",
+   "rMinus2": 6013,
+   "r0": 5760.9
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 7
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Forecast error (MAPE)",
+   "rMinus2": 0.587,
+   "r0": 0.584
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Bias",
+   "rMinus2": 0.015,
+   "r0": -0.002
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Production batches previous round",
+   "rMinus2": 13,
+   "r0": 13
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 1886,
+   "r0": 1876
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.697,
+   "r0": 0.701
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Assignable Contribution Rate",
+   "rMinus2": 1304,
+   "r0": 1259
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.84,
+   "r0": 1.83
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "C-power PET",
+   "metric": "Rejects (value)",
+   "rMinus2": 1834,
+   "r0": 1829
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Demand per week (units)",
+   "rMinus2": 51040,
+   "r0": 51040
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Demand per week (value)",
+   "rMinus2": 12003,
+   "r0": 11756
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Unit price",
+   "rMinus2": 0.235,
+   "r0": 0.23
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Gross margin per piece",
+   "rMinus2": 0.097,
+   "r0": 0.093
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Gross margin per week",
+   "rMinus2": 4941,
+   "r0": 4750
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Service level (pieces)",
+   "rMinus2": 0.975,
+   "r0": 0.971
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Service level (order lines)",
+   "rMinus2": 0.967,
+   "r0": 0.961
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "OSA",
+   "rMinus2": 0.985,
+   "r0": 0.985
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Order lines per week",
+   "rMinus2": 3,
+   "r0": 3
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Obsoletes (%)",
+   "rMinus2": 0.086,
+   "r0": 0.08
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Obsoletes per week (value)",
+   "rMinus2": 610,
+   "r0": 561
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Stock (weeks)",
+   "rMinus2": 3.3,
+   "r0": 3.2
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Stock value",
+   "rMinus2": 23181.8,
+   "r0": 22538.7
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Economic inventory (weeks)",
+   "rMinus2": 8,
+   "r0": 7
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Forecast error (MAPE)",
+   "rMinus2": 0.52,
+   "r0": 0.517
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Bias",
+   "rMinus2": 0.013,
+   "r0": -0.001
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Production batches previous round",
+   "rMinus2": 13,
+   "r0": 13
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Start up productivity loss (value)",
+   "rMinus2": 1858,
+   "r0": 1843
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Production plan adherence (%)",
+   "rMinus2": 0.825,
+   "r0": 0.833
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Assignable Contribution Rate",
+   "rMinus2": 587,
+   "r0": 557
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Carbon footprint",
+   "rMinus2": 1.6,
+   "r0": 1.59
+  },
+  {
+   "group": "Sản phẩm",
+   "object": "Mango PET",
+   "metric": "Rejects (value)",
+   "rMinus2": 2355,
+   "r0": 2336
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Capacity",
+   "rMinus2": 900,
+   "r0": 900
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Usage",
+   "rMinus2": 859,
+   "r0": 840
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Cube utilization (%)",
+   "rMinus2": 0.954,
+   "r0": 0.934
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Overflow (%)",
+   "rMinus2": 0.118,
+   "r0": 0.108
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Orderlines per week",
+   "rMinus2": 1,
+   "r0": 1
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Pallets/Tanks per week",
+   "rMinus2": 212.8,
+   "r0": 212.4
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Hours per week",
+   "rMinus2": 74,
+   "r0": 74
+  },
+  {
+   "group": "Kho",
+   "object": "Kho NL",
+   "metric": "Flexible manpower (FTE)",
+   "rMinus2": 0.2,
+   "r0": 0.2
+  },
+  {
+   "group": "Kho",
+   "object": "Tank yard",
+   "metric": "Capacity",
+   "rMinus2": 20,
+   "r0": 20
+  },
+  {
+   "group": "Kho",
+   "object": "Tank yard",
+   "metric": "Usage",
+   "rMinus2": 6,
+   "r0": 6
+  },
+  {
+   "group": "Kho",
+   "object": "Tank yard",
+   "metric": "Cube utilization (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Kho",
+   "object": "Tank yard",
+   "metric": "Overflow (%)",
+   "rMinus2": 0,
+   "r0": 0
+  },
+  {
+   "group": "Kho",
+   "object": "Tank yard",
+   "metric": "Orderlines per week",
+   "rMinus2": 0.2,
+   "r0": 0.2
+  },
+  {
+   "group": "Kho",
+   "object": "Tank yard",
+   "metric": "Pallets/Tanks per week",
+   "rMinus2": 1.2,
+   "r0": 1.2
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Capacity",
+   "rMinus2": 1500,
+   "r0": 1500
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Usage",
+   "rMinus2": 1093,
+   "r0": 1061
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Cube utilization (%)",
+   "rMinus2": 0.729,
+   "r0": 0.707
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Overflow (%)",
+   "rMinus2": 0.002,
+   "r0": 0.002
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Orderlines per week",
+   "rMinus2": 17.8,
+   "r0": 17.8
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Pallets/Tanks per week",
+   "rMinus2": 334.5,
+   "r0": 334.5
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Hours per week",
+   "rMinus2": 101,
+   "r0": 100
+  },
+  {
+   "group": "Kho",
+   "object": "Kho TP DC Netherlands",
+   "metric": "Flexible manpower (FTE)",
+   "rMinus2": 0.1,
+   "r0": 0.1
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Mono Packaging Materials",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.926,
+   "r0": 0.923
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Mono Packaging Materials",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.036,
+   "r0": 0.036
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Mono Packaging Materials",
+   "metric": "Deliveries previous round",
+   "rMinus2": 5.6,
+   "r0": 5.7
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Mono Packaging Materials",
+   "metric": "Purchase value previous round",
+   "rMinus2": 112251,
+   "r0": 110692
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Mono Packaging Materials",
+   "metric": "Transport costs previous round",
+   "rMinus2": 4616,
+   "r0": 4552
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Trio PET PLC",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.838,
+   "r0": 0.841
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Trio PET PLC",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.058,
+   "r0": 0.059
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Trio PET PLC",
+   "metric": "Deliveries previous round",
+   "rMinus2": 5.9,
+   "r0": 5.9
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Trio PET PLC",
+   "metric": "Purchase value previous round",
+   "rMinus2": 309591,
+   "r0": 307931
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Trio PET PLC",
+   "metric": "Transport costs previous round",
+   "rMinus2": 146193,
+   "r0": 145393
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Seitan Vitamins",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.821,
+   "r0": 0.815
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Seitan Vitamins",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.012,
+   "r0": 0.012
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Seitan Vitamins",
+   "metric": "Deliveries previous round",
+   "rMinus2": 4.7,
+   "r0": 4.7
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Seitan Vitamins",
+   "metric": "Purchase value previous round",
+   "rMinus2": 2310,
+   "r0": 2295
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Seitan Vitamins",
+   "metric": "Transport costs previous round",
+   "rMinus2": 1601,
+   "r0": 1592
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "NO8DO Mango",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.938,
+   "r0": 0.937
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "NO8DO Mango",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.005,
+   "r0": 0.005
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "NO8DO Mango",
+   "metric": "Deliveries previous round",
+   "rMinus2": 5.3,
+   "r0": 5.3
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "NO8DO Mango",
+   "metric": "Purchase value previous round",
+   "rMinus2": 83026,
+   "r0": 81658
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "NO8DO Mango",
+   "metric": "Transport costs previous round",
+   "rMinus2": 3357,
+   "r0": 3314
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Miami Oranges",
+   "metric": "Delivery reliability (%)",
+   "rMinus2": 0.983,
+   "r0": 0.978
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Miami Oranges",
+   "metric": "Rejection (%)",
+   "rMinus2": 0.011,
+   "r0": 0.01
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Miami Oranges",
+   "metric": "Deliveries previous round",
+   "rMinus2": 5.1,
+   "r0": 5.4
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Miami Oranges",
+   "metric": "Purchase value previous round",
+   "rMinus2": 412440,
+   "r0": 409042
+  },
+  {
+   "group": "Nhà cung cấp",
+   "object": "Miami Oranges",
+   "metric": "Transport costs previous round",
+   "rMinus2": 35299,
+   "r0": 35046
+  }
+ ],
  "analysis": {
   "components": [
    {

@@ -130,3 +130,13 @@ Tất cả 27 chỉ số trong bảng đối chiếu (mục 7 của CLAUDE.md v�
 - Giới hạn mỗi ô (`src/sync/limits.ts`) dùng chung cho ô nhập và kiểm tra trước khi ghi; khớp `firestore.rules` (có test đối chiếu): pallet location 0–100.000, FTE 0–200, intake 1–60 ngày, số ca 1–5; SC: safety stock 0–26 tuần, lot size 0,2–26 tuần, production interval 1–130 ngày, frozen 0–26 tuần.
 - Số sai/vượt giới hạn: ô viền đỏ, không gửi lên Firebase. Lỗi khi ghi: báo phần nào, thay đổi gì, nguyên nhân (quyền, mạng, hạn mức, đăng nhập); trạng thái lưu từng phòng ở nút trạng thái góc phải và tab Nhóm; 30 lỗi gần nhất lưu trên máy, có nút "Copy chi tiết lỗi". Nhật ký nhóm chỉ ghi khi bản chung đã nhận thay đổi.
 - Giới hạn trên là giới hạn chống nhập nhầm, không phải luật game.
+
+## 10. Dữ liệu bản 25/11/2026 (file cập nhật)
+
+- Tab 2, 3, 5, 6, 9, 10, 11, 12 và tab luật **không đổi** so với bản trước → số Round 0 và mọi kết quả hiệu chỉnh giữ nguyên.
+- Tab 7 đổi tiêu đề sang tên gốc tiếng Anh của game; `build-data.ts` nhận cả hai kiểu. Thêm cột: obsoletes, bias (NL); demand, floating stock, obsolete value, bias, rejects (TP); dashboard KPI R-2/R-1/R0.
+- Cột "Start up productivity loss **per batch**" (tab 7): game ghi "per batch" nhưng 6 SKU cộng lại = 8.434 ≈ tổng start-up loss cả round (€8.435) → app hiểu là **tổng/SKU/round** (khớp công thức: 13 mẻ × ~72 € = 934 cho Orange 1L).
+- Tab 4, cột mới "Số lần giao/tuần" = 5,7 / 5,9 / 5,4 / 5,3 / 4,7: trùng "Deliveries/round" ở tab 10 và khớp lot size 4 tuần (~6 lần/round) → nhiều khả năng là **mỗi round**, tiêu đề ghi nhầm "tuần". App chưa dùng cột này.
+- Tab 1, ô "Availability Vitamin C" = 0 ở bản mới: công thức `='7_Supply Chain'!H29` trỏ vào cột Obsoletes sau khi tab 7 đổi cột (đúng phải là cột I = 84,3%). Lỗi trong sheet; app không đọc ô này (đọc trực tiếp bảng tab 7).
+- Tab 13 (R-2 vs R0, 497 chỉ số): **thiếu dữ liệu quyết định Round -2** nên chưa dùng làm điểm hiệu chỉnh thứ hai; chỉ dùng để xem mức dao động giữa các round.
+- Bảng thông số 23 NCC (tab 4): lead time, phí mỗi chuyến, phí / pallet-drum-IBC, phí / FTL-tank theo Truck/Boat — đã đọc vào dữ liệu, **chưa dùng trong mô hình** (Purchasing chưa làm). Thử khớp nhanh phí vận chuyển R0: phí mỗi chuyến × số lần giao + phí đơn vị × số đơn vị (làm tròn lên mỗi chuyến) cho sai lệch −6% đến +3% (PET chưa rõ tính theo pallet hay FTL: +8% / −10%).
