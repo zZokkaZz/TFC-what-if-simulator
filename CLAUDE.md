@@ -5,6 +5,18 @@
 
 ---
 
+## 0. LUẬT SỐ 1 — KHÔNG BỊA SỐ (đọc trước mọi việc, áp dụng mọi phiên)
+
+Đây là bài thi thật. **Cấm bịa, cấm "vẽ" số liệu.**
+
+1. Mọi con số hiển thị như "số của game/sheet" phải **chép đúng từ `data/TFC_Round0.xlsx`**. Không làm tròn lại, không tính lại rồi đặt dưới tên cột của sheet.
+2. Thiếu số trong file → ghi **"thiếu dữ liệu"**. Không đoán, không suy từ nguồn khác rồi trình bày như số thật.
+3. Số do mô hình tính (kịch bản, dự báo) phải **tách bạch và gắn nhãn** (in đậm kèm "R0 …", badge "mô hình"/"ước lượng"/"hiệu chỉnh R0"). Khi chưa đổi quyết định, ô nào mang tên cột của sheet phải **bằng đúng số sheet**.
+4. Hai tab trong file lệch nhau (vd làm tròn) → hiện cả hai và ghi rõ đang dùng nguồn nào.
+5. Có test `tests/sheet-fidelity.test.ts` đọc thẳng file Excel so từng ô; test đỏ thì **không được push**.
+6. Không chắc → **hỏi người dùng**, không tự quyết.
+7. Chỉ đọc dữ liệu từ file trong `data/`. Khi người dùng sửa Google Sheet, phải tải lại .xlsx vào repo rồi mới cập nhật app.
+
 ## 1. Mục tiêu
 
 Build một **web app what-if cho game The Fresh Connection (TFC)** để team 4 người (VSCC 2027, Challenge A) thử quyết định **trước khi** nhập vào game thật.

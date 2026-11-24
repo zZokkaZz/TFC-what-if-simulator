@@ -290,3 +290,6 @@ table.sheet th.extra, table.sheet td.extra { background: var(--warn-bg); }
 table.sheet td.nm { color: var(--muted); font-style: italic; }
 .sheet-legend { font-size: 11.5px; color: var(--ink-2); margin: 0 0 6px; }
 .lg-sheet { font-weight: 400; } .lg-scaled { font-weight: 700; } .lg-nm { color: var(--muted); font-style: italic; }
+.raw { margin: 10px 0 14px; }
+.raw h4 .src, h4 .src { font-weight: 400; color: var(--muted); }
+table.raw-t td { font-variant-numeric: tabular-nums; }

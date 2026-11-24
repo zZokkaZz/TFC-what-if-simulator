@@ -10,6 +10,7 @@ import { DailyChart } from './charts';
 import { eur, num, pct } from './format';
 import { causesFor } from './trace';
 import { WarningsPanel } from './WarningsPanel';
+import { RawTable, fmtCell } from './RawTable';
 
 interface Props {
   data: Round0Data;
@@ -200,12 +201,16 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
           ]} />
         </Card>
 
-        <Card title="Dữ liệu R0 khác (dashboard tab 7, tab 11, tab 12)">
-          {data.supplyChain.dashboard.length > 0 && (
-            <Table head={['KPI (dashboard game)', 'Round -2', 'Round -1', 'Round 0', 'Nhận xét của game']}
-              rows={data.supplyChain.dashboard.map((k) => [k.kpi, k.rMinus2 === null ? '—' : /%/.test(k.kpi) ? pct(k.rMinus2, 2) : num(k.rMinus2, 2), k.rMinus1 === null ? '—' : /%/.test(k.kpi) ? pct(k.rMinus1, 2) : num(k.rMinus1, 2), k.r0 === null ? '—' : /%/.test(k.kpi) ? pct(k.r0, 2) : num(k.r0, 2), k.comment ?? ''])} />
-          )}
-          <h4>Tồn kho theo ngày R0 (tuần nhu cầu) — tab 11</h4>
+        <Card title="Toàn bộ số liệu Supply Chain trong sheet (nguyên văn, đúng thứ tự cột)">
+          <p class="muted">Các bảng dưới đây chép <b>y như file</b> <code>{data.meta.source}</code> (đọc lúc {new Date(data.meta.generatedAt).toLocaleString('vi-VN')}), không tính toán gì. Ô trống = file để trống.</p>
+          <RawTable data={data} id="sc-comp" />
+          <RawTable data={data} id="sc-prod" />
+          <RawTable data={data} id="sc-check" />
+          <RawTable data={data} id="sc-dash" />
+          <RawTable data={data} id="an-comp" note="Lưu ý: tab 10 (công cụ Analysis) làm tròn Economic inventory thành số nguyên (9 / 8 / 11 / 8 / 18) trong khi tab 7 ghi 8,7 / 7,7 / 10,8 / 7,7 / 18,4. App dùng số tab 7." />
+          <RawTable data={data} id="an-prod" note="Tab 10 làm tròn Economic inventory TP (8 / 7 / 8 / 8 / 7 / 7) — tab 7 ghi 7,5 / 7,5 / 7,5 / 7,6 / 7,4 / 7,5. App dùng số tab 7." />
+          <RawTable data={data} id="an-wh" />
+          <h4>Tồn kho theo ngày R0 (tuần nhu cầu) <span class="src">— tab 11_R0 Theo ngày</span></h4>
           <div class="row gap">
             <select value={dailyItem} onChange={(e) => setDailyItem((e.currentTarget as HTMLSelectElement).value)}>
               {[...comps, ...skus].map((k) => <option value={k}>{k}</option>)}
@@ -213,14 +218,27 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
             <span class="small-text">Hết hàng R0: {data.dailyStats.stockoutDays[dailyItem] ?? 0}/130 ngày</span>
           </div>
           <DailyChart values={data.daily.filter((x) => x.day >= 1).map((x) => (comps as string[]).includes(dailyItem) ? x.rmWeeks[dailyItem as ComponentKey] : x.fgWeeks[dailyItem as SkuKey])} limit={(comps as string[]).includes(dailyItem) ? sc.components[dailyItem as ComponentKey].safetyStockWeeks : sc.products[dailyItem as SkuKey].safetyStockWeeks} unit="tuần" limitLabel="Safety stock đang đặt" />
+          <RawTable data={data} id="daily-stats" />
           <details>
-            <summary>Nhu cầu theo tuần R0 (tab 12)</summary>
-            <Table head={['SKU', 'TB/tuần', 'Độ lệch chuẩn', 'CV', 'Thấp nhất', 'Cao nhất']}
-              rows={skus.map((s) => {
-                const vals = data.weekly.weeks.filter((w) => w.week >= 1).map((w) => w.demand[s]);
-                return [s, num(data.weekly.mean[s]), num(data.weekly.std[s]), pct(data.weekly.cv[s], 0), num(Math.min(...vals)), num(Math.max(...vals))];
-              })} />
+            <summary>Tồn kho từng ngày (130 ngày × 11 mặt hàng) — tab 11</summary>
+            <div class="tbl-wrap">
+              <table class="sheet raw-t">
+                <thead><tr><th>Ngày</th>{comps.map((k) => <th>{k}</th>)}{skus.map((k) => <th>{k}</th>)}<th>Giờ kho NL</th><th>Giờ kho TP</th></tr></thead>
+                <tbody>{data.daily.map((x) => <tr><td>{x.day}</td>{comps.map((k) => <td class={x.rmWeeks[k] === 0 ? 'ko' : ''}>{num(x.rmWeeks[k], 2)}</td>)}{skus.map((k) => <td class={x.fgWeeks[k] === 0 ? 'ko' : ''}>{num(x.fgWeeks[k], 2)}</td>)}<td>{num(x.rmHours, 2)}</td><td>{num(x.fgHours, 2)}</td></tr>)}</tbody>
+              </table>
+            </div>
           </details>
+          <details>
+            <summary>Nhu cầu theo tuần (26 tuần + thống kê) — tab 12</summary>
+            <RawTable data={data} id="week" />
+            <Table head={['SKU', 'TB/tuần', 'Độ lệch chuẩn', 'CV']} rows={skus.map((k) => [k, num(data.weekly.mean[k], 2), num(data.weekly.std[k], 2), pct(data.weekly.cv[k])])} />
+          </details>
+          <details>
+            <summary>Sản phẩm, BOM, nguyên liệu — tab 3</summary>
+            <RawTable data={data} id="prod-bom" />
+            <RawTable data={data} id="comp-spec" />
+          </details>
+          <HistorySc data={data} />
         </Card>
       </div>
     </div>
@@ -249,5 +267,22 @@ function Cell({ c, f, goodUp, goodDown, alert, sub, extra }: { c: SheetCell; f: 
       {changed && c.r0 !== null && <div class="small-text">R0 {f(c.r0)}</div>}
       {sub && <div class="small-text">{sub}</div>}
     </td>
+  );
+}
+
+/** Tab 13: Round -2 so với Round 0, chỉ các chỉ số nguyên liệu & sản phẩm (Supply Chain). */
+function HistorySc({ data }: { data: Round0Data }) {
+  const rows = data.history.filter((h) => /Nguyên liệu|Sản phẩm/i.test(h.group));
+  const objects = [...new Set(rows.map((h) => h.object))];
+  const [obj, setObj] = useState(objects.find((o) => /Vitamin/.test(o)) ?? objects[0] ?? '');
+  if (!rows.length) return <p class="muted">Thiếu dữ liệu: file không có tab 13 (lịch sử R-2 vs R0).</p>;
+  const sel = rows.filter((h) => h.object === obj);
+  return (
+    <details>
+      <summary>Lịch sử Round -2 so với Round 0 (nguyên liệu & sản phẩm) — tab 13</summary>
+      <p class="muted">Game lưu R-2, R-1, R0; R-1 trùng hoàn toàn R0 nên sheet chỉ so R-2 với R0. <b>Thiếu dữ liệu quyết định của R-2</b> nên app không dùng làm mốc hiệu chỉnh.</p>
+      <select value={obj} onChange={(e) => setObj((e.currentTarget as HTMLSelectElement).value)}>{objects.map((o) => <option value={o}>{o}</option>)}</select>
+      <Table head={['Chỉ số (tên gốc game)', 'Round -2', 'Round 0', 'Δ (R0 − R-2)']} rows={sel.map((h) => [h.metric, fmtCell(h.metric, h.rMinus2), fmtCell(h.metric, h.r0), h.rMinus2 !== null && h.r0 !== null ? fmtCell(h.metric, Math.round((h.r0 - h.rMinus2) * 1e6) / 1e6) : ''])} />
+    </details>
   );
 }

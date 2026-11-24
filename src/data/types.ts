@@ -274,6 +274,8 @@ export interface Round0Data {
     dashboard: { kpi: string; rMinus2: number | null; rMinus1: number | null; r0: number | null; comment: string | null }[];
   };
   history: { group: string; object: string; metric: string; rMinus2: number | null; r0: number | null }[];
+  /** Bảng nguyên văn từ sheet (để hiển thị đúng như file) */
+  rawTables: { id: string; sheet: string; title: string; headers: string[]; rows: (string | number | null)[][] }[];
   analysis: {
     components: { component: ComponentKey; orderLinesPerRound: number; obsoletes: number }[];
     products: { sku: SkuKey; rejectsEur: number; gmPerWeek: number }[];

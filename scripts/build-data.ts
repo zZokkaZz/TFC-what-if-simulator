@@ -650,6 +650,43 @@ const history = histName ? (() => {
   return t.rows.map((r) => ({ group: t.str(r, /^Nhóm$/), object: t.str(r, /^Đối tượng$/), metric: t.str(r, /^Chỉ số/), rMinus2: t.numOpt(r, /^Round -2$/), r0: t.numOpt(r, /^Round 0$/) }));
 })() : [];
 
+// ================= Bảng nguyên văn (hiển thị đúng như sheet, không xử lý số) =================
+// Mỗi bảng: tiêu đề cột + các dòng y như trong file (số giữ nguyên giá trị gốc).
+interface RawTable { id: string; sheet: string; title: string; headers: string[]; rows: (string | number | null)[][] }
+const rawTables: RawTable[] = [];
+function captureRaw(id: string, sheetName: string, rows: Rows, title: string, required: RegExp[], keepTotal = true) {
+  if (!rows.some((r) => required.every((re) => (r ?? []).some((c) => re.test(String(c ?? '').normalize('NFC').trim()))))) return;
+  const t = table(rows, title, required);
+  // Lấy lại cả dòng TỔNG (table() bỏ dòng TỔNG)
+  const start = rows.findIndex((r) => required.every((re) => (r ?? []).some((c) => re.test(String(c ?? '').normalize('NFC').trim()))));
+  const body: (string | number | null)[][] = [];
+  for (let i = start + 1; i < rows.length; i++) {
+    const r = rows[i] ?? [];
+    if (r.every((c) => c === null || c === '')) break;
+    if (!keepTotal && /^tổng$/i.test(String(r[0] ?? '').trim())) continue;
+    body.push(t.headers.map((_, k) => { const v = r[k]; return v === undefined || v === '' ? null : typeof v === 'boolean' ? String(v) : v; }));
+  }
+  const n = t.headers.reduce((m, h, k) => (h || body.some((r) => r[k] !== null) ? k + 1 : m), 0);
+  rawTables.push({ id, sheet: sheetName, title, headers: t.headers.slice(0, n), rows: body.map((r) => r.slice(0, n)) });
+}
+captureRaw('sc-comp', '7_Supply Chain', scRows, 'Tồn kho nguyên liệu R0', [/^Component$/, /^(Reliability NCC|Delivery reliability)/, /^(Tồn|Stock) \((tuần|weeks)\)/]);
+captureRaw('sc-prod', '7_Supply Chain', scRows, 'Tồn kho thành phẩm R0', [/^(SKU|Product)$/, /^(SL pieces|Service level \(pieces\))/, /plan adherence/i]);
+captureRaw('sc-check', '7_Supply Chain', scRows, 'Kiểm tra tổng stock', [/^Mục$/, /Giá trị \(€\)/]);
+captureRaw('sc-dash', '7_Supply Chain', scRows, 'Dashboard Supply Chain', [/^KPI$/, /^Round 0$/]);
+captureRaw('an-comp', '10_R0 Analysis', anRows, 'Analysis — Component', [/^Component$/, /Order lines\/round/, /Component availability/]);
+captureRaw('an-prod', '10_R0 Analysis', anRows, 'Analysis — Product', [/^Product$/, /Production batches/, /Plan adherence/]);
+captureRaw('an-wh', '10_R0 Analysis', anRows, 'Analysis — Warehouse', [/^Warehouse$/, /Cube utilization/]);
+captureRaw('prod-bom', '3_Sản phẩm', prodRows, 'Sản phẩm, BOM & nhu cầu', [/^SKU$/, /^Bao bì$/, /BOM/]);
+captureRaw('comp-spec', '3_Sản phẩm', prodRows, 'Nguyên liệu (quy cách)', [/^Component$/, /^Đơn vị$/, /Quy cách/]);
+captureRaw('week', '12_R0 Theo tuần', wkRows, 'Nhu cầu theo tuần', [/^Tuần$/, /^Orange 1L$/, /^Mango PET$/]);
+// Thống kê tab 11 (các dòng dưới bảng theo ngày): dùng tiêu đề cột của bảng theo ngày
+{
+  const hdr = tDay.headers;
+  const labels = [/^Trung bình/i, /^Thấp nhất/i, /^Cao nhất/i, /hết hàng/i, /Giờ công cố định/i, /vượt giờ công/i];
+  const rows11 = labels.map((re) => dayRows.find((r) => re.test(String(r?.[0] ?? '').normalize('NFC')))).filter(Boolean) as Cell[][];
+  if (rows11.length) rawTables.push({ id: 'daily-stats', sheet: '11_R0 Theo ngày', title: 'Thống kê 130 ngày (tồn: tuần nhu cầu; giờ công: giờ/ngày)', headers: hdr.map((h, k) => (k === 0 ? 'Chỉ số' : h)), rows: rows11.map((r) => hdr.map((_, k) => { const v = r[k]; return v === undefined || v === '' ? null : (v as string | number | null); })) });
+}
+
 // ================= kiểm tra chéo =================
 if (products.length !== 6) fail(`Cần 6 SKU, đọc được ${products.length}`);
 if (components.length !== 5) fail(`Cần 5 nguyên liệu, đọc được ${components.length}`);
@@ -669,6 +706,7 @@ const out: Round0Data = {
   sales: { contracts: customerContracts, customerResults, productResults, customerProduct, notes: salesNotes },
   supplyChain: { components: scComponents, products: scProducts, frozenPeriodWeeks: frozen, componentStock, productStock, totalStockValue, dashboard: dashTable },
   history,
+  rawTables,
   analysis: { components: anComponents, products: anProducts, distributor },
   daily,
   dailyStats,
