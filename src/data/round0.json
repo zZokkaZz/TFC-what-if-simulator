@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-24T19:46:54.945Z",
+  "generatedAt": "2026-11-24T19:52:13.477Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -6321,6 +6321,92 @@
      null,
      null
     ]
+   ],
+   "pct": [
+    [
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
    ]
   },
   {
@@ -6480,6 +6566,141 @@
      8312,
      null
     ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
    ]
   },
   {
@@ -6502,6 +6723,20 @@
     [
      "Chênh lệch",
      1
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false
+    ],
+    [
+     false,
+     false
+    ],
+    [
+     false,
+     false
     ]
    ]
   },
@@ -6544,6 +6779,36 @@
      3.18,
      3.18,
      null
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false
     ]
    ]
   },
@@ -6665,6 +6930,103 @@
      0.843,
      0.002,
      4852
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false
+    ],
+    [
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false
     ]
    ]
   },
@@ -6848,6 +7210,158 @@
      1.59,
      2336
     ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     true,
+     false,
+     false,
+     false
+    ]
    ]
   },
   {
@@ -6902,6 +7416,44 @@
      334.5,
      100,
      0.1
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     false,
+     false,
+     false,
+     false
     ]
    ]
   },
@@ -7070,6 +7622,148 @@
      166.833,
      2873.7
     ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
    ]
   },
   {
@@ -7118,6 +7812,1740 @@
      0.15,
      "Drum 250 L, IBC 1.000 L, tank 30.000 L",
      52
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "ops-dec",
+   "sheet": "5_Operations",
+   "title": "Quyết định Ops hiện tại",
+   "headers": [
+    "Khu vực",
+    "Thông số",
+    "Giá trị",
+    "Lựa chọn và chi phí (Info Center)"
+   ],
+   "rows": [
+    [
+     "Inbound",
+     "Raw materials inspection",
+     "Tắt cả 5 NCC",
+     "Bật: thêm 2 giờ công/dòng đơn nhận hàng; giảm hỏng dây chuyền và hàng lỗi"
+    ],
+    [
+     "Inbound",
+     "Pallet locations kho NL",
+     900,
+     "€200/chỗ/năm; thiếu chỗ dùng overflow €3/pallet/ngày"
+    ],
+    [
+     "Inbound",
+     "Nhân viên cố định kho NL (FTE)",
+     5,
+     "€40.000/năm/người (40 giờ/tuần); thiếu người thuê thời vụ €42/giờ"
+    ],
+    [
+     "Inbound",
+     "Intake time (ngày)",
+     5,
+     "Dài hơn: giảm đỉnh tải nhân công, nhưng NL sẵn sàng muộn hơn"
+    ],
+    [
+     "Mixing",
+     "Máy trộn",
+     "Fruitmix MQ",
+     "Xem bảng MÁY TRỘN"
+    ],
+    [
+     "Bottling",
+     "Preventive maintenance",
+     "None",
+     "Minimal: 1 giờ/tuần, giảm 30% hỏng. Extensive: 3 giờ/tuần, giảm 50% hỏng"
+    ],
+    [
+     "Bottling",
+     "Solve breakdowns training",
+     "No",
+     "€400/người, thời gian sửa giảm 40%"
+    ],
+    [
+     "Bottling",
+     "Dây chuyền",
+     "Swiss Fill 2",
+     "Xem bảng DÂY CHUYỀN"
+    ],
+    [
+     "Bottling",
+     "Số ca",
+     2,
+     "1 ca 40 giờ, 2 ca 80, 3 ca 120, 4 ca 144, 5 ca 168 giờ/tuần. Vượt 168 giờ phải thuê ngoài, chi phí gấp 2"
+    ],
+    [
+     "Bottling",
+     "SMED action",
+     "Không",
+     "€20.000/năm, giảm 30% thời gian chuyển đổi"
+    ],
+    [
+     "Bottling",
+     "Increase speed",
+     "Không",
+     "€30.000/năm, tăng 10% tốc độ (lít/giờ)"
+    ],
+    [
+     "Outbound",
+     "Pallet locations kho TP (DC Netherlands)",
+     1500,
+     "€200/chỗ/năm; thiếu chỗ dùng overflow €3/pallet/ngày"
+    ],
+    [
+     "Outbound",
+     "Nhân viên cố định kho TP (FTE)",
+     4,
+     "€40.000/năm/người; thiếu người thuê thời vụ €42/giờ"
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "ops-res",
+   "sheet": "5_Operations",
+   "title": "Kết quả Ops Round 0",
+   "headers": [
+    "Khu vực",
+    "Chỉ số",
+    "Giá trị",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "Kho NL",
+     "Capacity (pallet)",
+     900,
+     null
+    ],
+    [
+     "Kho NL",
+     "Usage trung bình (pallet)",
+     840,
+     null
+    ],
+    [
+     "Kho NL",
+     "Utilization",
+     0.934,
+     "Khá đầy (cube utilization theo game)"
+    ],
+    [
+     "Kho NL",
+     "Overflow",
+     0.108,
+     "Phí overflow 35.423 (2_Finance)"
+    ],
+    [
+     "Kho NL",
+     "Order lines nhận/tuần",
+     1,
+     null
+    ],
+    [
+     "Kho NL",
+     "Pallet nhận/tuần",
+     212.4,
+     null
+    ],
+    [
+     "Kho NL",
+     "Giờ công cần/tuần",
+     74,
+     null
+    ],
+    [
+     "Kho NL",
+     "Giờ công cố định đang có/tuần",
+     200,
+     "Số FTE × 40 giờ"
+    ],
+    [
+     "Kho NL",
+     "Thời vụ (FTE)",
+     0.2,
+     "Thuê lúc cao điểm"
+    ],
+    [
+     "Tank yard",
+     "Tank-days/tuần",
+     29,
+     "Thuê ngoài (PulpStore)"
+    ],
+    [
+     "Kho TP",
+     "Capacity (pallet)",
+     1500,
+     null
+    ],
+    [
+     "Kho TP",
+     "Usage trung bình (pallet)",
+     1061,
+     null
+    ],
+    [
+     "Kho TP",
+     "Utilization",
+     0.707,
+     "Khá trống"
+    ],
+    [
+     "Kho TP",
+     "Overflow",
+     0.001,
+     null
+    ],
+    [
+     "Kho TP",
+     "Order lines/tuần",
+     17.8,
+     null
+    ],
+    [
+     "Kho TP",
+     "Pallet/tuần",
+     334.5,
+     null
+    ],
+    [
+     "Kho TP",
+     "Giờ công cần/tuần",
+     100,
+     null
+    ],
+    [
+     "Kho TP",
+     "Giờ công cố định đang có/tuần",
+     160,
+     "Số FTE × 40 giờ"
+    ],
+    [
+     "Kho TP",
+     "Thời vụ (FTE)",
+     0.1,
+     "Thuê lúc cao điểm"
+    ],
+    [
+     "Swiss Fill 2",
+     "Run time (giờ/tuần)",
+     62.6,
+     "78,2% thời gian"
+    ],
+    [
+     "Swiss Fill 2",
+     "Changeover (giờ/tuần)",
+     12.1,
+     0.151
+    ],
+    [
+     "Swiss Fill 2",
+     "Breakdown (giờ/tuần)",
+     10.8,
+     0.136
+    ],
+    [
+     "Swiss Fill 2",
+     "Unused (giờ/tuần)",
+     3.9,
+     0.049
+    ],
+    [
+     "Swiss Fill 2",
+     "Overtime (giờ/tuần)",
+     9.4,
+     "11,7%, đã nằm trong 4 dòng trên"
+    ],
+    [
+     "Swiss Fill 2",
+     "Tổng giờ dây chuyền/tuần",
+     89.4,
+     "≈ 80 giờ (2 ca) cộng overtime"
+    ],
+    [
+     "Swiss Fill 2",
+     "Production plan adherence",
+     0.787,
+     "Thấp"
+    ],
+    [
+     "Swiss Fill 2",
+     "Start-up productivity loss (€)",
+     8435,
+     null
+    ],
+    [
+     "Fruitmix MQ",
+     "Cleaning time",
+     0.145,
+     null
+    ],
+    [
+     "Fruitmix MQ",
+     "Lô trung bình (L)",
+     11022,
+     "Min 8.000, max 12.000"
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     true
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "ops-mixers",
+   "sheet": "5_Operations",
+   "title": "Máy trộn có thể chọn",
+   "headers": [
+    "Máy",
+    "Đang dùng",
+    "Mẻ tối thiểu (L)",
+    "Mẻ tối đa (L)",
+    "Phí/năm (€)",
+    "Phí/giờ chạy (€)",
+    "Đầu tư (€)",
+    "Trộn/mẻ (giờ)",
+    "Vệ sinh (giờ)"
+   ],
+   "rows": [
+    [
+     "Fruitmix MQ",
+     "Đang dùng",
+     8000,
+     12000,
+     62500,
+     135,
+     312500,
+     2,
+     2
+    ],
+    [
+     "MegaChurn 20",
+     null,
+     15000,
+     20000,
+     75000,
+     160,
+     375000,
+     2,
+     3
+    ],
+    [
+     "FMM 4000",
+     null,
+     3000,
+     6000,
+     50000,
+     100,
+     250000,
+     2,
+     1
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "ops-lines",
+   "sheet": "5_Operations",
+   "title": "Dây chuyền đóng chai có thể chọn",
+   "headers": [
+    "Dây chuyền",
+    "Đang dùng",
+    "Tốc độ (L/giờ)",
+    "Công nhân/ca",
+    "Phí/năm (€)",
+    "Đầu tư (€)",
+    "Formula changeover (giờ)",
+    "Size changeover (giờ)",
+    "Tolerance",
+    "Start-up loss",
+    "Lương công nhân/năm theo số ca hiện tại (€40.000/người)"
+   ],
+   "rows": [
+    [
+     "Swiss Fill 2",
+     "Đang dùng",
+     3100,
+     5,
+     98000,
+     490000,
+     2,
+     4,
+     "Middle",
+     0.1,
+     400000
+    ],
+    [
+     "TopSpeed 1",
+     null,
+     3250,
+     4,
+     114000,
+     570000,
+     4,
+     6,
+     "Narrow",
+     0.15,
+     320000
+    ],
+    [
+     "MultiFlex 1",
+     null,
+     2950,
+     6,
+     85000,
+     425000,
+     1,
+     2,
+     "Wide",
+     0.08,
+     480000
+    ],
+    [
+     "Swiss Fill 1",
+     null,
+     3100,
+     5,
+     98000,
+     490000,
+     2,
+     4,
+     "Middle",
+     0.1,
+     400000
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "ops-norms",
+   "sheet": "5_Operations",
+   "title": "Định mức thời gian & chi phí (Info Center)",
+   "headers": [
+    "Khu vực",
+    "Công việc",
+    "Định mức"
+   ],
+   "rows": [
+    [
+     "Kho NL",
+     "Nhận hàng",
+     "1 giờ/dòng đơn và 6 phút/pallet"
+    ],
+    [
+     "Kho NL",
+     "Cấp cho sản xuất",
+     "6 phút/pallet; 12 phút/tank"
+    ],
+    [
+     "Kho NL",
+     "Việc cố định (dọn dẹp, vận hành)",
+     "Khoảng 4 giờ/ngày"
+    ],
+    [
+     "Kho NL",
+     "Chuyển ra/vào overflow",
+     "6 phút/pallet"
+    ],
+    [
+     "Kho NL",
+     "Đổ IBC khi tank yard thiếu chỗ",
+     "1 giờ/IBC"
+    ],
+    [
+     "Kho NL",
+     "Raw materials inspection",
+     "Thêm 2 giờ/dòng đơn"
+    ],
+    [
+     "Tank yard (PulpStore)",
+     "Chi phí",
+     "€25/tank/ngày; €10/lần nhận; €100/lần giao"
+    ],
+    [
+     "Kho TP",
+     "Nhập hàng từ sản xuất",
+     "6 phút/pallet"
+    ],
+    [
+     "Kho TP",
+     "Soạn hàng",
+     "10 phút/dòng đơn, 6 phút/pallet hoặc layer, 3 phút/thùng"
+    ],
+    [
+     "Kho TP",
+     "Chuyển overflow hoặc hủy hàng lỗi thời",
+     "6 phút/pallet"
+    ],
+    [
+     "Kho TP",
+     "Việc cố định",
+     "4 giờ/ngày"
+    ],
+    [
+     "Kho TP",
+     "Phân phối DC Netherlands tới khách",
+     "€31/pallet"
+    ],
+    [
+     "Bottling",
+     "Vượt 168 giờ/tuần",
+     "Thuê ngoài, chi phí gấp 2"
+    ],
+    [
+     "Bottling",
+     "Sau mỗi lần changeover",
+     "Giờ đầu tiên bị hao hụt (start-up loss)"
+    ],
+    [
+     "Bottling",
+     "Formula vs size changeover",
+     "Formula: cùng bao bì, đổi vị (nhanh). Size: đổi bao bì 1L và PET (lâu hơn)"
+    ],
+    [
+     "Chung",
+     "Nhân viên cố định",
+     "40 giờ/tuần, €40.000/năm"
+    ],
+    [
+     "Chung",
+     "Thời vụ",
+     "€42/giờ, năng suất thấp hơn nhân viên cố định"
+    ],
+    [
+     "Chung",
+     "Pallet location",
+     "€200/năm; tăng giảm mỗi round không mất phí"
+    ],
+    [
+     "Chung",
+     "Overflow",
+     "€3/pallet/ngày"
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "an-line",
+   "sheet": "10_R0 Analysis",
+   "title": "Analysis — Bottling line",
+   "headers": [
+    "Bottling line",
+    "Run time (giờ/tuần)",
+    "Changeover (giờ/tuần)",
+    "Breakdown (giờ/tuần)",
+    "Unused (giờ/tuần)",
+    "Overtime (giờ/tuần)",
+    "Run time %",
+    "Changeover %",
+    "Breakdown %",
+    "Unused %",
+    "Overtime %",
+    "Start-up loss (€)",
+    "Plan adherence",
+    "Outsourced (giờ)",
+    "Outsourced %"
+   ],
+   "rows": [
+    [
+     "Swiss Fill 2",
+     62.6,
+     12.1,
+     11,
+     3.9,
+     9.4,
+     0.782,
+     0.151,
+     0.136,
+     0.049,
+     0.117,
+     8435,
+     0.787,
+     0,
+     0
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     true,
+     true,
+     true,
+     true,
+     true,
+     false,
+     true,
+     false,
+     true
+    ]
+   ]
+  },
+  {
+   "id": "an-mixer",
+   "sheet": "10_R0 Analysis",
+   "title": "Analysis — Mixers",
+   "headers": [
+    "Mixer",
+    "Cleaning time",
+    "Average lot size (L)"
+   ],
+   "rows": [
+    [
+     "Fruitmix MQ",
+     0.145,
+     11022
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     true,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "an-dist",
+   "sheet": "10_R0 Analysis",
+   "title": "Analysis — Distributor",
+   "headers": [
+    "Distributor",
+    "Distribution costs (€)",
+    "Service level",
+    "Pallets in small shipments",
+    "Pallets in medium shipments",
+    "Pallets in large shipments",
+    "Parcels webshop"
+   ],
+   "rows": [
+    [
+     "Super Service",
+     192114,
+     1,
+     373,
+     1146,
+     7180,
+     0
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     true,
+     false,
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "fin",
+   "sheet": "2_Finance",
+   "title": "P&L Round 0",
+   "headers": [
+    "Nhóm",
+    "Dòng",
+    "Round 0 (€)",
+    "Ghi chú"
+   ],
+   "rows": [
+    [
+     "Tổng",
+     "ROI",
+     -0.07682767295,
+     "Operating profit / Investment. Game: -7,68%"
+    ],
+    [
+     "Doanh thu",
+     "Contracted sales – Food & Groceries",
+     1297902,
+     null
+    ],
+    [
+     "Doanh thu",
+     "Contracted sales – LAND Market",
+     632821,
+     null
+    ],
+    [
+     "Doanh thu",
+     "Contracted sales – Dominick's",
+     698240,
+     null
+    ],
+    [
+     "Doanh thu",
+     "Penalty service level – Food & Groceries",
+     -252766,
+     "Giao không đạt 95% bị phạt"
+    ],
+    [
+     "Doanh thu",
+     "Penalty service level – LAND Market",
+     -46360,
+     null
+    ],
+    [
+     "Doanh thu",
+     "Penalty service level – Dominick's",
+     -23582,
+     null
+    ],
+    [
+     "TỔNG",
+     "Realized revenue",
+     2306255,
+     "Game: 2.306.255"
+    ],
+    [
+     "COGS – mua NL",
+     "Mono Packaging Materials (Pack)",
+     110692,
+     null
+    ],
+    [
+     "COGS – mua NL",
+     "Trio PET PLC (PET)",
+     307931,
+     null
+    ],
+    [
+     "COGS – mua NL",
+     "Miami Oranges (Orange)",
+     409042,
+     null
+    ],
+    [
+     "COGS – mua NL",
+     "NO8DO Mango (Mango)",
+     81658,
+     null
+    ],
+    [
+     "COGS – mua NL",
+     "Seitan Vitamins (Vitamin C)",
+     2295,
+     null
+    ],
+    [
+     "Tổng phụ",
+     "Purchase value",
+     911618,
+     "Game: 911.617 (lệch 1 do làm tròn)"
+    ],
+    [
+     "COGS – sản xuất",
+     "Bottling line fixed costs",
+     49000,
+     "Swiss Fill 2: 98.000/năm × 0,5"
+    ],
+    [
+     "COGS – sản xuất",
+     "Permanent employees (bottling)",
+     200000,
+     "2 ca × 5 người × 40.000 × 0,5"
+    ],
+    [
+     "COGS – sản xuất",
+     "Flexible manpower (bottling)",
+     66670,
+     "Thời vụ €42/giờ"
+    ],
+    [
+     "COGS – sản xuất",
+     "Mixer fixed costs",
+     31250,
+     "Fruitmix MQ 62.500/năm × 0,5"
+    ],
+    [
+     "COGS – sản xuất",
+     "Mixer variable costs",
+     144569,
+     "€135/giờ chạy máy"
+    ],
+    [
+     "Tổng phụ",
+     "Production costs",
+     491489,
+     "Game: 491.489"
+    ],
+    [
+     "TỔNG",
+     "Cost of goods sold (COGS)",
+     1403107,
+     "Game: 1.403.107"
+    ],
+    [
+     "TỔNG",
+     "Gross margin",
+     903148,
+     "Revenue trừ COGS. Game: 903.148"
+    ],
+    [
+     "Indirect – overhead",
+     "Energy",
+     150904,
+     null
+    ],
+    [
+     "Indirect – overhead",
+     "Water",
+     26779,
+     null
+    ],
+    [
+     "Indirect – overhead",
+     "Other",
+     146619,
+     null
+    ],
+    [
+     "Indirect – tồn kho",
+     "Interest on components",
+     11181,
+     null
+    ],
+    [
+     "Indirect – tồn kho",
+     "Interest on products",
+     12926,
+     null
+    ],
+    [
+     "Indirect – kho",
+     "Pallet locations raw materials warehouse",
+     90000,
+     "900 chỗ × 200 × 0,5"
+    ],
+    [
+     "Indirect – kho",
+     "Overflow raw materials warehouse",
+     35423,
+     "€3/pallet/ngày"
+    ],
+    [
+     "Indirect – kho",
+     "Outsourcing tank yard",
+     25282,
+     "€25/tank/ngày + phí nhận, giao"
+    ],
+    [
+     "Indirect – kho",
+     "Pallet locations finished goods warehouse",
+     150000,
+     "1.500 chỗ × 200 × 0,5"
+    ],
+    [
+     "Indirect – kho",
+     "Overflow finished goods warehouse",
+     607,
+     null
+    ],
+    [
+     "Indirect – rủi ro",
+     "Costs of scrap",
+     40203,
+     "Hàng hỏng, lỗi thời"
+    ],
+    [
+     "Indirect – handling",
+     "Inbound permanent employees",
+     100000,
+     "5 FTE × 40.000 × 0,5"
+    ],
+    [
+     "Indirect – handling",
+     "Inbound flexible manpower",
+     6753,
+     null
+    ],
+    [
+     "Indirect – handling",
+     "Outbound permanent employees",
+     80000,
+     "4 FTE × 40.000 × 0,5"
+    ],
+    [
+     "Indirect – handling",
+     "Outbound flexible manpower",
+     3725,
+     null
+    ],
+    [
+     "Indirect – admin",
+     "Inbound order lines",
+     271,
+     null
+    ],
+    [
+     "Indirect – admin",
+     "Inbound orders",
+     1353,
+     null
+    ],
+    [
+     "Indirect – admin",
+     "Contracted suppliers",
+     100000,
+     null
+    ],
+    [
+     "Indirect – admin",
+     "Outbound order lines",
+     927,
+     null
+    ],
+    [
+     "Indirect – admin",
+     "Outbound orders",
+     7167,
+     null
+    ],
+    [
+     "Indirect",
+     "Distribution costs",
+     192114,
+     "DC Netherlands → khách hàng"
+    ],
+    [
+     "Indirect",
+     "Interest",
+     27419,
+     null
+    ],
+    [
+     "TỔNG",
+     "Indirect cost",
+     1209653,
+     "Game: 1.209.651 (lệch 2 do làm tròn)"
+    ],
+    [
+     "TỔNG",
+     "Operating profit",
+     -306505,
+     "Gross margin trừ Indirect cost. Game: -306.503"
+    ],
+    [
+     "Investment",
+     "Fixed",
+     2500000,
+     null
+    ],
+    [
+     "Investment",
+     "Stock",
+     321424,
+     "Giá trị tồn kho NL + TP (xem 7_Supply Chain)"
+    ],
+    [
+     "Investment",
+     "Machines",
+     802500,
+     "Mixer 312.500 + dây chuyền 490.000"
+    ],
+    [
+     "Investment",
+     "Payment terms",
+     365589,
+     "Phải thu khách trừ phải trả NCC"
+    ],
+    [
+     "TỔNG",
+     "Investment",
+     3989513,
+     "Game: 3.989.513"
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     true,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false
     ]
    ]
   },
@@ -7377,6 +9805,251 @@
      119232,
      22752,
      92160
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
     ]
    ]
   },

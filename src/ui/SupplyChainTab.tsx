@@ -10,7 +10,7 @@ import { DailyChart } from './charts';
 import { eur, num, pct } from './format';
 import { causesFor } from './trace';
 import { WarningsPanel } from './WarningsPanel';
-import { RawTable, fmtCell } from './RawTable';
+import { RawTable, HistoryTable } from './RawTable';
 
 interface Props {
   data: Round0Data;
@@ -238,7 +238,7 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
             <RawTable data={data} id="prod-bom" />
             <RawTable data={data} id="comp-spec" />
           </details>
-          <HistorySc data={data} />
+          <HistoryTable data={data} groups={/Nguyên liệu|Sản phẩm/i} title="Lịch sử Round -2 so với Round 0 (nguyên liệu & sản phẩm)" />
         </Card>
       </div>
     </div>
@@ -270,19 +270,3 @@ function Cell({ c, f, goodUp, goodDown, alert, sub, extra }: { c: SheetCell; f: 
   );
 }
 
-/** Tab 13: Round -2 so với Round 0, chỉ các chỉ số nguyên liệu & sản phẩm (Supply Chain). */
-function HistorySc({ data }: { data: Round0Data }) {
-  const rows = data.history.filter((h) => /Nguyên liệu|Sản phẩm/i.test(h.group));
-  const objects = [...new Set(rows.map((h) => h.object))];
-  const [obj, setObj] = useState(objects.find((o) => /Vitamin/.test(o)) ?? objects[0] ?? '');
-  if (!rows.length) return <p class="muted">Thiếu dữ liệu: file không có tab 13 (lịch sử R-2 vs R0).</p>;
-  const sel = rows.filter((h) => h.object === obj);
-  return (
-    <details>
-      <summary>Lịch sử Round -2 so với Round 0 (nguyên liệu & sản phẩm) — tab 13</summary>
-      <p class="muted">Game lưu R-2, R-1, R0; R-1 trùng hoàn toàn R0 nên sheet chỉ so R-2 với R0. <b>Thiếu dữ liệu quyết định của R-2</b> nên app không dùng làm mốc hiệu chỉnh.</p>
-      <select value={obj} onChange={(e) => setObj((e.currentTarget as HTMLSelectElement).value)}>{objects.map((o) => <option value={o}>{o}</option>)}</select>
-      <Table head={['Chỉ số (tên gốc game)', 'Round -2', 'Round 0', 'Δ (R0 − R-2)']} rows={sel.map((h) => [h.metric, fmtCell(h.metric, h.rMinus2), fmtCell(h.metric, h.r0), h.rMinus2 !== null && h.r0 !== null ? fmtCell(h.metric, Math.round((h.r0 - h.rMinus2) * 1e6) / 1e6) : ''])} />
-    </details>
-  );
-}

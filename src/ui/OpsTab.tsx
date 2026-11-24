@@ -6,6 +6,7 @@ import { simulate } from '../model/simulate';
 import { useMemo } from 'preact/hooks';
 import type { Warning } from '../model/warnings';
 import { WarningsPanel } from './WarningsPanel';
+import { RawTable, HistoryTable } from './RawTable';
 import { opsChecks } from '../model/acceptance';
 import { BOTTLING } from '../model/rules';
 import { COMPONENTS } from '../model/purchasing';
@@ -179,6 +180,30 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
         </WarehouseCard>
 
         <CostCard res={res} baseRes={baseRes} />
+
+        <Card title="Toàn bộ số liệu Ops trong sheet (nguyên văn, đúng thứ tự cột)">
+          <p class="muted">Chép <b>y như file</b> <code>{data.meta.source}</code>, không tính toán. Số "R0 thật" ở các thẻ phía trên đều lấy từ các bảng này.</p>
+          <RawTable data={data} id="ops-dec" />
+          <RawTable data={data} id="ops-res" />
+          <RawTable data={data} id="ops-mixers" />
+          <RawTable data={data} id="ops-lines" note="Cột cuối là công thức trong sheet (công nhân/ca × số ca hiện tại × €40.000)." />
+          <RawTable data={data} id="an-line" note="Lưu ý: tab 10 ghi Breakdown 11,0 giờ/tuần, tab 5 ghi 10,8. App dùng 10,8 (tab 5)." />
+          <RawTable data={data} id="an-mixer" />
+          <RawTable data={data} id="an-wh" note="Tank yard: tab 10 ghi capacity 20, usage 6, 1,2 tank/tuần; tab 5 ghi 29 tank-days/tuần." />
+          <RawTable data={data} id="an-dist" />
+          <h4>Giờ công kho theo ngày — số THẬT R0 <span class="src">— tab 11_R0 Theo ngày</span></h4>
+          <div class="charts2">
+            <div><h4>Kho NL (R0)</h4><DailyChart values={data.daily.filter((x) => x.day >= 1).map((x) => x.rmHours)} limit={data.dailyStats.rmFixedHoursPerDay} unit="giờ" limitLabel="Giờ cố định/ngày (R0)" /></div>
+            <div><h4>Kho TP (R0)</h4><DailyChart values={data.daily.filter((x) => x.day >= 1).map((x) => x.fgHours)} limit={data.dailyStats.fgFixedHoursPerDay} unit="giờ" limitLabel="Giờ cố định/ngày (R0)" /></div>
+          </div>
+          <RawTable data={data} id="daily-stats" />
+          <RawTable data={data} id="ops-norms" />
+          <details>
+            <summary>P&L Round 0 đầy đủ — tab 2</summary>
+            <RawTable data={data} id="fin" />
+          </details>
+          <HistoryTable data={data} groups={/Dây chuyền|Máy trộn|Kho/i} title="Lịch sử Round -2 so với Round 0 (dây chuyền, máy trộn, kho)" />
+        </Card>
 
         <Card title="Đối chiếu Round 0 (test hiệu chỉnh mục 7)">
           <p class="muted">So sánh <b>baseline mô hình</b> (quyết định R0) với số game thật. Dòng "hiệu chỉnh" dùng để tính hệ số nên khớp do cấu tạo; các dòng còn lại là dự báo độc lập.</p>

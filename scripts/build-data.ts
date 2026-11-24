@@ -42,7 +42,7 @@ function fail(msg: string): never {
   process.exit(1);
 }
 
-const wb = XLSX.readFile(SRC);
+const wb = XLSX.readFile(SRC, { cellNF: true });
 const sheetNames = wb.SheetNames;
 
 function sheet(label: string, ...patterns: RegExp[]): Rows {
@@ -652,7 +652,9 @@ const history = histName ? (() => {
 
 // ================= Bảng nguyên văn (hiển thị đúng như sheet, không xử lý số) =================
 // Mỗi bảng: tiêu đề cột + các dòng y như trong file (số giữ nguyên giá trị gốc).
-interface RawTable { id: string; sheet: string; title: string; headers: string[]; rows: (string | number | null)[][] }
+interface RawTable { id: string; sheet: string; title: string; headers: string[]; rows: (string | number | null)[][]; pct?: boolean[][] }
+// Định dạng % lấy từ chính ô trong file (number format chứa "%")
+const isPctCell = (sheetName: string, r: number, c: number) => { const ws = wb.Sheets[sheetName]; const cell = ws?.[XLSX.utils.encode_cell({ r, c })]; return !!cell && typeof cell.v === 'number' && typeof cell.z === 'string' && cell.z.includes('%'); };
 const rawTables: RawTable[] = [];
 function captureRaw(id: string, sheetName: string, rows: Rows, title: string, required: RegExp[], keepTotal = true) {
   if (!rows.some((r) => required.every((re) => (r ?? []).some((c) => re.test(String(c ?? '').normalize('NFC').trim()))))) return;
@@ -660,14 +662,17 @@ function captureRaw(id: string, sheetName: string, rows: Rows, title: string, re
   // Lấy lại cả dòng TỔNG (table() bỏ dòng TỔNG)
   const start = rows.findIndex((r) => required.every((re) => (r ?? []).some((c) => re.test(String(c ?? '').normalize('NFC').trim()))));
   const body: (string | number | null)[][] = [];
+  const pct: boolean[][] = [];
+  const realName = sheetNames.find((x) => x.normalize('NFC') === sheetName.normalize('NFC')) ?? sheetName;
   for (let i = start + 1; i < rows.length; i++) {
     const r = rows[i] ?? [];
     if (r.every((c) => c === null || c === '')) break;
     if (!keepTotal && /^tổng$/i.test(String(r[0] ?? '').trim())) continue;
     body.push(t.headers.map((_, k) => { const v = r[k]; return v === undefined || v === '' ? null : typeof v === 'boolean' ? String(v) : v; }));
+    pct.push(t.headers.map((_, k) => isPctCell(realName, i, k)));
   }
   const n = t.headers.reduce((m, h, k) => (h || body.some((r) => r[k] !== null) ? k + 1 : m), 0);
-  rawTables.push({ id, sheet: sheetName, title, headers: t.headers.slice(0, n), rows: body.map((r) => r.slice(0, n)) });
+  rawTables.push({ id, sheet: sheetName, title, headers: t.headers.slice(0, n), rows: body.map((r) => r.slice(0, n)), pct: pct.map((r) => r.slice(0, n)) });
 }
 captureRaw('sc-comp', '7_Supply Chain', scRows, 'Tồn kho nguyên liệu R0', [/^Component$/, /^(Reliability NCC|Delivery reliability)/, /^(Tồn|Stock) \((tuần|weeks)\)/]);
 captureRaw('sc-prod', '7_Supply Chain', scRows, 'Tồn kho thành phẩm R0', [/^(SKU|Product)$/, /^(SL pieces|Service level \(pieces\))/, /plan adherence/i]);
@@ -678,6 +683,15 @@ captureRaw('an-prod', '10_R0 Analysis', anRows, 'Analysis — Product', [/^Produ
 captureRaw('an-wh', '10_R0 Analysis', anRows, 'Analysis — Warehouse', [/^Warehouse$/, /Cube utilization/]);
 captureRaw('prod-bom', '3_Sản phẩm', prodRows, 'Sản phẩm, BOM & nhu cầu', [/^SKU$/, /^Bao bì$/, /BOM/]);
 captureRaw('comp-spec', '3_Sản phẩm', prodRows, 'Nguyên liệu (quy cách)', [/^Component$/, /^Đơn vị$/, /Quy cách/]);
+captureRaw('ops-dec', '5_Operations', opsRows, 'Quyết định Ops hiện tại', [/^Khu vực$/, /^Thông số$/, /^Giá trị$/]);
+captureRaw('ops-res', '5_Operations', opsRows, 'Kết quả Ops Round 0', [/^Khu vực$/, /^Chỉ số$/, /^Giá trị$/]);
+captureRaw('ops-mixers', '5_Operations', opsRows, 'Máy trộn có thể chọn', [/^Máy$/, /Mẻ tối thiểu/]);
+captureRaw('ops-lines', '5_Operations', opsRows, 'Dây chuyền đóng chai có thể chọn', [/^Dây chuyền$/, /Tốc độ/, /Formula changeover/]);
+captureRaw('ops-norms', '5_Operations', opsRows, 'Định mức thời gian & chi phí (Info Center)', [/^Khu vực$/, /^Công việc$/, /^Định mức$/]);
+captureRaw('an-line', '10_R0 Analysis', anRows, 'Analysis — Bottling line', [/^Bottling line$/, /^Run time/]);
+captureRaw('an-mixer', '10_R0 Analysis', anRows, 'Analysis — Mixers', [/^Mixer$/, /Cleaning time/]);
+captureRaw('an-dist', '10_R0 Analysis', anRows, 'Analysis — Distributor', [/^Distributor$/, /Distribution costs/]);
+captureRaw('fin', '2_Finance', finRows, 'P&L Round 0', [/^Nhóm$/, /^Dòng$/, /Round 0/]);
 captureRaw('week', '12_R0 Theo tuần', wkRows, 'Nhu cầu theo tuần', [/^Tuần$/, /^Orange 1L$/, /^Mango PET$/]);
 // Thống kê tab 11 (các dòng dưới bảng theo ngày): dùng tiêu đề cột của bảng theo ngày
 {
