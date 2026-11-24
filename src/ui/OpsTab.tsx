@@ -7,6 +7,7 @@ import { useMemo } from 'preact/hooks';
 import { opsChecks } from '../model/acceptance';
 import { BOTTLING } from '../model/rules';
 import { COMPONENTS } from '../model/purchasing';
+import { OPS_LIMITS } from '../sync/limits';
 import { Badge, Card, Grid, Metric, NumberField, SelectField, Table, YesNo } from './components';
 import { DailyChart, LineHoursChart } from './charts';
 import { eur, num, pct, signed } from './format';
@@ -71,9 +72,9 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
             </div>
             <span class="f-hint">+2 giờ công/dòng đơn nhận hàng (luật). Giảm hỏng máy chỉ với bao bì Pack/PET kém <Badge basis="estimate" />: giả định Poor ×{num(est.qualityBreakdownMult.Poor, 2)}, Middle ×{num(est.qualityBreakdownMult.Middle, 2)} so với High; inspection bớt {num(est.inspectionQualityRelief * 100)}% phần dư. Với PET {petQ ?? ''}: breakdown {num(inspPet.off, 1)} → {num(inspPet.on, 1)} giờ/tuần. Chỉnh hệ số ở tab "Giả định & R0".</span>
           </div>
-          <NumberField label="Number of pallet locations" unit="pallet" value={o.rmPalletLocations} disabled={dis} min={0} step={10} changed={o.rmPalletLocations !== b.rmPalletLocations} hint="€200/chỗ/năm · thiếu chỗ → overflow €3/pallet/ngày" onChange={(v) => setOps({ rmPalletLocations: Math.round(v) })} />
-          <NumberField label="Number of permanent employees" unit="FTE" value={o.rmFte} disabled={dis} min={0} step={1} changed={o.rmFte !== b.rmFte} hint="€40.000/năm, 40 giờ/tuần · thiếu → thời vụ €42/giờ" onChange={(v) => setOps({ rmFte: v })} />
-          <NumberField label="Intake time" unit="ngày" value={o.intakeDays} min={1} max={20} step={1} disabled={dis} changed={o.intakeDays !== b.intakeDays} hint={<><span class="warn-text">⚠ Tác động lên component availability (NL sẵn sàng muộn hơn → dễ thiếu NL, plan adherence ↓) CHƯA được mô hình.</span> Hiện chỉ dàn đỉnh giờ nhận hàng <Badge basis="estimate" />.</>} onChange={(v) => setOps({ intakeDays: Math.round(v) })} />
+          <NumberField label="Number of pallet locations" unit="pallet" value={o.rmPalletLocations} disabled={dis} limit={OPS_LIMITS.rmPalletLocations} step={10} changed={o.rmPalletLocations !== b.rmPalletLocations} hint="€200/chỗ/năm · thiếu chỗ → overflow €3/pallet/ngày" onChange={(v) => setOps({ rmPalletLocations: v })} />
+          <NumberField label="Number of permanent employees" unit="FTE" value={o.rmFte} disabled={dis} limit={OPS_LIMITS.rmFte} step={1} changed={o.rmFte !== b.rmFte} hint="€40.000/năm, 40 giờ/tuần · thiếu → thời vụ €42/giờ" onChange={(v) => setOps({ rmFte: v })} />
+          <NumberField label="Intake time" unit="ngày" value={o.intakeDays} limit={OPS_LIMITS.intakeDays} step={1} disabled={dis} changed={o.intakeDays !== b.intakeDays} hint={<><span class="warn-text">⚠ Tác động lên component availability (NL sẵn sàng muộn hơn → dễ thiếu NL, plan adherence ↓) CHƯA được mô hình.</span> Hiện chỉ dàn đỉnh giờ nhận hàng <Badge basis="estimate" />.</>} onChange={(v) => setOps({ intakeDays: v })} />
         </fieldset>
 
         <fieldset>
@@ -101,8 +102,8 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
 
         <fieldset>
           <legend>Outbound · Kho thành phẩm (DC Netherlands)</legend>
-          <NumberField label="Number of pallet locations" unit="pallet" value={o.fgPalletLocations} disabled={dis} min={0} step={10} changed={o.fgPalletLocations !== b.fgPalletLocations} hint="€200/chỗ/năm · thiếu chỗ → overflow €3/pallet/ngày" onChange={(v) => setOps({ fgPalletLocations: Math.round(v) })} />
-          <NumberField label="Number of permanent employees" unit="FTE" value={o.fgFte} disabled={dis} min={0} step={1} changed={o.fgFte !== b.fgFte} hint="€40.000/năm, 40 giờ/tuần · thiếu → thời vụ €42/giờ" onChange={(v) => setOps({ fgFte: v })} />
+          <NumberField label="Number of pallet locations" unit="pallet" value={o.fgPalletLocations} disabled={dis} limit={OPS_LIMITS.fgPalletLocations} step={10} changed={o.fgPalletLocations !== b.fgPalletLocations} hint="€200/chỗ/năm · thiếu chỗ → overflow €3/pallet/ngày" onChange={(v) => setOps({ fgPalletLocations: v })} />
+          <NumberField label="Number of permanent employees" unit="FTE" value={o.fgFte} disabled={dis} limit={OPS_LIMITS.fgFte} step={1} changed={o.fgFte !== b.fgFte} hint="€40.000/năm, 40 giờ/tuần · thiếu → thời vụ €42/giờ" onChange={(v) => setOps({ fgFte: v })} />
         </fieldset>
 
         <details class="ctx">

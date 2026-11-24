@@ -4,12 +4,30 @@ import type { Inputs } from '../model/types';
 import type { Backend, ConnStatus, Dept, DeptDoc, LogEntry, Role, Snapshot, Unsub } from './types';
 import { DEPTS, DEPT_SHORT, ROLE_LABEL } from './types';
 import { diffDept, summarize } from './diff';
+import { describeIssues, type Issue } from './limits';
 
 export interface Notice {
   id: number;
   kind: 'conflict' | 'info' | 'error';
   text: string;
   at: number;
+  count: number; // số lần lặp lại (thông báo trùng được gộp)
+}
+
+/** Trạng thái lưu của từng phòng lên bản chung. */
+export interface DeptSave {
+  state: 'idle' | 'pending' | 'saved' | 'error';
+  at: number | null; // lúc lưu xong / lúc lỗi
+  message?: string;
+  issues?: Issue[];
+}
+
+export interface ErrorEntry {
+  id: number;
+  at: number;
+  dept: Dept | null;
+  text: string;
+  detail?: string; // mã lỗi gốc để gửi cho người sửa app
 }
 
 export interface SyncState {
@@ -27,6 +45,8 @@ export interface SyncState {
   snapshots: Snapshot[];
   notices: Notice[];
   error: string | null;
+  saves: Record<Dept, DeptSave>;
+  errors: ErrorEntry[]; // 30 lỗi gần nhất (chỉ trên máy này)
 }
 
 export interface ControllerOptions {
@@ -37,14 +57,20 @@ export interface ControllerOptions {
   logLimit?: number;
   /** Làm sạch dữ liệu nhận về (ghép lên baseline, bỏ khóa lạ). */
   sanitize: (dept: Dept, data: unknown) => unknown;
+  /** Kiểm tra trước khi ghi; có lỗi thì KHÔNG gửi lên Firebase. */
+  validate?: (dept: Dept, data: unknown) => Issue[];
   now?: () => number;
 }
 
-function friendly(e: Error): string {
-  const m = `${(e as { code?: string }).code ?? ''} ${e.message}`;
-  if (/permission/i.test(m)) return 'Firebase từ chối quyền — kiểm tra đã Publish firestore.rules chưa và mã đội đúng định dạng (8–64 ký tự).';
-  if (/unavailable|network|offline/i.test(m)) return 'Không kết nối được Firebase (mạng?). App vẫn chạy với số đã lưu.';
-  return e.message;
+const rawErr = (e: unknown) => `${(e as { code?: string })?.code ?? ''} ${(e as Error)?.message ?? String(e)}`.trim();
+
+function friendly(e: unknown): string {
+  const m = rawErr(e);
+  if (/permission/i.test(m)) return 'Firebase từ chối quyền — có thể có ô vượt giới hạn, rules chưa Publish/đã đổi, hoặc mã đội sai định dạng (8–64 ký tự: chữ, số, - _).';
+  if (/unavailable|network|offline|failed to fetch/i.test(m)) return 'Không kết nối được Firebase (mất mạng?). Số vẫn giữ trên máy, có mạng sẽ tự gửi.';
+  if (/quota|resource-exhausted/i.test(m)) return 'Hết hạn mức miễn phí của Firebase hôm nay (gói Spark). Thử lại sau.';
+  if (/unauthenticated|auth/i.test(m)) return 'Chưa đăng nhập được Firebase (Anonymous Auth có đang bật?).';
+  return m;
 }
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x)) as T;
@@ -75,6 +101,8 @@ export class SyncController {
       ready: false, uid: null, team: opts.team, role: opts.role,
       shared: clone(base), local: null, sharedChangedWhileLocal: false,
       status: 'connecting', pending: [], meta: {}, log: [], snapshots: [], notices: [], error: null,
+      saves: Object.fromEntries(DEPTS.map((d) => [d, { state: 'idle', at: null }])) as Record<Dept, DeptSave>,
+      errors: [],
     };
     for (const d of DEPTS) this.lastRemote[d] = clone(base[d]);
   }
@@ -85,10 +113,12 @@ export class SyncController {
       const { uid } = await this.backend.init();
       this.set({ uid });
     } catch (e) {
-      this.set({ status: 'error', error: `Không đăng nhập được Firebase: ${(e as Error).message}` });
+      const text = `Không đăng nhập được Firebase: ${friendly(e)}`;
+      this.recordError(null, text, rawErr(e));
+      this.set({ status: 'error', error: text });
       return;
     }
-    const onErr = (e: Error) => this.set({ status: 'error', error: friendly(e) });
+    const onErr = (e: Error) => { const t = friendly(e); this.recordError(null, `Lỗi đọc dữ liệu nhóm: ${t}`, rawErr(e)); this.set({ status: 'error', error: t }); };
     this.unsubs.push(this.backend.watchDecisions(this.opts.team, (docs, meta) => this.onDecisions(docs, meta), onErr));
     this.unsubs.push(this.backend.watchLog(this.opts.team, this.opts.logLimit ?? 50, (log) => this.set({ log }), onErr));
     this.unsubs.push(this.backend.watchSnapshots(this.opts.team, (snapshots) => this.set({ snapshots }), onErr));
@@ -122,12 +152,35 @@ export class SyncController {
       return;
     }
     this.lastEditAt[dept] = this.now();
-    this.dirty.add(dept);
     this.set({ shared: { ...this.state.shared, [dept]: clone(data) } as Inputs });
     if (this.timers[dept]) clearTimeout(this.timers[dept]);
+    const issues = this.opts.validate?.(dept, data) ?? [];
+    if (issues.length) {
+      // Không gửi lên Firebase: báo rõ ô nào, số nào, giới hạn bao nhiêu
+      this.dirty.delete(dept);
+      const text = `Chưa lưu phần ${DEPT_SHORT[dept]} lên bản chung: ${describeIssues(issues)}. Sửa lại ô này thì app tự lưu.`;
+      this.setSave(dept, { state: 'error', at: this.now(), message: text, issues });
+      this.recordError(dept, text);
+      this.notice('error', text);
+      this.refreshStatus();
+      return;
+    }
+    this.dirty.add(dept);
+    this.setSave(dept, { state: 'pending', at: this.state.saves[dept].at });
     this.timers[dept] = setTimeout(() => void this.flush(dept), this.debounceMs);
     this.refreshStatus();
   }
+
+  /** Bỏ thay đổi chưa lưu được của một phòng, quay về bản đã lưu gần nhất trên máy chủ. */
+  revertDept(dept: Dept) {
+    if (this.timers[dept]) { clearTimeout(this.timers[dept]); this.timers[dept] = undefined; }
+    this.dirty.delete(dept);
+    this.set({ shared: { ...this.state.shared, [dept]: clone(this.lastRemote[dept]) } as Inputs });
+    this.setSave(dept, { state: this.state.meta[dept] ? 'saved' : 'idle', at: this.state.meta[dept]?.updatedAt ?? null });
+    this.refreshStatus();
+  }
+
+  clearErrors() { this.set({ errors: [] }); }
 
   /** Ghi ngay phần của một phòng (bỏ qua thời gian chờ). */
   async flush(dept: Dept): Promise<void> {
@@ -144,11 +197,20 @@ export class SyncController {
     this.refreshStatus();
     const uid = this.state.uid ?? 'unknown';
     try {
-      const w = this.backend.writeDecision(this.opts.team, dept, { data, uid, role: this.opts.role, clientId: this.opts.clientId, rev });
-      if (changes.length) void this.backend.addLog(this.opts.team, { uid, role: this.opts.role, dept, summary: summarize(dept, changes), changes }).catch((e) => this.notice('error', `Không ghi được nhật ký: ${(e as Error).message}`));
-      await w;
+      await this.backend.writeDecision(this.opts.team, dept, { data, uid, role: this.opts.role, clientId: this.opts.clientId, rev });
+      // Chỉ ghi nhật ký khi bản chung đã nhận thay đổi
+      if (changes.length) void this.backend.addLog(this.opts.team, { uid, role: this.opts.role, dept, summary: summarize(dept, changes), changes }).catch((e) => {
+        const t = `Đã lưu phần ${DEPT_SHORT[dept]} nhưng không ghi được nhật ký: ${friendly(e)}`;
+        this.recordError(dept, t, rawErr(e));
+      });
+      if (!this.dirty.has(dept)) this.setSave(dept, { state: 'saved', at: this.now() });
     } catch (e) {
-      this.notice('error', `Không ghi được phần ${DEPT_SHORT[dept]}: ${(e as Error).message}`);
+      this.lastRemote[dept] = before;
+      const where = changes.length ? ` (thay đổi: ${changes.slice(0, 3).map((c) => `${c.label} ${c.from} → ${c.to}`).join('; ')})` : '';
+      const text = `Không lưu được phần ${DEPT_SHORT[dept]}${where}: ${friendly(e)}`;
+      this.setSave(dept, { state: 'error', at: this.now(), message: text });
+      this.recordError(dept, text, rawErr(e));
+      this.notice('error', text);
     } finally {
       this.inflight.delete(dept);
       this.refreshStatus();
@@ -203,12 +265,18 @@ export class SyncController {
       await this.backend.addSnapshot(this.opts.team, { name: n, uid: this.state.uid ?? 'unknown', role: this.opts.role, inputs: clone(this.state.shared) });
       this.notice('info', `Đã chụp bản chung "${n}".`);
     } catch (e) {
-      this.notice('error', `Không chụp được: ${(e as Error).message}`);
+      const t = `Không chụp được bản chung "${n}": ${friendly(e)}`;
+      this.recordError(null, t, rawErr(e));
+      this.notice('error', t);
     }
   }
 
   async deleteSnapshot(id: string) {
-    try { await this.backend.deleteSnapshot(this.opts.team, id); } catch (e) { this.notice('error', (e as Error).message); }
+    try { await this.backend.deleteSnapshot(this.opts.team, id); } catch (e) {
+      const t = `Không xóa được bản chụp: ${friendly(e)}`;
+      this.recordError(null, t, rawErr(e));
+      this.notice('error', t);
+    }
   }
 
   /** Mở snapshot trong kịch bản riêng (mỗi vai trò tự đẩy phần mình nếu muốn khôi phục). */
@@ -241,6 +309,7 @@ export class SyncController {
       const data = this.opts.sanitize(d, doc.data);
       const mine = doc.clientId === this.opts.clientId;
       metaOut[d] = { updatedAt: doc.updatedAt, role: doc.role, clientId: doc.clientId, rev: doc.rev };
+      if (this.state.saves[d].state === 'idle') this.setSave(d, { state: 'saved', at: doc.updatedAt });
       if (!mine && (this.revs[d] ?? 0) < doc.rev) this.revs[d] = doc.rev;
       const busy = this.dirty.has(d) || this.inflight.has(d);
       if (mine) { this.lastRemote[d] = data; continue; }
@@ -273,8 +342,24 @@ export class SyncController {
   }
 
   private notice(kind: Notice['kind'], text: string) {
-    const n: Notice = { id: ++this.noticeSeq, kind, text, at: this.now() };
-    this.set({ notices: [...this.state.notices.slice(-4), n] });
+    const last = this.state.notices[this.state.notices.length - 1];
+    if (last && last.text === text && last.kind === kind) {
+      this.set({ notices: [...this.state.notices.slice(0, -1), { ...last, count: last.count + 1, at: this.now() }] });
+      return;
+    }
+    const n: Notice = { id: ++this.noticeSeq, kind, text, at: this.now(), count: 1 };
+    this.set({ notices: [...this.state.notices.filter((x) => x.text !== text).slice(-3), n] });
+  }
+
+  private recordError(dept: Dept | null, text: string, detail?: string) {
+    const last = this.state.errors[0];
+    if (last && last.text === text) return;
+    const e: ErrorEntry = { id: ++this.noticeSeq, at: this.now(), dept, text, detail };
+    this.set({ errors: [e, ...this.state.errors].slice(0, 30) });
+  }
+
+  private setSave(dept: Dept, s: DeptSave) {
+    this.set({ saves: { ...this.state.saves, [dept]: s } });
   }
 
   private set(patch: Partial<SyncState>) {

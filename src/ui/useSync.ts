@@ -4,6 +4,7 @@ import { SyncController, type SyncState } from '../sync/controller';
 import { FirebaseBackend } from '../sync/firebaseBackend';
 import { BroadcastHub, MockBackend } from '../sync/mockBackend';
 import { makeSanitizer } from '../sync/sanitize';
+import { validateDept } from '../sync/limits';
 import type { Backend } from '../sync/types';
 import { clientId, useMockBackend, type Session } from './session';
 
@@ -24,7 +25,7 @@ export function useSync(session: Session | null, base: Inputs): { ctl: SyncContr
   const ctl = useMemo(() => {
     if (!session || session.mode !== 'team') return null;
     try {
-      return new SyncController(backend(), base, { team: session.team, role: session.role, clientId: clientId(), sanitize: makeSanitizer(base) });
+      return new SyncController(backend(), base, { team: session.team, role: session.role, clientId: clientId(), sanitize: makeSanitizer(base), validate: validateDept });
     } catch (e) {
       console.error(e);
       return null;

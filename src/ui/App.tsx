@@ -5,7 +5,7 @@ import type { Inputs, OpsInputs } from '../model/types';
 import { baselineInputs, simulate } from '../model/simulate';
 import { withEst } from '../model/assumptions';
 import type { Dept } from '../sync/types';
-import { DEPT_SHORT, ROLE_LABEL } from '../sync/types';
+import { DEPTS, DEPT_SHORT, ROLE_LABEL } from '../sync/types';
 import { loadInputs, loadTab, saveInputs, saveTab } from './state';
 import { loadEst, loadSession, saveEst, saveSession, useMockBackend, type Session } from './session';
 import { useSync } from './useSync';
@@ -13,7 +13,7 @@ import { changedPaths } from './trace';
 import { eur, pct, signed } from './format';
 import { OpsTab } from './OpsTab';
 import { AssumptionsTab, FinanceTab, PurchasingTab, SalesTab, SupplyChainTab } from './OtherTabs';
-import { TeamTab, statusText } from './TeamTab';
+import { TeamTab, statusText, ago } from './TeamTab';
 import { Gate } from './Gate';
 
 const data = rawData as unknown as Round0Data;
@@ -45,6 +45,7 @@ export function App() {
   const [tab, setTab] = useState<string>(() => loadTab('ops'));
   const [estOver, setEstOver] = useState<Record<string, number>>(() => loadEst());
   const [solo, setSolo] = useState<Inputs>(() => loadInputs(BASE));
+  const [statusOpen, setStatusOpen] = useState(false);
   useEffect(() => saveTab(tab), [tab]);
   useEffect(() => saveInputs(solo), [solo]);
   useEffect(() => saveEst(estOver), [estOver]);
@@ -109,7 +110,14 @@ export function App() {
         <div class="top-actions">
           {team && (
             <>
-              <span class={`conn conn-${team.state.status}`} title={statusText(team.state)}><i />{statusText(team.state).split(' — ')[0]}</span>
+              {(() => {
+                const unsaved = DEPTS.filter((d) => team.state.saves[d].state === 'error');
+                const cls = unsaved.length ? 'error' : team.state.status;
+                const label = unsaved.length ? `Chưa lưu: ${unsaved.map((d) => DEPT_SHORT[d]).join(', ')}` : statusText(team.state).split(' — ')[0];
+                return (
+                  <button class={`conn conn-${cls}`} title="Bấm để xem trạng thái lưu và lỗi" onClick={() => setStatusOpen(!statusOpen)}><i />{label} ▾</button>
+                );
+              })()}
               <button class="chip" title="Đổi vai trò hoặc mã đội" onClick={() => setGateOpen(true)}>{ROLE_LABEL[team.state.role]} ▾</button>
               {isLocal ? (
                 <>
@@ -136,10 +144,34 @@ export function App() {
         <div class="toasts" aria-live="polite">
           {team.state.notices.map((n) => (
             <div class={`toast toast-${n.kind}`}>
-              <span>{n.text}</span>
+              <span>{n.text}{n.count > 1 && <b> (×{n.count})</b>}</span>
               <button class="x" aria-label="Đóng" onClick={() => team.ctl.dismissNotice(n.id)}>×</button>
             </div>
           ))}
+        </div>
+      )}
+      {team && statusOpen && (
+        <div class="status-panel" role="dialog" aria-label="Trạng thái lưu">
+          <div class="sp-head"><b>Trạng thái lưu lên bản chung</b><button class="x" aria-label="Đóng" onClick={() => setStatusOpen(false)}>×</button></div>
+          <p class="muted">{statusText(team.state)}</p>
+          <table class="compact">
+            <tbody>
+              {DEPTS.map((d) => {
+                const sv = team.state.saves[d];
+                return (
+                  <tr>
+                    <td>{DEPT_SHORT[d]}</td>
+                    <td class={sv.state === 'error' ? 'ko' : sv.state === 'saved' ? 'ok' : ''}>
+                      {sv.state === 'saved' ? `✔ đã lưu ${ago(sv.at)}` : sv.state === 'pending' ? 'đang gửi…' : sv.state === 'error' ? '✖ chưa lưu' : 'chưa ai sửa (= R0)'}
+                    </td>
+                    <td>{sv.state === 'error' && <><span class="small-text">{sv.message}</span> {team.state.role === d && <button class="btn small" onClick={() => team.ctl.revertDept(d)}>Bỏ thay đổi chưa lưu</button>}</>}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <p class="muted">Lỗi gần đây: {team.state.errors.length ? `${team.state.errors.length} lỗi — xem tab Nhóm` : 'không có'}.</p>
+          <button class="btn small" onClick={() => { setTab('team'); setStatusOpen(false); }}>Mở tab Nhóm</button>
         </div>
       )}
       <main>

@@ -135,3 +135,77 @@ describe('Kịch bản riêng & snapshot', () => {
     expect(ops.getState().log[0].summary).toContain('1059');
   });
 });
+
+import { validateDept, OPS_LIMITS } from '../src/sync/limits';
+import { readFileSync } from 'node:fs';
+
+describe('Báo lỗi rõ ràng', () => {
+  const mkV = async (role: Role, id: string, backend?: MockBackend) => {
+    const c = new SyncController(backend ?? new MockBackend(hub, `uid-${id}`), base, { team: TEAM, role, clientId: id, sanitize, validate: validateDept, debounceMs: 500 });
+    await c.start();
+    return c;
+  };
+
+  it('số vượt giới hạn: không gửi lên Firebase, báo đúng ô + số + giới hạn', async () => {
+    const ops = await mkV('ops', 'A');
+    const spy = vi.spyOn(MockBackend.prototype, 'writeDecision');
+    ops.editShared('ops', { ...ops.current().ops, rmFte: 530 });
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(spy).not.toHaveBeenCalled();
+    const st = ops.getState();
+    expect(st.saves.ops.state).toBe('error');
+    expect(st.saves.ops.message).toContain('FTE kho NL = 530');
+    expect(st.saves.ops.message).toContain('tối đa 200');
+    expect(st.errors[0].dept).toBe('ops');
+    spy.mockRestore();
+  });
+
+  it('sửa lại số hợp lệ thì tự lưu và hết lỗi', async () => {
+    const ops = await mkV('ops', 'A');
+    ops.editShared('ops', { ...ops.current().ops, rmFte: 530 });
+    ops.editShared('ops', { ...ops.current().ops, rmFte: 6 });
+    await vi.advanceTimersByTimeAsync(600);
+    expect(ops.getState().saves.ops.state).toBe('saved');
+    expect(hub.read(TEAM).decisions.ops?.data).toMatchObject({ rmFte: 6 });
+  });
+
+  it('Firebase từ chối: báo phần nào, thay đổi gì, nguyên nhân dễ hiểu; không ghi nhật ký', async () => {
+    const be = new MockBackend(hub, 'uid-A');
+    be.writeDecision = async () => { throw Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' }); };
+    const ops = await mkV('ops', 'A', be);
+    ops.editShared('ops', { ...ops.current().ops, shifts: 3 });
+    await vi.advanceTimersByTimeAsync(600);
+    const st = ops.getState();
+    expect(st.saves.ops.state).toBe('error');
+    expect(st.saves.ops.message).toContain('Không lưu được phần Ops (thay đổi: số ca 2 → 3)');
+    expect(st.saves.ops.message).toContain('Firebase từ chối quyền');
+    expect(st.errors[0].detail).toContain('permission-denied');
+    expect(hub.read(TEAM).log).toHaveLength(0);
+  });
+
+  it('thông báo trùng được gộp, có số lần', async () => {
+    const ops = await mkV('ops', 'A');
+    for (let i = 0; i < 4; i++) ops.editShared('ops', { ...ops.current().ops, rmFte: 530 });
+    const errs = ops.getState().notices.filter((n) => n.kind === 'error');
+    expect(errs).toHaveLength(1);
+    expect(errs[0].count).toBe(4);
+  });
+
+  it('"Bỏ thay đổi chưa lưu" quay về bản đã lưu', async () => {
+    const ops = await mkV('ops', 'A');
+    ops.editShared('ops', { ...ops.current().ops, rmFte: 7 });
+    await vi.advanceTimersByTimeAsync(600);
+    ops.editShared('ops', { ...ops.current().ops, rmFte: 530 });
+    ops.revertDept('ops');
+    expect(ops.current().ops.rmFte).toBe(7);
+    expect(ops.getState().saves.ops.state).toBe('saved');
+  });
+
+  it('giới hạn trong app khớp với firestore.rules', () => {
+    const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+    for (const [k, lim] of Object.entries(OPS_LIMITS)) {
+      if (k === 'shifts') { expect(rules).toContain(`d.shifts >= ${lim.min} && d.shifts <= ${lim.max}`); continue; }
+      expect(rules, k).toContain(`num(d.${k}, ${lim.min}, ${lim.max})`);
+    }
+  });
+});

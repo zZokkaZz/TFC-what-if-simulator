@@ -1,4 +1,6 @@
 import type { ComponentChildren } from 'preact';
+import { useEffect, useState } from 'preact/hooks';
+import { checkNumber, type NumLimit } from '../sync/limits';
 import type { Basis } from '../model/types';
 import type { Cause } from './trace';
 import { signed } from './format';
@@ -80,23 +82,38 @@ export function Grid({ children }: { children: ComponentChildren }) {
 // ---------- ô quyết định ----------
 interface FieldBase { label: string; unit?: string; hint?: ComponentChildren; changed?: boolean; disabled?: boolean }
 
-export function NumberField(p: FieldBase & { value: number; min?: number; max?: number; step?: number; onChange: (v: number) => void }) {
+/**
+ * Ô số có kiểm tra giới hạn. Gõ sai/vượt giới hạn: ô viền đỏ + dòng lỗi ngay dưới,
+ * KHÔNG gửi số sai đi (bản chung giữ số hợp lệ gần nhất).
+ */
+export function NumberField(p: FieldBase & { value: number; limit?: NumLimit; step?: number; onChange: (v: number) => void }) {
+  const [text, setText] = useState(String(p.value));
+  const [err, setErr] = useState<string | null>(null);
+  const [focus, setFocus] = useState(false);
+  // Số đổi từ bên ngoài (đồng đội sửa, reset) khi không đang gõ → cập nhật ô
+  useEffect(() => { if (!focus) { setText(String(p.value)); setErr(null); } }, [p.value, focus]);
   return (
-    <label class={`field${p.changed ? ' changed' : ''}`}>
+    <label class={`field${p.changed ? ' changed' : ''}${err ? ' invalid' : ''}`}>
       <span class="f-label">{p.label}{p.unit && <em> ({p.unit})</em>}</span>
       <input
-        type="number"
-        disabled={p.disabled}
+        type="text"
         inputMode="decimal"
-        value={p.value}
-        min={p.min}
-        max={p.max}
-        step={p.step ?? 1}
+        disabled={p.disabled}
+        value={text}
+        aria-invalid={!!err}
+        onFocus={() => setFocus(true)}
+        onBlur={() => { setFocus(false); if (err) { setText(String(p.value)); setErr(null); } }}
         onInput={(e) => {
-          const v = Number((e.currentTarget as HTMLInputElement).value);
-          if (Number.isFinite(v)) p.onChange(Math.min(p.max ?? Infinity, Math.max(p.min ?? -Infinity, v)));
+          const raw = (e.currentTarget as HTMLInputElement).value;
+          setText(raw);
+          const v = Number(raw.trim().replace(',', '.'));
+          const msg = raw.trim() === '' ? 'chưa nhập số' : p.limit ? checkNumber(v, p.limit) : Number.isFinite(v) ? null : 'phải là số';
+          setErr(msg);
+          if (!msg) p.onChange(v);
         }}
       />
+      {err && <span class="f-err">⚠ {err} — chưa lưu. Rời ô sẽ trả về {p.value.toLocaleString('vi-VN')}.</span>}
+      {p.limit && !err && <span class="f-range">Cho phép {p.limit.min.toLocaleString('vi-VN')}–{p.limit.max.toLocaleString('vi-VN')}{p.limit.int ? ', số nguyên' : ''}</span>}
       {p.hint && <span class="f-hint">{p.hint}</span>}
     </label>
   );

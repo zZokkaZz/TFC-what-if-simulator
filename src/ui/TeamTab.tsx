@@ -32,6 +32,18 @@ interface Props {
   res: Results;
 }
 
+function copyErrors(state: SyncState) {
+  const lines = [
+    `TFC What-if — lỗi đồng bộ (${new Date().toLocaleString('vi-VN')})`,
+    `Vai trò: ${ROLE_LABEL[state.role]} · trạng thái: ${state.status}${state.error ? ' · ' + state.error : ''}`,
+    ...DEPTS.map((d) => `Lưu ${DEPT_SHORT[d]}: ${state.saves[d].state}${state.saves[d].message ? ' — ' + state.saves[d].message : ''}`),
+    '',
+    ...state.errors.map((e) => `[${new Date(e.at).toLocaleString('vi-VN')}] ${e.dept ? DEPT_SHORT[e.dept] + ': ' : ''}${e.text}${e.detail ? ' | ' + e.detail : ''}`),
+  ];
+  const text = lines.join('\n');
+  try { void navigator.clipboard.writeText(text).then(() => alert('Đã copy chi tiết lỗi.')); } catch { prompt('Copy đoạn sau:', text); }
+}
+
 export function TeamTab({ data, est, ctl, state, res }: Props) {
   const [name, setName] = useState('');
   const snaps = state.snapshots.slice(0, 6);
@@ -60,6 +72,29 @@ export function TeamTab({ data, est, ctl, state, res }: Props) {
             <div class="metric"><div class="m-label">Phần {DEPT_SHORT[d]}</div><div class="m-value small">{state.meta[d] ? `cập nhật ${ago(state.meta[d]!.updatedAt)}` : 'chưa ai sửa (= R0)'}</div></div>
           ))}
         </div>
+      </Card>
+
+      <Card title={`Lỗi gần đây (${state.errors.length})`} alert={DEPTS.some((d) => state.saves[d].state === 'error')}
+        extra={<span class="row gap">
+          <button class="btn small" disabled={!state.errors.length} onClick={() => copyErrors(state)}>Copy chi tiết lỗi</button>
+          <button class="btn small" disabled={!state.errors.length} onClick={() => ctl.clearErrors()}>Xóa danh sách</button>
+        </span>}>
+        <div class="metrics">
+          {DEPTS.map((d) => {
+            const sv = state.saves[d];
+            return (
+              <div class={`metric${sv.state === 'error' ? ' alert' : ''}`}>
+                <div class="m-label">Lưu phần {DEPT_SHORT[d]}</div>
+                <div class="m-value small">{sv.state === 'saved' ? `✔ đã lưu ${ago(sv.at)}` : sv.state === 'pending' ? 'đang gửi…' : sv.state === 'error' ? '✖ chưa lưu' : 'chưa ai sửa (= R0)'}</div>
+                {sv.state === 'error' && state.role === d && <button class="btn small" onClick={() => ctl.revertDept(d)}>Bỏ thay đổi chưa lưu</button>}
+              </div>
+            );
+          })}
+        </div>
+        {state.errors.length === 0 ? <p class="muted">Chưa có lỗi nào trên máy này.</p> : (
+          <Table head={['Lúc', 'Phần', 'Lỗi']} rows={state.errors.map((e) => [ago(e.at), e.dept ? DEPT_SHORT[e.dept] : '—', <span title={e.detail ?? ''}>{e.text}</span>])} />
+        )}
+        <p class="muted">Danh sách chỉ lưu trên máy này (tối đa 30 dòng). Gặp lỗi lạ: bấm "Copy chi tiết lỗi" rồi gửi cho người sửa app.</p>
       </Card>
 
       <Card title="Bản chụp có tên (snapshot)">

@@ -124,3 +124,9 @@ Tất cả 27 chỉ số trong bảng đối chiếu (mục 7 của CLAUDE.md v�
 - `apiKey` web Firebase công khai theo thiết kế. Có thể giới hạn API key theo HTTP referrer trong Google Cloud Console, nhưng làm vậy thì mở file trực tiếp (`file://`) sẽ không đồng bộ được.
 - Nên dùng mã dài (≥ 16 ký tự ngẫu nhiên) và gửi qua kênh riêng. Khi lộ mã: đổi sang mã mới (dữ liệu cũ vẫn nằm trên Firestore dưới mã cũ, xóa thủ công trong Console nếu cần).
 - Nhật ký không xóa được qua app (rules). App chỉ hiện 50 dòng mới nhất; dòng cũ vẫn chiếm dung lượng nhưng rất nhỏ so với 1 GiB của gói Spark.
+
+## 9. Giới hạn ô nhập & báo lỗi đồng bộ
+
+- Giới hạn mỗi ô (`src/sync/limits.ts`) dùng chung cho ô nhập và kiểm tra trước khi ghi; khớp `firestore.rules` (có test đối chiếu): pallet location 0–100.000, FTE 0–200, intake 1–60 ngày, số ca 1–5; SC: safety stock 0–26 tuần, lot size 0,2–26 tuần, production interval 1–130 ngày, frozen 0–26 tuần.
+- Số sai/vượt giới hạn: ô viền đỏ, không gửi lên Firebase. Lỗi khi ghi: báo phần nào, thay đổi gì, nguyên nhân (quyền, mạng, hạn mức, đăng nhập); trạng thái lưu từng phòng ở nút trạng thái góc phải và tab Nhóm; 30 lỗi gần nhất lưu trên máy, có nút "Copy chi tiết lỗi". Nhật ký nhóm chỉ ghi khi bản chung đã nhận thay đổi.
+- Giới hạn trên là giới hạn chống nhập nhầm, không phải luật game.
