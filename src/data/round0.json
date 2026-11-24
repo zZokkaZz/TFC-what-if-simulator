@@ -1,0 +1,5186 @@
+{
+ "meta": {
+  "source": "data/TFC_Round0.xlsx",
+  "generatedAt": "2026-11-24T13:21:14.986Z",
+  "sheets": [
+   "0_README",
+   "1_Vấn đề R0",
+   "2_Finance",
+   "3_Sản phẩm",
+   "4_Purchasing",
+   "5_Operations",
+   "6_Sales",
+   "7_Supply Chain",
+   "10_R0 Analysis",
+   "11_R0 Theo ngày",
+   "12_R0 Theo tuần",
+   "9_Viết tắt",
+   "Luật for ops and others phòng b"
+  ]
+ },
+ "issues": [
+  {
+   "no": 1,
+   "issue": "ROI âm",
+   "evidence": "ROI -7,68% = Operating profit -306.503 / Investment 3.989.513. Chi phí gián tiếp 1.209.651 lớn hơn lãi gộp 903.148",
+   "owner": "Cả công ty",
+   "opsLink": "Ops nắm phần lớn chi phí sản xuất, kho, nhân công"
+  },
+  {
+   "no": 2,
+   "issue": "Bị phạt service level",
+   "evidence": "Penalty -322.708 (F&G -252.766; LAND -46.360; Dominick's -23.582). SL order lines: F&G 91,2%, LAND 92,1%, Dominick's 93,2%, đều dưới 95% đã hứa",
+   "owner": "Sales, SC",
+   "opsLink": "Plan adherence dây chuyền chỉ 78,7% nên giao trễ"
+  },
+  {
+   "no": 3,
+   "issue": "Hàng lỗi thời cao",
+   "evidence": "Obsolete 8,1%, chi phí scrap 40.203. Cao nhất: Mango 1L 8,8%, Orange 1L 8,4%, Orange PET 8,2%. Hạn dùng SP 20 tuần, khách đòi còn ít nhất 75%",
+   "owner": "SC, Sales",
+   "opsLink": "Hủy hàng tốn giờ công kho TP (6 phút/pallet)"
+  },
+  {
+   "no": 4,
+   "issue": "Thiếu Vitamin C",
+   "evidence": "Availability 84,3%, hết hàng 31/130 ngày (tab 11), reliability NCC 81,5%, lead time 60 ngày (tàu từ Trung Quốc). SL C-power 1L 83,8%, C-power PET 83,6%",
+   "owner": "Purchasing, SC",
+   "opsLink": "Thiếu nguyên liệu làm xáo lịch sản xuất"
+  },
+  {
+   "no": 5,
+   "issue": "Chai PET kém (Trio PET)",
+   "evidence": "Quality Poor, rejection 5,9%, reliability 84,1%, free capacity 3%. Chi phí vận chuyển 145.393, cao nhất trong 5 NCC",
+   "owner": "Purchasing",
+   "opsLink": "Gây hỏng dây chuyền: breakdown 10,8 giờ/tuần (13,6%)"
+  },
+  {
+   "no": 6,
+   "issue": "Dây chuyền đóng chai yếu",
+   "evidence": "Swiss Fill 2: run 78,2%, changeover 15,1%, breakdown 13,6%, overtime 9,4 giờ/tuần; plan adherence 78,7%; thời vụ 66.670; start-up loss 8.435",
+   "owner": "Ops",
+   "opsLink": "Xem xét bảo trì, training, SMED, inspection chai PET"
+  },
+  {
+   "no": 7,
+   "issue": "Kho nguyên liệu tràn",
+   "evidence": "Dùng 840/900 pallet (93,4%), overflow 10,8%, phí overflow 35.423",
+   "owner": "Ops, SC",
+   "opsLink": "Lot size NL 4 tuần làm hàng về dồn một lúc"
+  },
+  {
+   "no": 8,
+   "issue": "Kho thành phẩm dư",
+   "evidence": "Dùng 1.061/1.500 pallet (70,7%), overflow 0,1%. Mỗi pallet €200/năm, tức €100/round",
+   "owner": "Ops",
+   "opsLink": "Dư khoảng 440 pallet, ước tính 44.000/round"
+  },
+  {
+   "no": 9,
+   "issue": "Nhân công kho có thể thừa",
+   "evidence": "Inbound cần 74 giờ/tuần, 5 FTE có 200 giờ. Outbound cần 100 giờ/tuần, 4 FTE có 160 giờ. Vẫn thuê thời vụ 0,2 và 0,1 FTE lúc cao điểm",
+   "owner": "Ops",
+   "opsLink": "Xem lại số FTE, chú ý đỉnh tải"
+  },
+  {
+   "no": 10,
+   "issue": "Máy trộn",
+   "evidence": "Vệ sinh chiếm 14,5% thời gian; lô trung bình 11.022 L (min 8.000, max 12.000)",
+   "owner": "Ops, SC",
+   "opsLink": "Interval quá ngắn sẽ bị làm tròn lên 8.000 L"
+  },
+  {
+   "no": 11,
+   "issue": "Dự báo sai nhiều",
+   "evidence": "Forecast error (MAPE) 47–61% ở cả 6 SKU",
+   "owner": "Sales, SC",
+   "opsLink": "Nhu cầu dao động nên cần dư công suất hoặc tồn kho"
+  }
+ ],
+ "finance": {
+  "lines": [
+   {
+    "group": "Doanh thu",
+    "label": "Contracted sales – Food & Groceries",
+    "value": 1297902,
+    "note": null
+   },
+   {
+    "group": "Doanh thu",
+    "label": "Contracted sales – LAND Market",
+    "value": 632821,
+    "note": null
+   },
+   {
+    "group": "Doanh thu",
+    "label": "Contracted sales – Dominick's",
+    "value": 698240,
+    "note": null
+   },
+   {
+    "group": "Doanh thu",
+    "label": "Penalty service level – Food & Groceries",
+    "value": -252766,
+    "note": "Giao không đạt 95% bị phạt"
+   },
+   {
+    "group": "Doanh thu",
+    "label": "Penalty service level – LAND Market",
+    "value": -46360,
+    "note": null
+   },
+   {
+    "group": "Doanh thu",
+    "label": "Penalty service level – Dominick's",
+    "value": -23582,
+    "note": null
+   },
+   {
+    "group": "COGS – mua NL",
+    "label": "Mono Packaging Materials (Pack)",
+    "value": 110692,
+    "note": null
+   },
+   {
+    "group": "COGS – mua NL",
+    "label": "Trio PET PLC (PET)",
+    "value": 307931,
+    "note": null
+   },
+   {
+    "group": "COGS – mua NL",
+    "label": "Miami Oranges (Orange)",
+    "value": 409042,
+    "note": null
+   },
+   {
+    "group": "COGS – mua NL",
+    "label": "NO8DO Mango (Mango)",
+    "value": 81658,
+    "note": null
+   },
+   {
+    "group": "COGS – mua NL",
+    "label": "Seitan Vitamins (Vitamin C)",
+    "value": 2295,
+    "note": null
+   },
+   {
+    "group": "COGS – sản xuất",
+    "label": "Bottling line fixed costs",
+    "value": 49000,
+    "note": "Swiss Fill 2: 98.000/năm × 0,5"
+   },
+   {
+    "group": "COGS – sản xuất",
+    "label": "Permanent employees (bottling)",
+    "value": 200000,
+    "note": "2 ca × 5 người × 40.000 × 0,5"
+   },
+   {
+    "group": "COGS – sản xuất",
+    "label": "Flexible manpower (bottling)",
+    "value": 66670,
+    "note": "Thời vụ €42/giờ"
+   },
+   {
+    "group": "COGS – sản xuất",
+    "label": "Mixer fixed costs",
+    "value": 31250,
+    "note": "Fruitmix MQ 62.500/năm × 0,5"
+   },
+   {
+    "group": "COGS – sản xuất",
+    "label": "Mixer variable costs",
+    "value": 144569,
+    "note": "€135/giờ chạy máy"
+   },
+   {
+    "group": "Indirect – overhead",
+    "label": "Energy",
+    "value": 150904,
+    "note": null
+   },
+   {
+    "group": "Indirect – overhead",
+    "label": "Water",
+    "value": 26779,
+    "note": null
+   },
+   {
+    "group": "Indirect – overhead",
+    "label": "Other",
+    "value": 146619,
+    "note": null
+   },
+   {
+    "group": "Indirect – tồn kho",
+    "label": "Interest on components",
+    "value": 11181,
+    "note": null
+   },
+   {
+    "group": "Indirect – tồn kho",
+    "label": "Interest on products",
+    "value": 12926,
+    "note": null
+   },
+   {
+    "group": "Indirect – kho",
+    "label": "Pallet locations raw materials warehouse",
+    "value": 90000,
+    "note": "900 chỗ × 200 × 0,5"
+   },
+   {
+    "group": "Indirect – kho",
+    "label": "Overflow raw materials warehouse",
+    "value": 35423,
+    "note": "€3/pallet/ngày"
+   },
+   {
+    "group": "Indirect – kho",
+    "label": "Outsourcing tank yard",
+    "value": 25282,
+    "note": "€25/tank/ngày + phí nhận, giao"
+   },
+   {
+    "group": "Indirect – kho",
+    "label": "Pallet locations finished goods warehouse",
+    "value": 150000,
+    "note": "1.500 chỗ × 200 × 0,5"
+   },
+   {
+    "group": "Indirect – kho",
+    "label": "Overflow finished goods warehouse",
+    "value": 607,
+    "note": null
+   },
+   {
+    "group": "Indirect – rủi ro",
+    "label": "Costs of scrap",
+    "value": 40203,
+    "note": "Hàng hỏng, lỗi thời"
+   },
+   {
+    "group": "Indirect – handling",
+    "label": "Inbound permanent employees",
+    "value": 100000,
+    "note": "5 FTE × 40.000 × 0,5"
+   },
+   {
+    "group": "Indirect – handling",
+    "label": "Inbound flexible manpower",
+    "value": 6753,
+    "note": null
+   },
+   {
+    "group": "Indirect – handling",
+    "label": "Outbound permanent employees",
+    "value": 80000,
+    "note": "4 FTE × 40.000 × 0,5"
+   },
+   {
+    "group": "Indirect – handling",
+    "label": "Outbound flexible manpower",
+    "value": 3725,
+    "note": null
+   },
+   {
+    "group": "Indirect – admin",
+    "label": "Inbound order lines",
+    "value": 271,
+    "note": null
+   },
+   {
+    "group": "Indirect – admin",
+    "label": "Inbound orders",
+    "value": 1353,
+    "note": null
+   },
+   {
+    "group": "Indirect – admin",
+    "label": "Contracted suppliers",
+    "value": 100000,
+    "note": null
+   },
+   {
+    "group": "Indirect – admin",
+    "label": "Outbound order lines",
+    "value": 927,
+    "note": null
+   },
+   {
+    "group": "Indirect – admin",
+    "label": "Outbound orders",
+    "value": 7167,
+    "note": null
+   },
+   {
+    "group": "Indirect",
+    "label": "Distribution costs",
+    "value": 192114,
+    "note": "DC Netherlands → khách hàng"
+   },
+   {
+    "group": "Indirect",
+    "label": "Interest",
+    "value": 27419,
+    "note": null
+   },
+   {
+    "group": "Investment",
+    "label": "Fixed",
+    "value": 2500000,
+    "note": null
+   },
+   {
+    "group": "Investment",
+    "label": "Stock",
+    "value": 321424,
+    "note": "Giá trị tồn kho NL + TP (xem 7_Supply Chain)"
+   },
+   {
+    "group": "Investment",
+    "label": "Machines",
+    "value": 802500,
+    "note": "Mixer 312.500 + dây chuyền 490.000"
+   },
+   {
+    "group": "Investment",
+    "label": "Payment terms",
+    "value": 365589,
+    "note": "Phải thu khách trừ phải trả NCC"
+   }
+  ],
+  "totals": {
+   "roi": -0.07682767295,
+   "realizedRevenue": 2306255,
+   "purchaseValue": 911618,
+   "productionCosts": 491489,
+   "cogs": 1403107,
+   "grossMargin": 903148,
+   "indirectCost": 1209653,
+   "operatingProfit": -306505,
+   "investment": 3989513
+  }
+ },
+ "products": [
+  {
+   "key": "Orange 1L",
+   "name": "Fressie Orange 1 liter",
+   "packaging": "Pack",
+   "litersPerUnit": 1,
+   "unitsPerCase": 10,
+   "unitsPerLayer": 120,
+   "unitsPerPallet": 600,
+   "basePrice": 0.45,
+   "bom": {
+    "Pack": 1,
+    "PET": 0,
+    "Orange": 0.2,
+    "Vitamin C": 0,
+    "Mango": 0
+   },
+   "demandPerWeek": 67394
+  },
+  {
+   "key": "C-power 1L",
+   "name": "Fressie Orange/C-power 1 liter",
+   "packaging": "Pack",
+   "litersPerUnit": 1,
+   "unitsPerCase": 10,
+   "unitsPerLayer": 120,
+   "unitsPerPallet": 600,
+   "basePrice": 0.55,
+   "bom": {
+    "Pack": 1,
+    "PET": 0,
+    "Orange": 0.19,
+    "Vitamin C": 0.01,
+    "Mango": 0
+   },
+   "demandPerWeek": 11361
+  },
+  {
+   "key": "Mango 1L",
+   "name": "Fressie Orange/Mango 1 liter",
+   "packaging": "Pack",
+   "litersPerUnit": 1,
+   "unitsPerCase": 10,
+   "unitsPerLayer": 120,
+   "unitsPerPallet": 600,
+   "basePrice": 0.48,
+   "bom": {
+    "Pack": 1,
+    "PET": 0,
+    "Orange": 0.15,
+    "Vitamin C": 0,
+    "Mango": 0.05
+   },
+   "demandPerWeek": 42162
+  },
+  {
+   "key": "Orange PET",
+   "name": "Fressie Orange PET",
+   "packaging": "PET",
+   "litersPerUnit": 0.3,
+   "unitsPerCase": 24,
+   "unitsPerLayer": 288,
+   "unitsPerPallet": 1440,
+   "basePrice": 0.22,
+   "bom": {
+    "Pack": 0,
+    "PET": 1,
+    "Orange": 0.06,
+    "Vitamin C": 0,
+    "Mango": 0
+   },
+   "demandPerWeek": 118084
+  },
+  {
+   "key": "C-power PET",
+   "name": "Fressie Orange/C-power PET",
+   "packaging": "PET",
+   "litersPerUnit": 0.3,
+   "unitsPerCase": 24,
+   "unitsPerLayer": 288,
+   "unitsPerPallet": 1440,
+   "basePrice": 0.32,
+   "bom": {
+    "Pack": 0,
+    "PET": 1,
+    "Orange": 0.057,
+    "Vitamin C": 0.003,
+    "Mango": 0
+   },
+   "demandPerWeek": 17741
+  },
+  {
+   "key": "Mango PET",
+   "name": "Fressie Orange/Mango PET",
+   "packaging": "PET",
+   "litersPerUnit": 0.3,
+   "unitsPerCase": 24,
+   "unitsPerLayer": 288,
+   "unitsPerPallet": 1440,
+   "basePrice": 0.25,
+   "bom": {
+    "Pack": 0,
+    "PET": 1,
+    "Orange": 0.045,
+    "Vitamin C": 0,
+    "Mango": 0.015
+   },
+   "demandPerWeek": 51040
+  }
+ ],
+ "components": [
+  {
+   "key": "Pack",
+   "name": "Pack 1 liter",
+   "unit": "cái",
+   "basePrice": 0.03,
+   "spec": "17.280 cái/pallet",
+   "unitsPerPallet": 17280,
+   "unitsPerLayer": null,
+   "liquidUnits": null,
+   "shelfLifeWeeks": null
+  },
+  {
+   "key": "PET",
+   "name": "PET",
+   "unit": "cái",
+   "basePrice": 0.03,
+   "spec": "216 cái/layer, 1.080 cái/pallet",
+   "unitsPerPallet": 1080,
+   "unitsPerLayer": 216,
+   "liquidUnits": null,
+   "shelfLifeWeeks": null
+  },
+  {
+   "key": "Orange",
+   "name": "Orange",
+   "unit": "lít",
+   "basePrice": 0.4,
+   "spec": "Drum 250 L, IBC 1.000 L, tank 30.000 L",
+   "unitsPerPallet": null,
+   "unitsPerLayer": null,
+   "liquidUnits": {
+    "drum": 250,
+    "ibc": 1000,
+    "tank": 30000
+   },
+   "shelfLifeWeeks": 52
+  },
+  {
+   "key": "Mango",
+   "name": "Mango",
+   "unit": "lít",
+   "basePrice": 0.9,
+   "spec": "Drum 250 L, IBC 1.000 L, tank 30.000 L",
+   "unitsPerPallet": null,
+   "unitsPerLayer": null,
+   "liquidUnits": {
+    "drum": 250,
+    "ibc": 1000,
+    "tank": 30000
+   },
+   "shelfLifeWeeks": 52
+  },
+  {
+   "key": "Vitamin C",
+   "name": "Vitamin C",
+   "unit": "lít",
+   "basePrice": 0.15,
+   "spec": "Drum 250 L, IBC 1.000 L, tank 30.000 L",
+   "unitsPerPallet": null,
+   "unitsPerLayer": null,
+   "liquidUnits": {
+    "drum": 250,
+    "ibc": 1000,
+    "tank": 30000
+   },
+   "shelfLifeWeeks": 52
+  }
+ ],
+ "purchasing": {
+  "contracts": [
+   {
+    "component": "Pack",
+    "supplier": "Mono Packaging Materials",
+    "inUse": true,
+    "contractIndex": 0.994,
+    "quality": "High",
+    "leadTimeDays": 15,
+    "certified": false,
+    "country": "France",
+    "transport": "Truck",
+    "freeCapacity": 0.18,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.95,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "PET",
+    "supplier": "Trio PET PLC",
+    "inUse": true,
+    "contractIndex": 0.962,
+    "quality": "Poor",
+    "leadTimeDays": 10,
+    "certified": false,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.03,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.94,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Miami Oranges",
+    "inUse": true,
+    "contractIndex": 1.004,
+    "quality": "High",
+    "leadTimeDays": 30,
+    "certified": true,
+    "country": "United States",
+    "transport": "Boat",
+    "freeCapacity": 0.38,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Mango",
+    "supplier": "NO8DO Mango",
+    "inUse": true,
+    "contractIndex": 1.058,
+    "quality": "High",
+    "leadTimeDays": 10,
+    "certified": true,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.04,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "Seitan Vitamins",
+    "inUse": true,
+    "contractIndex": 0.9658,
+    "quality": "High",
+    "leadTimeDays": 60,
+    "certified": false,
+    "country": "China",
+    "transport": "Boat",
+    "freeCapacity": 0.5,
+    "paymentTermWeeks": 8,
+    "tradeUnit": "Drum",
+    "agreedReliability": 0.9,
+    "deliveryWindow": "1 day"
+   }
+  ],
+  "results": [
+   {
+    "supplier": "Mono Packaging Materials",
+    "component": "Pack",
+    "reliability": 0.923,
+    "rejection": 0.036,
+    "purchaseValue": 110692,
+    "transportCost": 4552,
+    "demandPerWeek": 132257,
+    "pricePaid": 0.0311,
+    "orderSize": 619636
+   },
+   {
+    "supplier": "Trio PET PLC",
+    "component": "PET",
+    "reliability": 0.841,
+    "rejection": 0.059,
+    "purchaseValue": 307931,
+    "transportCost": 145393,
+    "demandPerWeek": 204297,
+    "pricePaid": 0.0547,
+    "orderSize": 951612
+   },
+   {
+    "supplier": "Miami Oranges",
+    "component": "Orange",
+    "reliability": 0.978,
+    "rejection": 0.01,
+    "purchaseValue": 409042,
+    "transportCost": 35046,
+    "demandPerWeek": 35360,
+    "pricePaid": 0.4392,
+    "orderSize": 172581
+   },
+   {
+    "supplier": "NO8DO Mango",
+    "component": "Mango",
+    "reliability": 0.937,
+    "rejection": 0.005,
+    "purchaseValue": 81658,
+    "transportCost": 3314,
+    "demandPerWeek": 3165,
+    "pricePaid": 0.9925,
+    "orderSize": 15497
+   },
+   {
+    "supplier": "Seitan Vitamins",
+    "component": "Vitamin C",
+    "reliability": 0.815,
+    "rejection": 0.012,
+    "purchaseValue": 2295,
+    "transportCost": 1592,
+    "demandPerWeek": 184,
+    "pricePaid": 0.4729,
+    "orderSize": 1032
+   }
+  ],
+  "market": [
+   {
+    "component": "Pack",
+    "supplier": "Brit Pack",
+    "inUse": false,
+    "contractIndex": 1.014,
+    "quality": "High",
+    "leadTimeDays": 5,
+    "certified": true,
+    "country": "United Kingdom",
+    "transport": "Truck",
+    "freeCapacity": 0.2,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.95,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Pack",
+    "supplier": "Mono Packaging Materials",
+    "inUse": true,
+    "contractIndex": 0.994,
+    "quality": "High",
+    "leadTimeDays": 15,
+    "certified": false,
+    "country": "France",
+    "transport": "Truck",
+    "freeCapacity": 0.18,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.95,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Pack",
+    "supplier": "Smurfat Kippa Cartons",
+    "inUse": false,
+    "contractIndex": 1.02,
+    "quality": "Poor",
+    "leadTimeDays": 10,
+    "certified": true,
+    "country": "Germany",
+    "transport": "Truck",
+    "freeCapacity": 0.21,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Pack",
+    "supplier": "Wimberley-Park Packaging",
+    "inUse": false,
+    "contractIndex": 0.9904,
+    "quality": "High",
+    "leadTimeDays": 15,
+    "certified": false,
+    "country": "United Kingdom",
+    "transport": "Truck",
+    "freeCapacity": 0.08,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.92,
+    "deliveryWindow": "2 days"
+   },
+   {
+    "component": "Pack",
+    "supplier": "Swenska Cartons",
+    "inUse": false,
+    "contractIndex": 0.988,
+    "quality": "High",
+    "leadTimeDays": 10,
+    "certified": false,
+    "country": "Sweden",
+    "transport": "Truck",
+    "freeCapacity": 0.04,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.9,
+    "deliveryWindow": "1 week"
+   },
+   {
+    "component": "PET",
+    "supplier": "Plantin PET",
+    "inUse": false,
+    "contractIndex": 0.988,
+    "quality": "Middle",
+    "leadTimeDays": 15,
+    "certified": true,
+    "country": "France",
+    "transport": "Truck",
+    "freeCapacity": 0.06,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "1 week"
+   },
+   {
+    "component": "PET",
+    "supplier": "Philyp Jones Plastics",
+    "inUse": false,
+    "contractIndex": 1.024,
+    "quality": "Middle",
+    "leadTimeDays": 5,
+    "certified": true,
+    "country": "The Netherlands",
+    "transport": "Truck",
+    "freeCapacity": 0.05,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "PET",
+    "supplier": "Trio PET PLC",
+    "inUse": true,
+    "contractIndex": 0.962,
+    "quality": "Poor",
+    "leadTimeDays": 10,
+    "certified": false,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.03,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.94,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Aranzon Export",
+    "inUse": false,
+    "contractIndex": 0.958,
+    "quality": "Poor",
+    "leadTimeDays": 60,
+    "certified": false,
+    "country": "Brazil",
+    "transport": "Boat",
+    "freeCapacity": 0.14,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.92,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Cabana International",
+    "inUse": false,
+    "contractIndex": 0.928,
+    "quality": "Poor",
+    "leadTimeDays": 50,
+    "certified": false,
+    "country": "Brazil",
+    "transport": "Boat",
+    "freeCapacity": 0.11,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.94,
+    "deliveryWindow": "1 week"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Arancia d'Espana",
+    "inUse": false,
+    "contractIndex": 1.07,
+    "quality": "High",
+    "leadTimeDays": 10,
+    "certified": true,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.22,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Miami Oranges",
+    "inUse": true,
+    "contractIndex": 1.004,
+    "quality": "High",
+    "leadTimeDays": 30,
+    "certified": true,
+    "country": "United States",
+    "transport": "Boat",
+    "freeCapacity": 0.38,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Esferico y Naranjado",
+    "inUse": false,
+    "contractIndex": 1.0515,
+    "quality": "High",
+    "leadTimeDays": 15,
+    "certified": false,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.17,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Drum",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Jugo Puro",
+    "inUse": false,
+    "contractIndex": 0.957,
+    "quality": "Poor",
+    "leadTimeDays": 40,
+    "certified": false,
+    "country": "Costa Rica",
+    "transport": "Boat",
+    "freeCapacity": 0.09,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.93,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Orange",
+    "supplier": "Medina Portogal",
+    "inUse": false,
+    "contractIndex": 1.03,
+    "quality": "Middle",
+    "leadTimeDays": 15,
+    "certified": true,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.2,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Mango",
+    "supplier": "Mossi Mango",
+    "inUse": false,
+    "contractIndex": 0.943,
+    "quality": "High",
+    "leadTimeDays": 40,
+    "certified": false,
+    "country": "Burkina Faso",
+    "transport": "Boat",
+    "freeCapacity": 0.03,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.9,
+    "deliveryWindow": "1 week"
+   },
+   {
+    "component": "Mango",
+    "supplier": "NO8DO Mango",
+    "inUse": true,
+    "contractIndex": 1.058,
+    "quality": "High",
+    "leadTimeDays": 10,
+    "certified": true,
+    "country": "Spain",
+    "transport": "Truck",
+    "freeCapacity": 0.04,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Mango",
+    "supplier": "Tampa Fruits",
+    "inUse": false,
+    "contractIndex": 0.9587,
+    "quality": "Middle",
+    "leadTimeDays": 25,
+    "certified": false,
+    "country": "United States",
+    "transport": "Boat",
+    "freeCapacity": 0.02,
+    "paymentTermWeeks": 2,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.93,
+    "deliveryWindow": "1 week"
+   },
+   {
+    "component": "Mango",
+    "supplier": "Dalima Mango",
+    "inUse": false,
+    "contractIndex": 1.0205,
+    "quality": "Middle",
+    "leadTimeDays": 15,
+    "certified": true,
+    "country": "Nigeria",
+    "transport": "Truck",
+    "freeCapacity": 0.04,
+    "paymentTermWeeks": 6,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.95,
+    "deliveryWindow": "2 days"
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "AIL Vitamins",
+    "inUse": false,
+    "contractIndex": 1.023,
+    "quality": "Middle",
+    "leadTimeDays": 20,
+    "certified": true,
+    "country": "France",
+    "transport": "Truck",
+    "freeCapacity": 0.45,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Drum",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "YoBoMa",
+    "inUse": false,
+    "contractIndex": 0.984,
+    "quality": "Poor",
+    "leadTimeDays": 40,
+    "certified": true,
+    "country": "India",
+    "transport": "Boat",
+    "freeCapacity": 0.25,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Drum",
+    "agreedReliability": 0.95,
+    "deliveryWindow": "4 hours"
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "Seitan Vitamins",
+    "inUse": true,
+    "contractIndex": 0.9658,
+    "quality": "High",
+    "leadTimeDays": 60,
+    "certified": false,
+    "country": "China",
+    "transport": "Boat",
+    "freeCapacity": 0.5,
+    "paymentTermWeeks": 8,
+    "tradeUnit": "Drum",
+    "agreedReliability": 0.9,
+    "deliveryWindow": "1 day"
+   },
+   {
+    "component": "Vitamin C",
+    "supplier": "SYI",
+    "inUse": false,
+    "contractIndex": 1.0518,
+    "quality": "High",
+    "leadTimeDays": 4,
+    "certified": false,
+    "country": "The Netherlands",
+    "transport": "Truck",
+    "freeCapacity": 0.29,
+    "paymentTermWeeks": 6,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "4 hours"
+   }
+  ]
+ },
+ "ops": {
+  "decisions": {
+   "rmInspection": {
+    "Pack": false,
+    "PET": false,
+    "Orange": false,
+    "Mango": false,
+    "Vitamin C": false
+   },
+   "rmPalletLocations": 900,
+   "rmFte": 5,
+   "intakeDays": 5,
+   "mixer": "Fruitmix MQ",
+   "preventiveMaintenance": "None",
+   "breakdownTraining": false,
+   "bottlingLine": "Swiss Fill 2",
+   "shifts": 2,
+   "smed": false,
+   "increaseSpeed": false,
+   "fgPalletLocations": 1500,
+   "fgFte": 4
+  },
+  "results": {
+   "rm": {
+    "capacity": 900,
+    "usage": 840,
+    "utilization": 0.934,
+    "overflow": 0.108,
+    "orderLinesPerWeek": 1,
+    "palletsPerWeek": 212.4,
+    "hoursPerWeek": 74,
+    "flexFte": 0.2
+   },
+   "tankYard": {
+    "tankDaysPerWeek": 29,
+    "capacity": 20,
+    "usage": 6,
+    "tanksPerWeek": 1.2
+   },
+   "fg": {
+    "capacity": 1500,
+    "usage": 1061,
+    "utilization": 0.707,
+    "overflow": 0.001,
+    "orderLinesPerWeek": 17.8,
+    "palletsPerWeek": 334.5,
+    "hoursPerWeek": 100,
+    "flexFte": 0.1
+   },
+   "line": {
+    "name": "Swiss Fill 2",
+    "run": 62.6,
+    "changeover": 12.1,
+    "breakdown": 10.8,
+    "unused": 3.9,
+    "overtime": 9.4,
+    "planAdherence": 0.787,
+    "startupLossEur": 8435,
+    "outsourcedH": 0
+   },
+   "mixer": {
+    "name": "Fruitmix MQ",
+    "cleaningShare": 0.145,
+    "avgLotL": 11022
+   }
+  },
+  "mixers": [
+   {
+    "name": "Fruitmix MQ",
+    "inUse": true,
+    "minBatchL": 8000,
+    "maxBatchL": 12000,
+    "annualFee": 62500,
+    "costPerRunHour": 135,
+    "investment": 312500,
+    "mixHoursPerBatch": 2,
+    "cleanHours": 2
+   },
+   {
+    "name": "MegaChurn 20",
+    "inUse": false,
+    "minBatchL": 15000,
+    "maxBatchL": 20000,
+    "annualFee": 75000,
+    "costPerRunHour": 160,
+    "investment": 375000,
+    "mixHoursPerBatch": 2,
+    "cleanHours": 3
+   },
+   {
+    "name": "FMM 4000",
+    "inUse": false,
+    "minBatchL": 3000,
+    "maxBatchL": 6000,
+    "annualFee": 50000,
+    "costPerRunHour": 100,
+    "investment": 250000,
+    "mixHoursPerBatch": 2,
+    "cleanHours": 1
+   }
+  ],
+  "lines": [
+   {
+    "name": "Swiss Fill 2",
+    "inUse": true,
+    "speedLph": 3100,
+    "workersPerShift": 5,
+    "annualFee": 98000,
+    "investment": 490000,
+    "formulaChangeoverH": 2,
+    "sizeChangeoverH": 4,
+    "tolerance": "Middle",
+    "startupLoss": 0.1
+   },
+   {
+    "name": "TopSpeed 1",
+    "inUse": false,
+    "speedLph": 3250,
+    "workersPerShift": 4,
+    "annualFee": 114000,
+    "investment": 570000,
+    "formulaChangeoverH": 4,
+    "sizeChangeoverH": 6,
+    "tolerance": "Narrow",
+    "startupLoss": 0.15
+   },
+   {
+    "name": "MultiFlex 1",
+    "inUse": false,
+    "speedLph": 2950,
+    "workersPerShift": 6,
+    "annualFee": 85000,
+    "investment": 425000,
+    "formulaChangeoverH": 1,
+    "sizeChangeoverH": 2,
+    "tolerance": "Wide",
+    "startupLoss": 0.08
+   },
+   {
+    "name": "Swiss Fill 1",
+    "inUse": false,
+    "speedLph": 3100,
+    "workersPerShift": 5,
+    "annualFee": 98000,
+    "investment": 490000,
+    "formulaChangeoverH": 2,
+    "sizeChangeoverH": 4,
+    "tolerance": "Middle",
+    "startupLoss": 0.1
+   }
+  ],
+  "norms": [
+   {
+    "area": "Kho NL",
+    "task": "Nhận hàng",
+    "norm": "1 giờ/dòng đơn và 6 phút/pallet"
+   },
+   {
+    "area": "Kho NL",
+    "task": "Cấp cho sản xuất",
+    "norm": "6 phút/pallet; 12 phút/tank"
+   },
+   {
+    "area": "Kho NL",
+    "task": "Việc cố định (dọn dẹp, vận hành)",
+    "norm": "Khoảng 4 giờ/ngày"
+   },
+   {
+    "area": "Kho NL",
+    "task": "Chuyển ra/vào overflow",
+    "norm": "6 phút/pallet"
+   },
+   {
+    "area": "Kho NL",
+    "task": "Đổ IBC khi tank yard thiếu chỗ",
+    "norm": "1 giờ/IBC"
+   },
+   {
+    "area": "Kho NL",
+    "task": "Raw materials inspection",
+    "norm": "Thêm 2 giờ/dòng đơn"
+   },
+   {
+    "area": "Tank yard (PulpStore)",
+    "task": "Chi phí",
+    "norm": "€25/tank/ngày; €10/lần nhận; €100/lần giao"
+   },
+   {
+    "area": "Kho TP",
+    "task": "Nhập hàng từ sản xuất",
+    "norm": "6 phút/pallet"
+   },
+   {
+    "area": "Kho TP",
+    "task": "Soạn hàng",
+    "norm": "10 phút/dòng đơn, 6 phút/pallet hoặc layer, 3 phút/thùng"
+   },
+   {
+    "area": "Kho TP",
+    "task": "Chuyển overflow hoặc hủy hàng lỗi thời",
+    "norm": "6 phút/pallet"
+   },
+   {
+    "area": "Kho TP",
+    "task": "Việc cố định",
+    "norm": "4 giờ/ngày"
+   },
+   {
+    "area": "Kho TP",
+    "task": "Phân phối DC Netherlands tới khách",
+    "norm": "€31/pallet"
+   },
+   {
+    "area": "Bottling",
+    "task": "Vượt 168 giờ/tuần",
+    "norm": "Thuê ngoài, chi phí gấp 2"
+   },
+   {
+    "area": "Bottling",
+    "task": "Sau mỗi lần changeover",
+    "norm": "Giờ đầu tiên bị hao hụt (start-up loss)"
+   },
+   {
+    "area": "Bottling",
+    "task": "Formula vs size changeover",
+    "norm": "Formula: cùng bao bì, đổi vị (nhanh). Size: đổi bao bì 1L và PET (lâu hơn)"
+   },
+   {
+    "area": "Chung",
+    "task": "Nhân viên cố định",
+    "norm": "40 giờ/tuần, €40.000/năm"
+   },
+   {
+    "area": "Chung",
+    "task": "Thời vụ",
+    "norm": "€42/giờ, năng suất thấp hơn nhân viên cố định"
+   },
+   {
+    "area": "Chung",
+    "task": "Pallet location",
+    "norm": "€200/năm; tăng giảm mỗi round không mất phí"
+   },
+   {
+    "area": "Chung",
+    "task": "Overflow",
+    "norm": "€3/pallet/ngày"
+   }
+  ]
+ },
+ "sales": {
+  "contracts": [
+   {
+    "customer": "Food & Groceries",
+    "stores": 500,
+    "marketShare": 0.1,
+    "valueForMoney": true,
+    "contractIndex": 1.0085,
+    "serviceLevelType": "Order lines",
+    "serviceLevel": 0.95,
+    "shelfLife": 0.75,
+    "orderDeadline": "20:00",
+    "tradeUnit": "Pallet layer",
+    "paymentTermWeeks": 4,
+    "promotionalPressure": "Middle",
+    "promotionHorizon": "Short",
+    "skus": "Cả 6 SKU"
+   },
+   {
+    "customer": "LAND Market",
+    "stores": 300,
+    "marketShare": 0.08,
+    "valueForMoney": true,
+    "contractIndex": 0.9615,
+    "serviceLevelType": "Order lines",
+    "serviceLevel": 0.95,
+    "shelfLife": 0.75,
+    "orderDeadline": "17:00",
+    "tradeUnit": "Pallet layer",
+    "paymentTermWeeks": 4,
+    "promotionalPressure": "Middle",
+    "promotionHorizon": "Short",
+    "skus": "Cả 6 SKU"
+   },
+   {
+    "customer": "Dominick's",
+    "stores": 50,
+    "marketShare": 0.02,
+    "valueForMoney": false,
+    "contractIndex": 1.0166,
+    "serviceLevelType": "Order lines",
+    "serviceLevel": 0.95,
+    "shelfLife": 0.75,
+    "orderDeadline": "12:00",
+    "tradeUnit": "Pallet",
+    "paymentTermWeeks": 4,
+    "promotionalPressure": "Middle",
+    "promotionHorizon": "Short",
+    "skus": "Chỉ 3 SKU PET"
+   }
+  ],
+  "customerResults": [
+   {
+    "customer": "Food & Groceries",
+    "attainedContractIndex": 0.812,
+    "slPieces": 0.948,
+    "slOrderLines": 0.912,
+    "slOrders": 0.855,
+    "osa": 0.912,
+    "revenue": 1045136,
+    "grossMarginPerWeek": 13963,
+    "shipmentsPerWeek": 8,
+    "orderLinesPerWeek": 7,
+    "palletsPerWeek": 168.7,
+    "daysInWarehouse": 14.7,
+    "attainedShelfLife": 0.859,
+    "distributionCost": 94368
+   },
+   {
+    "customer": "LAND Market",
+    "attainedContractIndex": 0.891,
+    "slPieces": 0.944,
+    "slOrderLines": 0.921,
+    "slOrders": 0.869,
+    "osa": 0.906,
+    "revenue": 586461,
+    "grossMarginPerWeek": 9188,
+    "shipmentsPerWeek": 5,
+    "orderLinesPerWeek": 6.9,
+    "palletsPerWeek": 88.6,
+    "daysInWarehouse": 15.1,
+    "attainedShelfLife": 0.853,
+    "distributionCost": 52623
+   },
+   {
+    "customer": "Dominick's",
+    "attainedContractIndex": 0.982,
+    "slPieces": 0.967,
+    "slOrderLines": 0.932,
+    "slOrders": 0.912,
+    "osa": 0.97,
+    "revenue": 674658,
+    "grossMarginPerWeek": 11585,
+    "shipmentsPerWeek": 4,
+    "orderLinesPerWeek": 3.9,
+    "palletsPerWeek": 77.2,
+    "daysInWarehouse": 14.3,
+    "attainedShelfLife": 0.866,
+    "distributionCost": 45124
+   }
+  ],
+  "productResults": [
+   {
+    "sku": "Orange 1L",
+    "demandPerWeek": 67394,
+    "demandValuePerWeek": 25508,
+    "avgPrice": 0.379,
+    "gmPerUnit": 0.147,
+    "slPieces": 0.934,
+    "slOrderLines": 0.921,
+    "osa": 0.872,
+    "orderLinesPerWeek": 3,
+    "obsolete": 0.084,
+    "obsoletePerWeekEur": 1319
+   },
+   {
+    "sku": "C-power 1L",
+    "demandPerWeek": 11361,
+    "demandValuePerWeek": 5256,
+    "avgPrice": 0.463,
+    "gmPerUnit": 0.204,
+    "slPieces": 0.838,
+    "slOrderLines": 0.803,
+    "osa": 0.82,
+    "orderLinesPerWeek": 2,
+    "obsolete": 0.071,
+    "obsoletePerWeekEur": 210
+   },
+   {
+    "sku": "Mango 1L",
+    "demandPerWeek": 42162,
+    "demandValuePerWeek": 17018,
+    "avgPrice": 0.404,
+    "gmPerUnit": 0.137,
+    "slPieces": 0.974,
+    "slOrderLines": 0.97,
+    "osa": 0.912,
+    "orderLinesPerWeek": 3,
+    "obsolete": 0.088,
+    "obsoletePerWeekEur": 993
+   },
+   {
+    "sku": "Orange PET",
+    "demandPerWeek": 118084,
+    "demandValuePerWeek": 23935,
+    "avgPrice": 0.203,
+    "gmPerUnit": 0.079,
+    "slPieces": 0.98,
+    "slOrderLines": 0.975,
+    "osa": 0.976,
+    "orderLinesPerWeek": 4,
+    "obsolete": 0.082,
+    "obsoletePerWeekEur": 1201
+   },
+   {
+    "sku": "C-power PET",
+    "demandPerWeek": 17741,
+    "demandValuePerWeek": 5229,
+    "avgPrice": 0.295,
+    "gmPerUnit": 0.155,
+    "slPieces": 0.836,
+    "slOrderLines": 0.806,
+    "osa": 0.83,
+    "orderLinesPerWeek": 3,
+    "obsolete": 0.055,
+    "obsoletePerWeekEur": 137
+   },
+   {
+    "sku": "Mango PET",
+    "demandPerWeek": 51040,
+    "demandValuePerWeek": 11756,
+    "avgPrice": 0.23,
+    "gmPerUnit": 0.093,
+    "slPieces": 0.971,
+    "slOrderLines": 0.961,
+    "osa": 0.985,
+    "orderLinesPerWeek": 3,
+    "obsolete": 0.08,
+    "obsoletePerWeekEur": 561
+   }
+  ],
+  "customerProduct": [
+   {
+    "customer": "Food & Groceries",
+    "sku": "Orange 1L",
+    "demandPerWeek": 42637,
+    "price": 0.37,
+    "attainedShelfLife": 0.853,
+    "slPieces": 0.938,
+    "slOrderLines": 0.919,
+    "osa": 0.871,
+    "promoUplift": 0.033
+   },
+   {
+    "customer": "Food & Groceries",
+    "sku": "C-power 1L",
+    "demandPerWeek": 7182,
+    "price": 0.45,
+    "attainedShelfLife": 0.877,
+    "slPieces": 0.839,
+    "slOrderLines": 0.787,
+    "osa": 0.808,
+    "promoUplift": 0.037
+   },
+   {
+    "customer": "Food & Groceries",
+    "sku": "Mango 1L",
+    "demandPerWeek": 26777,
+    "price": 0.39,
+    "attainedShelfLife": 0.855,
+    "slPieces": 0.972,
+    "slOrderLines": 0.965,
+    "osa": 0.914,
+    "promoUplift": 0.035
+   },
+   {
+    "customer": "Food & Groceries",
+    "sku": "Orange PET",
+    "demandPerWeek": 35873,
+    "price": 0.18,
+    "attainedShelfLife": 0.846,
+    "slPieces": 0.975,
+    "slOrderLines": 0.969,
+    "osa": 0.966,
+    "promoUplift": 0.033
+   },
+   {
+    "customer": "Food & Groceries",
+    "sku": "C-power PET",
+    "demandPerWeek": 5412,
+    "price": 0.26,
+    "attainedShelfLife": 0.874,
+    "slPieces": 0.818,
+    "slOrderLines": 0.806,
+    "osa": 0.827,
+    "promoUplift": 0.034
+   },
+   {
+    "customer": "Food & Groceries",
+    "sku": "Mango PET",
+    "demandPerWeek": 15539,
+    "price": 0.2,
+    "attainedShelfLife": 0.852,
+    "slPieces": 0.971,
+    "slOrderLines": 0.958,
+    "osa": 0.975,
+    "promoUplift": 0.035
+   },
+   {
+    "customer": "LAND Market",
+    "sku": "Orange 1L",
+    "demandPerWeek": 24756,
+    "price": 0.4,
+    "attainedShelfLife": 0.851,
+    "slPieces": 0.927,
+    "slOrderLines": 0.923,
+    "osa": 0.875,
+    "promoUplift": 0.029
+   },
+   {
+    "customer": "LAND Market",
+    "sku": "C-power 1L",
+    "demandPerWeek": 4179,
+    "price": 0.49,
+    "attainedShelfLife": 0.87,
+    "slPieces": 0.837,
+    "slOrderLines": 0.818,
+    "osa": 0.84,
+    "promoUplift": 0.036
+   },
+   {
+    "customer": "LAND Market",
+    "sku": "Mango 1L",
+    "demandPerWeek": 15385,
+    "price": 0.43,
+    "attainedShelfLife": 0.851,
+    "slPieces": 0.978,
+    "slOrderLines": 0.975,
+    "osa": 0.907,
+    "promoUplift": 0.033
+   },
+   {
+    "customer": "LAND Market",
+    "sku": "Orange PET",
+    "demandPerWeek": 11935,
+    "price": 0.2,
+    "attainedShelfLife": 0.838,
+    "slPieces": 0.978,
+    "slOrderLines": 0.976,
+    "osa": 0.975,
+    "promoUplift": 0.035
+   },
+   {
+    "customer": "LAND Market",
+    "sku": "C-power PET",
+    "demandPerWeek": 1818,
+    "price": 0.29,
+    "attainedShelfLife": 0.866,
+    "slPieces": 0.838,
+    "slOrderLines": 0.82,
+    "osa": 0.842,
+    "promoUplift": 0.073
+   },
+   {
+    "customer": "LAND Market",
+    "sku": "Mango PET",
+    "demandPerWeek": 5132,
+    "price": 0.22,
+    "attainedShelfLife": 0.845,
+    "slPieces": 0.964,
+    "slOrderLines": 0.955,
+    "osa": 0.975,
+    "promoUplift": 0.037
+   },
+   {
+    "customer": "Dominick's",
+    "sku": "Orange PET",
+    "demandPerWeek": 70276,
+    "price": 0.22,
+    "attainedShelfLife": 0.851,
+    "slPieces": 0.984,
+    "slOrderLines": 0.979,
+    "osa": 0.981,
+    "promoUplift": 0.018
+   },
+   {
+    "customer": "Dominick's",
+    "sku": "C-power PET",
+    "demandPerWeek": 10512,
+    "price": 0.31,
+    "attainedShelfLife": 0.886,
+    "slPieces": 0.844,
+    "slOrderLines": 0.792,
+    "osa": 0.83,
+    "promoUplift": 0.017
+   },
+   {
+    "customer": "Dominick's",
+    "sku": "Mango PET",
+    "demandPerWeek": 30370,
+    "price": 0.25,
+    "attainedShelfLife": 0.86,
+    "slPieces": 0.972,
+    "slOrderLines": 0.967,
+    "osa": 0.992,
+    "promoUplift": 0.018
+   }
+  ],
+  "notes": [
+   "Shortage rule hiện tại: Proportional (thiếu hàng thì chia đều). Có thể đổi sang First-come-first-served hoặc Customer priority."
+  ]
+ },
+ "supplyChain": {
+  "components": [
+   {
+    "component": "Pack",
+    "safetyStockWeeks": 2,
+    "lotSizeWeeks": 4
+   },
+   {
+    "component": "PET",
+    "safetyStockWeeks": 2,
+    "lotSizeWeeks": 4
+   },
+   {
+    "component": "Orange",
+    "safetyStockWeeks": 2,
+    "lotSizeWeeks": 4
+   },
+   {
+    "component": "Mango",
+    "safetyStockWeeks": 2,
+    "lotSizeWeeks": 4
+   },
+   {
+    "component": "Vitamin C",
+    "safetyStockWeeks": 2,
+    "lotSizeWeeks": 4
+   }
+  ],
+  "products": [
+   {
+    "sku": "Orange 1L",
+    "productionIntervalDays": 10,
+    "safetyStockWeeks": 3
+   },
+   {
+    "sku": "C-power 1L",
+    "productionIntervalDays": 10,
+    "safetyStockWeeks": 3
+   },
+   {
+    "sku": "Mango 1L",
+    "productionIntervalDays": 10,
+    "safetyStockWeeks": 3
+   },
+   {
+    "sku": "Orange PET",
+    "productionIntervalDays": 10,
+    "safetyStockWeeks": 3
+   },
+   {
+    "sku": "C-power PET",
+    "productionIntervalDays": 10,
+    "safetyStockWeeks": 3
+   },
+   {
+    "sku": "Mango PET",
+    "productionIntervalDays": 10,
+    "safetyStockWeeks": 3
+   }
+  ],
+  "frozenPeriodWeeks": 3,
+  "componentStock": [
+   {
+    "component": "Pack",
+    "supplierReliability": 0.923,
+    "stockUnits": 564440,
+    "stockWeeks": 4.3,
+    "stockValue": 17553,
+    "economicWeeks": 8.7,
+    "demandPerWeek": 132257,
+    "availability": 0.995,
+    "purchasedInRound": 3559348,
+    "orderSize": 619636
+   },
+   {
+    "component": "PET",
+    "supplierReliability": 0.841,
+    "stockUnits": 851667,
+    "stockWeeks": 4.2,
+    "stockValue": 46566,
+    "economicWeeks": 7.7,
+    "demandPerWeek": 204297,
+    "availability": 0.995,
+    "purchasedInRound": 5631948,
+    "orderSize": 951612
+   },
+   {
+    "component": "Orange",
+    "supplierReliability": 0.978,
+    "stockUnits": 160757,
+    "stockWeeks": 4.5,
+    "stockValue": 70610,
+    "economicWeeks": 10.8,
+    "demandPerWeek": 35360,
+    "availability": 0.993,
+    "purchasedInRound": 931265,
+    "orderSize": 172581
+   },
+   {
+    "component": "Mango",
+    "supplierReliability": 0.937,
+    "stockUnits": 14089,
+    "stockWeeks": 4.4,
+    "stockValue": 13983,
+    "economicWeeks": 7.7,
+    "demandPerWeek": 3165,
+    "availability": 1,
+    "purchasedInRound": 82276,
+    "orderSize": 15497
+   },
+   {
+    "component": "Vitamin C",
+    "supplierReliability": 0.815,
+    "stockUnits": 769,
+    "stockWeeks": 4.2,
+    "stockValue": 364,
+    "economicWeeks": 18.4,
+    "demandPerWeek": 184,
+    "availability": 0.843,
+    "purchasedInRound": 4852,
+    "orderSize": 1032
+   }
+  ],
+  "productStock": [
+   {
+    "sku": "Orange 1L",
+    "slPieces": 0.934,
+    "slOrderLines": 0.921,
+    "stockWeeks": 3.2,
+    "stockValue": 49522,
+    "obsolete": 0.084,
+    "mape": 0.49,
+    "batches": 13,
+    "startupLossEur": 934,
+    "planAdherence": 0.829
+   },
+   {
+    "sku": "C-power 1L",
+    "slPieces": 0.838,
+    "slOrderLines": 0.803,
+    "stockWeeks": 2.5,
+    "stockValue": 7466,
+    "obsolete": 0.071,
+    "mape": 0.606,
+    "batches": 13,
+    "startupLossEur": 1043,
+    "planAdherence": 0.698
+   },
+   {
+    "sku": "Mango 1L",
+    "slPieces": 0.974,
+    "slOrderLines": 0.97,
+    "stockWeeks": 3.3,
+    "stockValue": 37556,
+    "obsolete": 0.088,
+    "mape": 0.509,
+    "batches": 13,
+    "startupLossEur": 1075,
+    "planAdherence": 0.829
+   },
+   {
+    "sku": "Orange PET",
+    "slPieces": 0.98,
+    "slOrderLines": 0.975,
+    "stockWeeks": 3.4,
+    "stockValue": 49505,
+    "obsolete": 0.082,
+    "mape": 0.471,
+    "batches": 13,
+    "startupLossEur": 1663,
+    "planAdherence": 0.833
+   },
+   {
+    "sku": "C-power PET",
+    "slPieces": 0.836,
+    "slOrderLines": 0.806,
+    "stockWeeks": 2.3,
+    "stockValue": 5761,
+    "obsolete": 0.055,
+    "mape": 0.584,
+    "batches": 13,
+    "startupLossEur": 1876,
+    "planAdherence": 0.701
+   },
+   {
+    "sku": "Mango PET",
+    "slPieces": 0.971,
+    "slOrderLines": 0.961,
+    "stockWeeks": 3.2,
+    "stockValue": 22539,
+    "obsolete": 0.08,
+    "mape": 0.517,
+    "batches": 13,
+    "startupLossEur": 1843,
+    "planAdherence": 0.833
+   }
+  ],
+  "totalStockValue": 321425
+ },
+ "analysis": {
+  "components": [
+   {
+    "component": "Pack",
+    "orderLinesPerRound": 5.7,
+    "obsoletes": 0
+   },
+   {
+    "component": "PET",
+    "orderLinesPerRound": 5.9,
+    "obsoletes": 0
+   },
+   {
+    "component": "Orange",
+    "orderLinesPerRound": 5.4,
+    "obsoletes": 0
+   },
+   {
+    "component": "Mango",
+    "orderLinesPerRound": 5.3,
+    "obsoletes": 0
+   },
+   {
+    "component": "Vitamin C",
+    "orderLinesPerRound": 4.7,
+    "obsoletes": 0
+   }
+  ],
+  "products": [
+   {
+    "sku": "Orange 1L",
+    "rejectsEur": 646,
+    "gmPerWeek": 9877
+   },
+   {
+    "sku": "C-power 1L",
+    "rejectsEur": 1021,
+    "gmPerWeek": 2315
+   },
+   {
+    "sku": "Mango 1L",
+    "rejectsEur": 1424,
+    "gmPerWeek": 5771
+   },
+   {
+    "sku": "Orange PET",
+    "rejectsEur": 1056,
+    "gmPerWeek": 9278
+   },
+   {
+    "sku": "C-power PET",
+    "rejectsEur": 1829,
+    "gmPerWeek": 2745
+   },
+   {
+    "sku": "Mango PET",
+    "rejectsEur": 2336,
+    "gmPerWeek": 4750
+   }
+  ],
+  "distributor": {
+   "name": "Super Service",
+   "cost": 192114,
+   "serviceLevel": 1,
+   "smallPallets": 373,
+   "mediumPallets": 1146,
+   "largePallets": 7180
+  }
+ },
+ "daily": [
+  {
+   "day": 0,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 2.58,
+    "Orange": 0,
+    "Mango": 5.01,
+    "Vitamin C": 3.87
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.4,
+    "C-power 1L": 3.82,
+    "Mango 1L": 3.29,
+    "Orange PET": 4.65,
+    "C-power PET": 0,
+    "Mango PET": 3.29
+   },
+   "rmHours": 5.16,
+   "fgHours": 21.13
+  },
+  {
+   "day": 1,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 2.58,
+    "Orange": 0,
+    "Mango": 5.01,
+    "Vitamin C": 3.87
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.4,
+    "C-power 1L": 3.82,
+    "Mango 1L": 3.29,
+    "Orange PET": 4.65,
+    "C-power PET": 0,
+    "Mango PET": 3.29
+   },
+   "rmHours": 5.16,
+   "fgHours": 21.13
+  },
+  {
+   "day": 2,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 2.43,
+    "Orange": 0,
+    "Mango": 5.01,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.24,
+    "C-power 1L": 3.82,
+    "Mango 1L": 3.04,
+    "Orange PET": 3.91,
+    "C-power PET": 0,
+    "Mango PET": 2.98
+   },
+   "rmHours": 5.16,
+   "fgHours": 7.62
+  },
+  {
+   "day": 3,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 2.43,
+    "Orange": 0,
+    "Mango": 5.01,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.24,
+    "C-power 1L": 3.82,
+    "Mango 1L": 3.04,
+    "Orange PET": 3.82,
+    "C-power PET": 0,
+    "Mango PET": 2.98
+   },
+   "rmHours": 5.16,
+   "fgHours": 10.93
+  },
+  {
+   "day": 4,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 2.43,
+    "Orange": 0,
+    "Mango": 5.01,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.24,
+    "C-power 1L": 3.82,
+    "Mango 1L": 3.04,
+    "Orange PET": 3.76,
+    "C-power PET": 0,
+    "Mango PET": 2.78
+   },
+   "rmHours": 18.5,
+   "fgHours": 24.2
+  },
+  {
+   "day": 5,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 1.95,
+    "Orange": 0,
+    "Mango": 5.01,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.68,
+    "C-power 1L": 3.35,
+    "Mango 1L": 2.92,
+    "Orange PET": 3.11,
+    "C-power PET": 0,
+    "Mango PET": 2.78
+   },
+   "rmHours": 4,
+   "fgHours": 20.23
+  },
+  {
+   "day": 6,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 0.2,
+    "Orange": 2.48,
+    "Mango": 3.12,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.68,
+    "C-power 1L": 3.03,
+    "Mango 1L": 5.11,
+    "Orange PET": 3.11,
+    "C-power PET": 0.29,
+    "Mango PET": 2.61
+   },
+   "rmHours": 4,
+   "fgHours": 8.05
+  },
+  {
+   "day": 7,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 0.2,
+    "Orange": 2.48,
+    "Mango": 3.12,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.56,
+    "C-power 1L": 3.03,
+    "Mango 1L": 5.04,
+    "Orange PET": 3.11,
+    "C-power PET": 0.29,
+    "Mango PET": 2.21
+   },
+   "rmHours": 4,
+   "fgHours": 9.58
+  },
+  {
+   "day": 8,
+   "rmWeeks": {
+    "Pack": 4.28,
+    "PET": 4.46,
+    "Orange": 2.48,
+    "Mango": 3.12,
+    "Vitamin C": 3.26
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.96,
+    "C-power 1L": 3.03,
+    "Mango 1L": 3.22,
+    "Orange PET": 2.68,
+    "C-power PET": 0.29,
+    "Mango PET": 2.21
+   },
+   "rmHours": 15.3,
+   "fgHours": 14.67
+  },
+  {
+   "day": 9,
+   "rmWeeks": {
+    "Pack": 3.01,
+    "PET": 4.46,
+    "Orange": 1.87,
+    "Mango": 3.12,
+    "Vitamin C": 1.9
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.61,
+    "C-power 1L": 3.03,
+    "Mango 1L": 3.22,
+    "Orange PET": 3.1,
+    "C-power PET": 0,
+    "Mango PET": 2.21
+   },
+   "rmHours": 4.8,
+   "fgHours": 26.87
+  },
+  {
+   "day": 10,
+   "rmWeeks": {
+    "Pack": 3.01,
+    "PET": 4.46,
+    "Orange": 1.87,
+    "Mango": 3.12,
+    "Vitamin C": 1.9
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.61,
+    "C-power 1L": 3.03,
+    "Mango 1L": 3.03,
+    "Orange PET": 3.1,
+    "C-power PET": 0,
+    "Mango PET": 5.2
+   },
+   "rmHours": 6.8,
+   "fgHours": 24.3
+  },
+  {
+   "day": 11,
+   "rmWeeks": {
+    "Pack": 3.01,
+    "PET": 4.46,
+    "Orange": 6.94,
+    "Mango": 2.72,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.61,
+    "C-power 1L": 3.03,
+    "Mango 1L": 2.93,
+    "Orange PET": 3.1,
+    "C-power PET": 0,
+    "Mango PET": 5.2
+   },
+   "rmHours": 4,
+   "fgHours": 10.03
+  },
+  {
+   "day": 12,
+   "rmWeeks": {
+    "Pack": 2.27,
+    "PET": 4.46,
+    "Orange": 6.94,
+    "Mango": 2.72,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.07,
+    "C-power 1L": 1.13,
+    "Mango 1L": 2.93,
+    "Orange PET": 3.1,
+    "C-power PET": 0,
+    "Mango PET": 5.08
+   },
+   "rmHours": 23.48,
+   "fgHours": 10.23
+  },
+  {
+   "day": 13,
+   "rmWeeks": {
+    "Pack": 2.27,
+    "PET": 4.28,
+    "Orange": 6.94,
+    "Mango": 2.72,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.07,
+    "C-power 1L": 0.75,
+    "Mango 1L": 2.93,
+    "Orange PET": 2.61,
+    "C-power PET": 0,
+    "Mango PET": 4.83
+   },
+   "rmHours": 25.18,
+   "fgHours": 22.4
+  },
+  {
+   "day": 14,
+   "rmWeeks": {
+    "Pack": 2.27,
+    "PET": 2.76,
+    "Orange": 6.94,
+    "Mango": 2.72,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.87,
+    "C-power 1L": 0.75,
+    "Mango 1L": 2.79,
+    "Orange PET": 2.42,
+    "C-power PET": 0.72,
+    "Mango PET": 4.75
+   },
+   "rmHours": 24.4,
+   "fgHours": 24.58
+  },
+  {
+   "day": 15,
+   "rmWeeks": {
+    "Pack": 6.69,
+    "PET": 2.15,
+    "Orange": 6.77,
+    "Mango": 2.72,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.69,
+    "C-power 1L": 0,
+    "Mango 1L": 4.57,
+    "Orange PET": 2.42,
+    "C-power PET": 0.38,
+    "Mango PET": 4.75
+   },
+   "rmHours": 24.4,
+   "fgHours": 14.85
+  },
+  {
+   "day": 16,
+   "rmWeeks": {
+    "Pack": 6.69,
+    "PET": 2.15,
+    "Orange": 6.39,
+    "Mango": 2.72,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.69,
+    "C-power 1L": 0,
+    "Mango 1L": 4.42,
+    "Orange PET": 2.35,
+    "C-power PET": 0.38,
+    "Mango PET": 4.75
+   },
+   "rmHours": 24.4,
+   "fgHours": 12.22
+  },
+  {
+   "day": 17,
+   "rmWeeks": {
+    "Pack": 5.61,
+    "PET": 5.53,
+    "Orange": 6.39,
+    "Mango": 1.21,
+    "Vitamin C": 0.96
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.32,
+    "C-power 1L": 0,
+    "Mango 1L": 4.06,
+    "Orange PET": 2.06,
+    "C-power PET": 0.31,
+    "Mango PET": 4.75
+   },
+   "rmHours": 5.42,
+   "fgHours": 20.35
+  },
+  {
+   "day": 18,
+   "rmWeeks": {
+    "Pack": 4.92,
+    "PET": 5.53,
+    "Orange": 5.23,
+    "Mango": 1.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.32,
+    "C-power 1L": 0,
+    "Mango 1L": 3.87,
+    "Orange PET": 2.06,
+    "C-power PET": 0.31,
+    "Mango PET": 4.75
+   },
+   "rmHours": 40.92,
+   "fgHours": 27.93
+  },
+  {
+   "day": 19,
+   "rmWeeks": {
+    "Pack": 4.92,
+    "PET": 5.53,
+    "Orange": 5.23,
+    "Mango": 6.26,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.32,
+    "C-power 1L": 0,
+    "Mango 1L": 3.78,
+    "Orange PET": 1.97,
+    "C-power PET": 0.31,
+    "Mango PET": 4.75
+   },
+   "rmHours": 4,
+   "fgHours": 21.22
+  },
+  {
+   "day": 20,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 5.53,
+    "Orange": 5.04,
+    "Mango": 6.26,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.24,
+    "C-power 1L": 0,
+    "Mango 1L": 3.78,
+    "Orange PET": 4.86,
+    "C-power PET": 0.31,
+    "Mango PET": 4.59
+   },
+   "rmHours": 10.8,
+   "fgHours": 14.92
+  },
+  {
+   "day": 21,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 5.53,
+    "Orange": 5.04,
+    "Mango": 6.26,
+    "Vitamin C": 4.54
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.13,
+    "C-power 1L": 0,
+    "Mango 1L": 3.78,
+    "Orange PET": 4.86,
+    "C-power PET": 0.31,
+    "Mango PET": 6.14
+   },
+   "rmHours": 7.4,
+   "fgHours": 29.22
+  },
+  {
+   "day": 22,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 5.4,
+    "Orange": 4.55,
+    "Mango": 6.26,
+    "Vitamin C": 3.59
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.87,
+    "C-power 1L": 2.38,
+    "Mango 1L": 3.78,
+    "Orange PET": 4.86,
+    "C-power PET": 0,
+    "Mango PET": 6.14
+   },
+   "rmHours": 4,
+   "fgHours": 25.87
+  },
+  {
+   "day": 23,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 5.4,
+    "Orange": 4.55,
+    "Mango": 5.64,
+    "Vitamin C": 3.59
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.65,
+    "C-power 1L": 1.29,
+    "Mango 1L": 3.51,
+    "Orange PET": 4.68,
+    "C-power PET": 0,
+    "Mango PET": 5.66
+   },
+   "rmHours": 4,
+   "fgHours": 11.83
+  },
+  {
+   "day": 24,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 5.4,
+    "Orange": 4.5,
+    "Mango": 5.64,
+    "Vitamin C": 3.59
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.51,
+    "C-power 1L": 1.29,
+    "Mango 1L": 4.92,
+    "Orange PET": 4.52,
+    "C-power PET": 0,
+    "Mango PET": 5.59
+   },
+   "rmHours": 4,
+   "fgHours": 10.63
+  },
+  {
+   "day": 25,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 4.9,
+    "Orange": 4.5,
+    "Mango": 4.68,
+    "Vitamin C": 3.59
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.22,
+    "C-power 1L": 1.29,
+    "Mango 1L": 4.92,
+    "Orange PET": 3.95,
+    "C-power PET": 2.41,
+    "Mango PET": 3.26
+   },
+   "rmHours": 4,
+   "fgHours": 19.63
+  },
+  {
+   "day": 26,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 4.07,
+    "Orange": 4.06,
+    "Mango": 4.68,
+    "Vitamin C": 3.59
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.22,
+    "C-power 1L": 1.29,
+    "Mango 1L": 4.77,
+    "Orange PET": 3.72,
+    "C-power PET": 2.41,
+    "Mango PET": 3.26
+   },
+   "rmHours": 4,
+   "fgHours": 21.18
+  },
+  {
+   "day": 27,
+   "rmWeeks": {
+    "Pack": 4.65,
+    "PET": 4.07,
+    "Orange": 4.06,
+    "Mango": 3.77,
+    "Vitamin C": 2.29
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.95,
+    "C-power 1L": 1.05,
+    "Mango 1L": 4.22,
+    "Orange PET": 3.72,
+    "C-power PET": 0.79,
+    "Mango PET": 2.64
+   },
+   "rmHours": 47.2,
+   "fgHours": 29.37
+  },
+  {
+   "day": 28,
+   "rmWeeks": {
+    "Pack": 4.4,
+    "PET": 4.07,
+    "Orange": 3.87,
+    "Mango": 3.77,
+    "Vitamin C": 0.93
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.85,
+    "C-power 1L": 1.05,
+    "Mango 1L": 4.22,
+    "Orange PET": 3.3,
+    "C-power PET": 0.79,
+    "Mango PET": 2.64
+   },
+   "rmHours": 4,
+   "fgHours": 26.9
+  },
+  {
+   "day": 29,
+   "rmWeeks": {
+    "Pack": 4.4,
+    "PET": 3.93,
+    "Orange": 3.87,
+    "Mango": 3.77,
+    "Vitamin C": 0.93
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.15,
+    "C-power 1L": 1.05,
+    "Mango 1L": 4.22,
+    "Orange PET": 3.17,
+    "C-power PET": 0.63,
+    "Mango PET": 2.64
+   },
+   "rmHours": 4,
+   "fgHours": 7.03
+  },
+  {
+   "day": 30,
+   "rmWeeks": {
+    "Pack": 4.4,
+    "PET": 3.93,
+    "Orange": 3.74,
+    "Mango": 3.77,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.15,
+    "C-power 1L": 1.05,
+    "Mango 1L": 4.22,
+    "Orange PET": 2.95,
+    "C-power PET": 0.63,
+    "Mango PET": 4.41
+   },
+   "rmHours": 4,
+   "fgHours": 17.3
+  },
+  {
+   "day": 31,
+   "rmWeeks": {
+    "Pack": 2.76,
+    "PET": 3.93,
+    "Orange": 2.59,
+    "Mango": 3.77,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.78,
+    "C-power 1L": 0,
+    "Mango 1L": 2.76,
+    "Orange PET": 4.52,
+    "C-power PET": 0.22,
+    "Mango PET": 3.9
+   },
+   "rmHours": 5.2,
+   "fgHours": 25.97
+  },
+  {
+   "day": 32,
+   "rmWeeks": {
+    "Pack": 2.76,
+    "PET": 3.93,
+    "Orange": 2.59,
+    "Mango": 3.77,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.55,
+    "C-power 1L": 0,
+    "Mango 1L": 2.76,
+    "Orange PET": 4.52,
+    "C-power PET": 0.22,
+    "Mango PET": 3.7
+   },
+   "rmHours": 5.4,
+   "fgHours": 30.92
+  },
+  {
+   "day": 33,
+   "rmWeeks": {
+    "Pack": 2.76,
+    "PET": 3.93,
+    "Orange": 2.59,
+    "Mango": 3.77,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.55,
+    "C-power 1L": 0,
+    "Mango 1L": 2.76,
+    "Orange PET": 3.75,
+    "C-power PET": 0,
+    "Mango PET": 3.7
+   },
+   "rmHours": 24.36,
+   "fgHours": 25.88
+  },
+  {
+   "day": 34,
+   "rmWeeks": {
+    "Pack": 2.76,
+    "PET": 3.93,
+    "Orange": 6.82,
+    "Mango": 3.77,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.39,
+    "C-power 1L": 0,
+    "Mango 1L": 5.19,
+    "Orange PET": 3.75,
+    "C-power PET": 0,
+    "Mango PET": 3.53
+   },
+   "rmHours": 24.2,
+   "fgHours": 14.3
+  },
+  {
+   "day": 35,
+   "rmWeeks": {
+    "Pack": 2.56,
+    "PET": 3.93,
+    "Orange": 6.82,
+    "Mango": 3.77,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.19,
+    "C-power 1L": 0,
+    "Mango 1L": 5.01,
+    "Orange PET": 3.75,
+    "C-power PET": 2.25,
+    "Mango PET": 3.22
+   },
+   "rmHours": 21.2,
+   "fgHours": 24.45
+  },
+  {
+   "day": 36,
+   "rmWeeks": {
+    "Pack": 2.56,
+    "PET": 3.93,
+    "Orange": 6.7,
+    "Mango": 2.29,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.86,
+    "C-power 1L": 0,
+    "Mango 1L": 4.85,
+    "Orange PET": 3.57,
+    "C-power PET": 1.96,
+    "Mango PET": 2.41
+   },
+   "rmHours": 21.2,
+   "fgHours": 23.25
+  },
+  {
+   "day": 37,
+   "rmWeeks": {
+    "Pack": 5.64,
+    "PET": 2.86,
+    "Orange": 6.12,
+    "Mango": 2.29,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.4,
+    "C-power 1L": 0,
+    "Mango 1L": 4.85,
+    "Orange PET": 3.57,
+    "C-power PET": 1.96,
+    "Mango PET": 1.4
+   },
+   "rmHours": 21.2,
+   "fgHours": 9.95
+  },
+  {
+   "day": 38,
+   "rmWeeks": {
+    "Pack": 5.64,
+    "PET": 2.35,
+    "Orange": 6.12,
+    "Mango": 2.29,
+    "Vitamin C": 0.02
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.2,
+    "C-power 1L": 0,
+    "Mango 1L": 4.85,
+    "Orange PET": 3.02,
+    "C-power PET": 1.96,
+    "Mango PET": 1.4
+   },
+   "rmHours": 4.54,
+   "fgHours": 8.98
+  },
+  {
+   "day": 39,
+   "rmWeeks": {
+    "Pack": 4.52,
+    "PET": 2.35,
+    "Orange": 6.12,
+    "Mango": 2.29,
+    "Vitamin C": 5.45
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.2,
+    "C-power 1L": 0,
+    "Mango 1L": 4.71,
+    "Orange PET": 2.62,
+    "C-power PET": 1.46,
+    "Mango PET": 1.4
+   },
+   "rmHours": 49.9,
+   "fgHours": 21.07
+  },
+  {
+   "day": 40,
+   "rmWeeks": {
+    "Pack": 4.25,
+    "PET": 2.09,
+    "Orange": 5.73,
+    "Mango": 2.29,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.87,
+    "C-power 1L": 0,
+    "Mango 1L": 3.83,
+    "Orange PET": 2.62,
+    "C-power PET": 1.46,
+    "Mango PET": 1.2
+   },
+   "rmHours": 9.9,
+   "fgHours": 22.62
+  },
+  {
+   "day": 41,
+   "rmWeeks": {
+    "Pack": 3.79,
+    "PET": 2.09,
+    "Orange": 5.2,
+    "Mango": 2.29,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.63,
+    "C-power 1L": 0,
+    "Mango 1L": 3.83,
+    "Orange PET": 2.62,
+    "C-power PET": 1.46,
+    "Mango PET": 2.55
+   },
+   "rmHours": 4,
+   "fgHours": 9.9
+  },
+  {
+   "day": 42,
+   "rmWeeks": {
+    "Pack": 3.79,
+    "PET": 6.4,
+    "Orange": 5.2,
+    "Mango": 2.29,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.12,
+    "C-power 1L": 0,
+    "Mango 1L": 3.5,
+    "Orange PET": 2.62,
+    "C-power PET": 1.46,
+    "Mango PET": 2.45
+   },
+   "rmHours": 65.08,
+   "fgHours": 21.73
+  },
+  {
+   "day": 43,
+   "rmWeeks": {
+    "Pack": 3.79,
+    "PET": 6.4,
+    "Orange": 5.03,
+    "Mango": 2.29,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.55,
+    "C-power 1L": 0,
+    "Mango 1L": 3.5,
+    "Orange PET": 0.58,
+    "C-power PET": 1.41,
+    "Mango PET": 2.14
+   },
+   "rmHours": 4.88,
+   "fgHours": 23.1
+  },
+  {
+   "day": 44,
+   "rmWeeks": {
+    "Pack": 3.79,
+    "PET": 6.4,
+    "Orange": 4.52,
+    "Mango": 1.95,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.55,
+    "C-power 1L": 0,
+    "Mango 1L": 2.86,
+    "Orange PET": 0.58,
+    "C-power PET": 2.85,
+    "Mango PET": 2
+   },
+   "rmHours": 5.86,
+   "fgHours": 9.22
+  },
+  {
+   "day": 45,
+   "rmWeeks": {
+    "Pack": 3.79,
+    "PET": 5.93,
+    "Orange": 4.52,
+    "Mango": 1.95,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.55,
+    "C-power 1L": 0.37,
+    "Mango 1L": 5.09,
+    "Orange PET": 0.58,
+    "C-power PET": 2.85,
+    "Mango PET": 1.8
+   },
+   "rmHours": 5.16,
+   "fgHours": 8.3
+  },
+  {
+   "day": 46,
+   "rmWeeks": {
+    "Pack": 3.52,
+    "PET": 5.93,
+    "Orange": 4.42,
+    "Mango": 0.06,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.07,
+    "C-power 1L": 0.37,
+    "Mango 1L": 5.09,
+    "Orange PET": 0.38,
+    "C-power PET": 2.61,
+    "Mango PET": 1.8
+   },
+   "rmHours": 5.16,
+   "fgHours": 11.27
+  },
+  {
+   "day": 47,
+   "rmWeeks": {
+    "Pack": 3.52,
+    "PET": 4.51,
+    "Orange": 3.57,
+    "Mango": 0.06,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.94,
+    "C-power 1L": 0.37,
+    "Mango 1L": 4.97,
+    "Orange PET": 0.38,
+    "C-power PET": 2.61,
+    "Mango PET": 1.8
+   },
+   "rmHours": 15.58,
+   "fgHours": 17.42
+  },
+  {
+   "day": 48,
+   "rmWeeks": {
+    "Pack": 3.52,
+    "PET": 4.51,
+    "Orange": 3.1,
+    "Mango": 0.06,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.03,
+    "C-power 1L": 0.37,
+    "Mango 1L": 4.97,
+    "Orange PET": 0,
+    "C-power PET": 3.99,
+    "Mango PET": 1.74
+   },
+   "rmHours": 4.28,
+   "fgHours": 16.65
+  },
+  {
+   "day": 49,
+   "rmWeeks": {
+    "Pack": 2.94,
+    "PET": 4.51,
+    "Orange": 3.1,
+    "Mango": 0.06,
+    "Vitamin C": 2.83
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.39,
+    "C-power 1L": 0.1,
+    "Mango 1L": 4.73,
+    "Orange PET": 0,
+    "C-power PET": 3.94,
+    "Mango PET": 1.48
+   },
+   "rmHours": 4,
+   "fgHours": 12.1
+  },
+  {
+   "day": 50,
+   "rmWeeks": {
+    "Pack": 2.94,
+    "PET": 4.51,
+    "Orange": 3.01,
+    "Mango": 0.06,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.39,
+    "C-power 1L": 0,
+    "Mango 1L": 4.73,
+    "Orange PET": 1.49,
+    "C-power PET": 3.73,
+    "Mango PET": 1.48
+   },
+   "rmHours": 4,
+   "fgHours": 10.67
+  },
+  {
+   "day": 51,
+   "rmWeeks": {
+    "Pack": 1.86,
+    "PET": 4.51,
+    "Orange": 3.01,
+    "Mango": 0.06,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.11,
+    "C-power 1L": 0,
+    "Mango 1L": 4.46,
+    "Orange PET": 1.28,
+    "C-power PET": 3.73,
+    "Mango PET": 1.36
+   },
+   "rmHours": 4,
+   "fgHours": 7.7
+  },
+  {
+   "day": 52,
+   "rmWeeks": {
+    "Pack": 1.86,
+    "PET": 4.51,
+    "Orange": 2.96,
+    "Mango": 0.06,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.91,
+    "C-power 1L": 0,
+    "Mango 1L": 4.46,
+    "Orange PET": 1.28,
+    "C-power PET": 2.76,
+    "Mango PET": 1.36
+   },
+   "rmHours": 5.4,
+   "fgHours": 19.35
+  },
+  {
+   "day": 53,
+   "rmWeeks": {
+    "Pack": 1.86,
+    "PET": 4.34,
+    "Orange": 2.96,
+    "Mango": 0.06,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.91,
+    "C-power 1L": 0,
+    "Mango 1L": 4.34,
+    "Orange PET": 1.19,
+    "C-power PET": 2.76,
+    "Mango PET": 4.34
+   },
+   "rmHours": 31.2,
+   "fgHours": 59.38
+  },
+  {
+   "day": 54,
+   "rmWeeks": {
+    "Pack": 1.86,
+    "PET": 4.34,
+    "Orange": 2.88,
+    "Mango": 6.27,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.82,
+    "C-power 1L": 1.58,
+    "Mango 1L": 3.94,
+    "Orange PET": 1.02,
+    "C-power PET": 4.43,
+    "Mango PET": 3.77
+   },
+   "rmHours": 4,
+   "fgHours": 46.95
+  },
+  {
+   "day": 55,
+   "rmWeeks": {
+    "Pack": 4.07,
+    "PET": 3.75,
+    "Orange": 2.69,
+    "Mango": 6.27,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.45,
+    "C-power 1L": 1.58,
+    "Mango 1L": 6.2,
+    "Orange PET": 1.02,
+    "C-power PET": 4.43,
+    "Mango PET": 3.77
+   },
+   "rmHours": 4,
+   "fgHours": 8.22
+  },
+  {
+   "day": 56,
+   "rmWeeks": {
+    "Pack": 3.98,
+    "PET": 2.76,
+    "Orange": 2.69,
+    "Mango": 4.83,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.45,
+    "C-power 1L": 1.16,
+    "Mango 1L": 6.2,
+    "Orange PET": 1.02,
+    "C-power PET": 4.36,
+    "Mango PET": 3.42
+   },
+   "rmHours": 4,
+   "fgHours": 8.05
+  },
+  {
+   "day": 57,
+   "rmWeeks": {
+    "Pack": 2.82,
+    "PET": 2.76,
+    "Orange": 1.01,
+    "Mango": 4.83,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.36,
+    "C-power 1L": 3.28,
+    "Mango 1L": 6.2,
+    "Orange PET": 1.02,
+    "C-power PET": 4.36,
+    "Mango PET": 3.42
+   },
+   "rmHours": 31.66,
+   "fgHours": 12.55
+  },
+  {
+   "day": 58,
+   "rmWeeks": {
+    "Pack": 2.82,
+    "PET": 2.76,
+    "Orange": 1.01,
+    "Mango": 4.83,
+    "Vitamin C": 0.89
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.36,
+    "C-power 1L": 3.28,
+    "Mango 1L": 5.79,
+    "Orange PET": 3.57,
+    "C-power PET": 4.36,
+    "Mango PET": 3.42
+   },
+   "rmHours": 23.96,
+   "fgHours": 14.65
+  },
+  {
+   "day": 59,
+   "rmWeeks": {
+    "Pack": 2.82,
+    "PET": 2.49,
+    "Orange": 0.4,
+    "Mango": 4.83,
+    "Vitamin C": 0.23
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.36,
+    "C-power 1L": 3.28,
+    "Mango 1L": 4.49,
+    "Orange PET": 3.02,
+    "C-power PET": 3.39,
+    "Mango PET": 3.42
+   },
+   "rmHours": 23.96,
+   "fgHours": 13.05
+  },
+  {
+   "day": 60,
+   "rmWeeks": {
+    "Pack": 2.82,
+    "PET": 2.49,
+    "Orange": 4.63,
+    "Mango": 4.83,
+    "Vitamin C": 0.23
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.36,
+    "C-power 1L": 3.28,
+    "Mango 1L": 3.79,
+    "Orange PET": 3.02,
+    "C-power PET": 2.9,
+    "Mango PET": 6.24
+   },
+   "rmHours": 23.96,
+   "fgHours": 14.45
+  },
+  {
+   "day": 61,
+   "rmWeeks": {
+    "Pack": 1.92,
+    "PET": 2.49,
+    "Orange": 4.63,
+    "Mango": 4.83,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.23,
+    "C-power 1L": 2.49,
+    "Mango 1L": 3.79,
+    "Orange PET": 3.02,
+    "C-power PET": 2.9,
+    "Mango PET": 6.24
+   },
+   "rmHours": 23.96,
+   "fgHours": 12.88
+  },
+  {
+   "day": 62,
+   "rmWeeks": {
+    "Pack": 1.92,
+    "PET": 2.49,
+    "Orange": 4.45,
+    "Mango": 4.83,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.79,
+    "C-power 1L": 2.49,
+    "Mango 1L": 3.79,
+    "Orange PET": 2.76,
+    "C-power PET": 2.63,
+    "Mango PET": 5.89
+   },
+   "rmHours": 4.5,
+   "fgHours": 10.07
+  },
+  {
+   "day": 63,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 2.49,
+    "Orange": 4.45,
+    "Mango": 4.83,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.79,
+    "C-power 1L": 2.49,
+    "Mango 1L": 5.24,
+    "Orange PET": 2.76,
+    "C-power PET": 2.63,
+    "Mango PET": 5.89
+   },
+   "rmHours": 64.24,
+   "fgHours": 30.58
+  },
+  {
+   "day": 64,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 2.49,
+    "Orange": 4.45,
+    "Mango": 3.58,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.79,
+    "C-power 1L": 2.13,
+    "Mango 1L": 5.24,
+    "Orange PET": 2.76,
+    "C-power PET": 2.63,
+    "Mango PET": 5.89
+   },
+   "rmHours": 5.34,
+   "fgHours": 31.28
+  },
+  {
+   "day": 65,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 2.49,
+    "Orange": 3.89,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.79,
+    "C-power 1L": 4.12,
+    "Mango 1L": 4.91,
+    "Orange PET": 2.44,
+    "C-power PET": 2.63,
+    "Mango PET": 5.83
+   },
+   "rmHours": 8.24,
+   "fgHours": 28.82
+  },
+  {
+   "day": 66,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 2.49,
+    "Orange": 3.75,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.79,
+    "C-power 1L": 4.12,
+    "Mango 1L": 4.71,
+    "Orange PET": 1.36,
+    "C-power PET": 3.23,
+    "Mango PET": 5.38
+   },
+   "rmHours": 28.54,
+   "fgHours": 36.63
+  },
+  {
+   "day": 67,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 0,
+    "Orange": 3.75,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.88,
+    "C-power 1L": 3.4,
+    "Mango 1L": 4.71,
+    "Orange PET": 1.36,
+    "C-power PET": 3.23,
+    "Mango PET": 5.38
+   },
+   "rmHours": 4.84,
+   "fgHours": 16.45
+  },
+  {
+   "day": 68,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 0,
+    "Orange": 3.75,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.45,
+    "C-power 1L": 5.82,
+    "Mango 1L": 4.46,
+    "Orange PET": 2.64,
+    "C-power PET": 3.18,
+    "Mango PET": 5.06
+   },
+   "rmHours": 5.5,
+   "fgHours": 14.42
+  },
+  {
+   "day": 69,
+   "rmWeeks": {
+    "Pack": 1.74,
+    "PET": 5.98,
+    "Orange": 3.16,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.45,
+    "C-power 1L": 5.07,
+    "Mango 1L": 3.65,
+    "Orange PET": 2.64,
+    "C-power PET": 3.18,
+    "Mango PET": 4.61
+   },
+   "rmHours": 47.4,
+   "fgHours": 26.27
+  },
+  {
+   "day": 70,
+   "rmWeeks": {
+    "Pack": 0.68,
+    "PET": 5.98,
+    "Orange": 3.16,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.45,
+    "C-power 1L": 5.07,
+    "Mango 1L": 3.51,
+    "Orange PET": 2.64,
+    "C-power PET": 3.18,
+    "Mango PET": 4.55
+   },
+   "rmHours": 7,
+   "fgHours": 30.18
+  },
+  {
+   "day": 71,
+   "rmWeeks": {
+    "Pack": 0.68,
+    "PET": 5.98,
+    "Orange": 3.16,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.53,
+    "C-power 1L": 5.07,
+    "Mango 1L": 3.07,
+    "Orange PET": 2.64,
+    "C-power PET": 3.18,
+    "Mango PET": 6.07
+   },
+   "rmHours": 4.3,
+   "fgHours": 27.05
+  },
+  {
+   "day": 72,
+   "rmWeeks": {
+    "Pack": 0,
+    "PET": 5.98,
+    "Orange": 2.69,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.53,
+    "C-power 1L": 5.07,
+    "Mango 1L": 3.07,
+    "Orange PET": 2.64,
+    "C-power PET": 2.94,
+    "Mango PET": 6.07
+   },
+   "rmHours": 4.3,
+   "fgHours": 14.83
+  },
+  {
+   "day": 73,
+   "rmWeeks": {
+    "Pack": 0,
+    "PET": 5.98,
+    "Orange": 2.64,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.98,
+    "C-power 1L": 5.07,
+    "Mango 1L": 3.07,
+    "Orange PET": 2.07,
+    "C-power PET": 2.94,
+    "Mango PET": 6.07
+   },
+   "rmHours": 4.3,
+   "fgHours": 10.42
+  },
+  {
+   "day": 74,
+   "rmWeeks": {
+    "Pack": 0,
+    "PET": 5.98,
+    "Orange": 6.56,
+    "Mango": 3.21,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.98,
+    "C-power 1L": 5.07,
+    "Mango 1L": 2.52,
+    "Orange PET": 2.07,
+    "C-power PET": 2.58,
+    "Mango PET": 5.61
+   },
+   "rmHours": 7.9,
+   "fgHours": 13.6
+  },
+  {
+   "day": 75,
+   "rmWeeks": {
+    "Pack": 0,
+    "PET": 5.98,
+    "Orange": 6.18,
+    "Mango": 2.87,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.98,
+    "C-power 1L": 4.35,
+    "Mango 1L": 2.46,
+    "Orange PET": 1.73,
+    "C-power PET": 4.21,
+    "Mango PET": 5.3
+   },
+   "rmHours": 4.3,
+   "fgHours": 13.58
+  },
+  {
+   "day": 76,
+   "rmWeeks": {
+    "Pack": 0,
+    "PET": 5.48,
+    "Orange": 6.18,
+    "Mango": 1.68,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.34,
+    "C-power 1L": 3.6,
+    "Mango 1L": 1.84,
+    "Orange PET": 0.25,
+    "C-power PET": 4.21,
+    "Mango PET": 5.3
+   },
+   "rmHours": 4,
+   "fgHours": 13.03
+  },
+  {
+   "day": 77,
+   "rmWeeks": {
+    "Pack": 0,
+    "PET": 4.32,
+    "Orange": 6.18,
+    "Mango": 6.41,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.34,
+    "C-power 1L": 5.97,
+    "Mango 1L": 2.8,
+    "Orange PET": 0.25,
+    "C-power PET": 4.21,
+    "Mango PET": 5.07
+   },
+   "rmHours": 5.4,
+   "fgHours": 27.85
+  },
+  {
+   "day": 78,
+   "rmWeeks": {
+    "Pack": 2.78,
+    "PET": 4.32,
+    "Orange": 5.83,
+    "Mango": 6.41,
+    "Vitamin C": 2.2
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.34,
+    "C-power 1L": 5.97,
+    "Mango 1L": 2.7,
+    "Orange PET": 0.25,
+    "C-power PET": 4.21,
+    "Mango PET": 4.83
+   },
+   "rmHours": 30.82,
+   "fgHours": 29.12
+  },
+  {
+   "day": 79,
+   "rmWeeks": {
+    "Pack": 2.78,
+    "PET": 4.32,
+    "Orange": 5.83,
+    "Mango": 6.41,
+    "Vitamin C": 2.2
+   },
+   "fgWeeks": {
+    "Orange 1L": 5.31,
+    "C-power 1L": 5.97,
+    "Mango 1L": 2.13,
+    "Orange PET": 0.25,
+    "C-power PET": 3.8,
+    "Mango PET": 2.98
+   },
+   "rmHours": 22.92,
+   "fgHours": 10.48
+  },
+  {
+   "day": 80,
+   "rmWeeks": {
+    "Pack": 2.32,
+    "PET": 4.14,
+    "Orange": 4.79,
+    "Mango": 6.02,
+    "Vitamin C": 2.2
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.83,
+    "C-power 1L": 5.97,
+    "Mango 1L": 1.81,
+    "Orange PET": 0.25,
+    "C-power PET": 3.8,
+    "Mango PET": 2.98
+   },
+   "rmHours": 22.92,
+   "fgHours": 8.25
+  },
+  {
+   "day": 81,
+   "rmWeeks": {
+    "Pack": 2.32,
+    "PET": 4.14,
+    "Orange": 4.79,
+    "Mango": 6.02,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.69,
+    "C-power 1L": 5.97,
+    "Mango 1L": 1.09,
+    "Orange PET": 1.96,
+    "C-power PET": 2.78,
+    "Mango PET": 2.98
+   },
+   "rmHours": 43.42,
+   "fgHours": 26.62
+  },
+  {
+   "day": 82,
+   "rmWeeks": {
+    "Pack": 1.89,
+    "PET": 4.14,
+    "Orange": 4.67,
+    "Mango": 6.02,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.32,
+    "C-power 1L": 5.27,
+    "Mango 1L": 1.09,
+    "Orange PET": 1.96,
+    "C-power PET": 2.78,
+    "Mango PET": 4.59
+   },
+   "rmHours": 22.92,
+   "fgHours": 29.32
+  },
+  {
+   "day": 83,
+   "rmWeeks": {
+    "Pack": 1.89,
+    "PET": 2.83,
+    "Orange": 4.67,
+    "Mango": 6.02,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.32,
+    "C-power 1L": 5.15,
+    "Mango 1L": 0.87,
+    "Orange PET": 1.76,
+    "C-power PET": 2.29,
+    "Mango PET": 4.59
+   },
+   "rmHours": 5.2,
+   "fgHours": 16.28
+  },
+  {
+   "day": 84,
+   "rmWeeks": {
+    "Pack": 1.89,
+    "PET": 2.49,
+    "Orange": 4.38,
+    "Mango": 6.02,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 4.1,
+    "C-power 1L": 5.15,
+    "Mango 1L": 0.75,
+    "Orange PET": 1.63,
+    "C-power PET": 2.21,
+    "Mango PET": 4.59
+   },
+   "rmHours": 44.42,
+   "fgHours": 44.67
+  },
+  {
+   "day": 85,
+   "rmWeeks": {
+    "Pack": 1.89,
+    "PET": 2.49,
+    "Orange": 4.25,
+    "Mango": 6.02,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.93,
+    "C-power 1L": 5.15,
+    "Mango 1L": 3.46,
+    "Orange PET": 1.63,
+    "C-power PET": 2.21,
+    "Mango PET": 2.64
+   },
+   "rmHours": 5.58,
+   "fgHours": 39.32
+  },
+  {
+   "day": 86,
+   "rmWeeks": {
+    "Pack": 1.79,
+    "PET": 2.49,
+    "Orange": 4.25,
+    "Mango": 6.02,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.93,
+    "C-power 1L": 5.15,
+    "Mango 1L": 3.46,
+    "Orange PET": 1.38,
+    "C-power PET": 4.04,
+    "Mango PET": 2.42
+   },
+   "rmHours": 5.58,
+   "fgHours": 12.67
+  },
+  {
+   "day": 87,
+   "rmWeeks": {
+    "Pack": 1.79,
+    "PET": 2.49,
+    "Orange": 3.47,
+    "Mango": 4.79,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.37,
+    "C-power 1L": 5.15,
+    "Mango 1L": 3.46,
+    "Orange PET": 1.08,
+    "C-power PET": 3.96,
+    "Mango PET": 2.42
+   },
+   "rmHours": 24.58,
+   "fgHours": 16.7
+  },
+  {
+   "day": 88,
+   "rmWeeks": {
+    "Pack": 6.09,
+    "PET": 2.49,
+    "Orange": 3.47,
+    "Mango": 4.05,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 3.37,
+    "C-power 1L": 5.15,
+    "Mango 1L": 3.3,
+    "Orange PET": 0.9,
+    "C-power PET": 3.96,
+    "Mango PET": 2.42
+   },
+   "rmHours": 5.58,
+   "fgHours": 14.02
+  },
+  {
+   "day": 89,
+   "rmWeeks": {
+    "Pack": 5.54,
+    "PET": 2.49,
+    "Orange": 3.47,
+    "Mango": 4.05,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.54,
+    "C-power 1L": 6.88,
+    "Mango 1L": 2.06,
+    "Orange PET": 2.64,
+    "C-power PET": 3.86,
+    "Mango PET": 2.42
+   },
+   "rmHours": 5.26,
+   "fgHours": 19.47
+  },
+  {
+   "day": 90,
+   "rmWeeks": {
+    "Pack": 5.54,
+    "PET": 2.3,
+    "Orange": 3.47,
+    "Mango": 3.38,
+    "Vitamin C": 1.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.54,
+    "C-power 1L": 6.16,
+    "Mango 1L": 1.86,
+    "Orange PET": 2.64,
+    "C-power PET": 3.86,
+    "Mango PET": 2.25
+   },
+   "rmHours": 5.68,
+   "fgHours": 31.97
+  },
+  {
+   "day": 91,
+   "rmWeeks": {
+    "Pack": 4.83,
+    "PET": 2.3,
+    "Orange": 3.47,
+    "Mango": 3.38,
+    "Vitamin C": 0.39
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.14,
+    "C-power 1L": 6.16,
+    "Mango 1L": 1.86,
+    "Orange PET": 2.45,
+    "C-power PET": 3.21,
+    "Mango PET": 1.98
+   },
+   "rmHours": 21.34,
+   "fgHours": 24.87
+  },
+  {
+   "day": 92,
+   "rmWeeks": {
+    "Pack": 4.83,
+    "PET": 2.3,
+    "Orange": 3.1,
+    "Mango": 3.38,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.14,
+    "C-power 1L": 6.16,
+    "Mango 1L": 1.86,
+    "Orange PET": 5.07,
+    "C-power PET": 3.21,
+    "Mango PET": 3.43
+   },
+   "rmHours": 21.34,
+   "fgHours": 13.82
+  },
+  {
+   "day": 93,
+   "rmWeeks": {
+    "Pack": 4.83,
+    "PET": 1.13,
+    "Orange": 2.33,
+    "Mango": 3.38,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.79,
+    "C-power 1L": 4.38,
+    "Mango 1L": 1.86,
+    "Orange PET": 4.75,
+    "C-power PET": 3.21,
+    "Mango PET": 3.43
+   },
+   "rmHours": 22.14,
+   "fgHours": 20.67
+  },
+  {
+   "day": 94,
+   "rmWeeks": {
+    "Pack": 4.56,
+    "PET": 0.43,
+    "Orange": 2.33,
+    "Mango": 3.38,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.79,
+    "C-power 1L": 4.38,
+    "Mango 1L": 4.22,
+    "Orange PET": 4.75,
+    "C-power PET": 3.07,
+    "Mango PET": 3.03
+   },
+   "rmHours": 21.34,
+   "fgHours": 18.45
+  },
+  {
+   "day": 95,
+   "rmWeeks": {
+    "Pack": 4.56,
+    "PET": 5.66,
+    "Orange": 7.4,
+    "Mango": 6.64,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.71,
+    "C-power 1L": 4.38,
+    "Mango 1L": 4.22,
+    "Orange PET": 4.75,
+    "C-power PET": 4.15,
+    "Mango PET": 3.03
+   },
+   "rmHours": 47.86,
+   "fgHours": 25.5
+  },
+  {
+   "day": 96,
+   "rmWeeks": {
+    "Pack": 4.56,
+    "PET": 5.66,
+    "Orange": 7.4,
+    "Mango": 6.64,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.35,
+    "C-power 1L": 4.38,
+    "Mango 1L": 4.22,
+    "Orange PET": 3.87,
+    "C-power PET": 4.15,
+    "Mango PET": 2.8
+   },
+   "rmHours": 4.5,
+   "fgHours": 30.8
+  },
+  {
+   "day": 97,
+   "rmWeeks": {
+    "Pack": 4.56,
+    "PET": 5.66,
+    "Orange": 7.25,
+    "Mango": 6.64,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.19,
+    "C-power 1L": 5.27,
+    "Mango 1L": 3.8,
+    "Orange PET": 3.59,
+    "C-power PET": 4.15,
+    "Mango PET": 2.8
+   },
+   "rmHours": 44.8,
+   "fgHours": 14.48
+  },
+  {
+   "day": 98,
+   "rmWeeks": {
+    "Pack": 4.56,
+    "PET": 5.66,
+    "Orange": 6.9,
+    "Mango": 6.64,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.19,
+    "C-power 1L": 4.37,
+    "Mango 1L": 3.8,
+    "Orange PET": 3.5,
+    "C-power PET": 4.08,
+    "Mango PET": 2.6
+   },
+   "rmHours": 4,
+   "fgHours": 8.97
+  },
+  {
+   "day": 99,
+   "rmWeeks": {
+    "Pack": 2.98,
+    "PET": 5.66,
+    "Orange": 6.9,
+    "Mango": 6.64,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.06,
+    "C-power 1L": 4.37,
+    "Mango 1L": 3.8,
+    "Orange PET": 4.79,
+    "C-power PET": 4.08,
+    "Mango PET": 2.15
+   },
+   "rmHours": 4,
+   "fgHours": 11.4
+  },
+  {
+   "day": 100,
+   "rmWeeks": {
+    "Pack": 2.98,
+    "PET": 5.66,
+    "Orange": 5.99,
+    "Mango": 6.64,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 4.37,
+    "Mango 1L": 3.47,
+    "Orange PET": 4.38,
+    "C-power PET": 3.33,
+    "Mango PET": 4.13
+   },
+   "rmHours": 6.82,
+   "fgHours": 25.75
+  },
+  {
+   "day": 101,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 5.45,
+    "Orange": 5.99,
+    "Mango": 6.64,
+    "Vitamin C": 3.61
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 4.37,
+    "Mango 1L": 3.29,
+    "Orange PET": 4.3,
+    "C-power PET": 3.33,
+    "Mango PET": 4.13
+   },
+   "rmHours": 6.32,
+   "fgHours": 29.32
+  },
+  {
+   "day": 102,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 5.45,
+    "Orange": 5.99,
+    "Mango": 6.24,
+    "Vitamin C": 3.61
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 2.9,
+    "Mango 1L": 3.05,
+    "Orange PET": 4.09,
+    "C-power PET": 3.33,
+    "Mango PET": 4.13
+   },
+   "rmHours": 11.72,
+   "fgHours": 15.87
+  },
+  {
+   "day": 103,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 5.45,
+    "Orange": 5.99,
+    "Mango": 6.24,
+    "Vitamin C": 2.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 2.09,
+    "Mango 1L": 2.81,
+    "Orange PET": 3.63,
+    "C-power PET": 3.33,
+    "Mango PET": 4.13
+   },
+   "rmHours": 4.92,
+   "fgHours": 12.87
+  },
+  {
+   "day": 104,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 4.32,
+    "Orange": 5.99,
+    "Mango": 5.09,
+    "Vitamin C": 2.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 2.09,
+    "Mango 1L": 2.5,
+    "Orange PET": 3.63,
+    "C-power PET": 6.02,
+    "Mango PET": 4.13
+   },
+   "rmHours": 4.92,
+   "fgHours": 18.78
+  },
+  {
+   "day": 105,
+   "rmWeeks": {
+    "Pack": 6.37,
+    "PET": 3.95,
+    "Orange": 5.99,
+    "Mango": 5.09,
+    "Vitamin C": 2.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 1.65,
+    "Mango 1L": 2.5,
+    "Orange PET": 3.63,
+    "C-power PET": 5.21,
+    "Mango PET": 3.32
+   },
+   "rmHours": 50.6,
+   "fgHours": 23.18
+  },
+  {
+   "day": 106,
+   "rmWeeks": {
+    "Pack": 6.14,
+    "PET": 3.95,
+    "Orange": 5.48,
+    "Mango": 5.09,
+    "Vitamin C": 2.75
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 1.65,
+    "Mango 1L": 2.5,
+    "Orange PET": 3.63,
+    "C-power PET": 5.21,
+    "Mango PET": 3.23
+   },
+   "rmHours": 7.9,
+   "fgHours": 18.1
+  },
+  {
+   "day": 107,
+   "rmWeeks": {
+    "Pack": 6.14,
+    "PET": 3.95,
+    "Orange": 5.48,
+    "Mango": 5.09,
+    "Vitamin C": 1.36
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 1.65,
+    "Mango 1L": 5.3,
+    "Orange PET": 3.24,
+    "C-power PET": 5.21,
+    "Mango PET": 3.23
+   },
+   "rmHours": 4,
+   "fgHours": 10.22
+  },
+  {
+   "day": 108,
+   "rmWeeks": {
+    "Pack": 5,
+    "PET": 3.95,
+    "Orange": 5.48,
+    "Mango": 5.09,
+    "Vitamin C": 1.36
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 1.9,
+    "Mango 1L": 5.3,
+    "Orange PET": 3.24,
+    "C-power PET": 5.08,
+    "Mango PET": 3.23
+   },
+   "rmHours": 4,
+   "fgHours": 15.07
+  },
+  {
+   "day": 109,
+   "rmWeeks": {
+    "Pack": 5,
+    "PET": 3.95,
+    "Orange": 5.48,
+    "Mango": 5.09,
+    "Vitamin C": 1.36
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 1.9,
+    "Mango 1L": 5.16,
+    "Orange PET": 2.74,
+    "C-power PET": 5.08,
+    "Mango PET": 3.23
+   },
+   "rmHours": 19.9,
+   "fgHours": 33.13
+  },
+  {
+   "day": 110,
+   "rmWeeks": {
+    "Pack": 5,
+    "PET": 3.95,
+    "Orange": 5.48,
+    "Mango": 5.09,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.98,
+    "C-power 1L": 1.51,
+    "Mango 1L": 5.16,
+    "Orange PET": 2.55,
+    "C-power PET": 5.08,
+    "Mango PET": 2.75
+   },
+   "rmHours": 4,
+   "fgHours": 29.92
+  },
+  {
+   "day": 111,
+   "rmWeeks": {
+    "Pack": 4.31,
+    "PET": 3.95,
+    "Orange": 5.09,
+    "Mango": 5.09,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.98,
+    "C-power 1L": 1.51,
+    "Mango 1L": 5.16,
+    "Orange PET": 4.58,
+    "C-power PET": 3.67,
+    "Mango PET": 2.38
+   },
+   "rmHours": 4,
+   "fgHours": 13.67
+  },
+  {
+   "day": 112,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 3.82,
+    "Orange": 5.09,
+    "Mango": 5.09,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.98,
+    "C-power 1L": 0.97,
+    "Mango 1L": 4.75,
+    "Orange PET": 4.49,
+    "C-power PET": 3.43,
+    "Mango PET": 2.38
+   },
+   "rmHours": 8.3,
+   "fgHours": 29.25
+  },
+  {
+   "day": 113,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 3.82,
+    "Orange": 4.67,
+    "Mango": 4.7,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.84,
+    "C-power 1L": 0.97,
+    "Mango 1L": 4.4,
+    "Orange PET": 4.39,
+    "C-power PET": 3.31,
+    "Mango PET": 5.42
+   },
+   "rmHours": 4,
+   "fgHours": 31.17
+  },
+  {
+   "day": 114,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 3.82,
+    "Orange": 4.59,
+    "Mango": 4.7,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.7,
+    "C-power 1L": 0.78,
+    "Mango 1L": 3.71,
+    "Orange PET": 4.39,
+    "C-power PET": 2.58,
+    "Mango PET": 4.74
+   },
+   "rmHours": 14.8,
+   "fgHours": 15.67
+  },
+  {
+   "day": 115,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 3.82,
+    "Orange": 4.59,
+    "Mango": 4.7,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.7,
+    "C-power 1L": 0.78,
+    "Mango 1L": 5.24,
+    "Orange PET": 4.09,
+    "C-power PET": 2.58,
+    "Mango PET": 4.64
+   },
+   "rmHours": 19.7,
+   "fgHours": 18.5
+  },
+  {
+   "day": 116,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 5.91,
+    "Orange": 4.59,
+    "Mango": 4.7,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.7,
+    "C-power 1L": 0.78,
+    "Mango 1L": 5.24,
+    "Orange PET": 3.98,
+    "C-power PET": 4.45,
+    "Mango PET": 4.64
+   },
+   "rmHours": 4.6,
+   "fgHours": 14.68
+  },
+  {
+   "day": 117,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 5.91,
+    "Orange": 3.72,
+    "Mango": 2.69,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.4,
+    "C-power 1L": 0.32,
+    "Mango 1L": 5.24,
+    "Orange PET": 3.23,
+    "C-power PET": 4.45,
+    "Mango PET": 3.77
+   },
+   "rmHours": 16.2,
+   "fgHours": 17.35
+  },
+  {
+   "day": 118,
+   "rmWeeks": {
+    "Pack": 4.08,
+    "PET": 5.91,
+    "Orange": 3.58,
+    "Mango": 2.69,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.59,
+    "C-power 1L": 0.02,
+    "Mango 1L": 5.24,
+    "Orange PET": 2.47,
+    "C-power PET": 4.45,
+    "Mango PET": 3.77
+   },
+   "rmHours": 4.6,
+   "fgHours": 20.23
+  },
+  {
+   "day": 119,
+   "rmWeeks": {
+    "Pack": 2.35,
+    "PET": 5.91,
+    "Orange": 3.58,
+    "Mango": 2.28,
+    "Vitamin C": 0.62
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.59,
+    "C-power 1L": 0.02,
+    "Mango 1L": 2.44,
+    "Orange PET": 4.15,
+    "C-power PET": 4.04,
+    "Mango PET": 3.16
+   },
+   "rmHours": 4.6,
+   "fgHours": 12.12
+  },
+  {
+   "day": 120,
+   "rmWeeks": {
+    "Pack": 2.35,
+    "PET": 5.91,
+    "Orange": 3.58,
+    "Mango": 2.28,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.59,
+    "C-power 1L": 2.63,
+    "Mango 1L": 2.44,
+    "Orange PET": 4.15,
+    "C-power PET": 4.04,
+    "Mango PET": 5.22
+   },
+   "rmHours": 4.6,
+   "fgHours": 13.2
+  },
+  {
+   "day": 121,
+   "rmWeeks": {
+    "Pack": 2.35,
+    "PET": 5.91,
+    "Orange": 8.24,
+    "Mango": 2.28,
+    "Vitamin C": 0
+   },
+   "fgWeeks": {
+    "Orange 1L": 2.39,
+    "C-power 1L": 2.63,
+    "Mango 1L": 2.2,
+    "Orange PET": 4.15,
+    "C-power PET": 3.56,
+    "Mango PET": 5.22
+   },
+   "rmHours": 4.7,
+   "fgHours": 17.72
+  },
+  {
+   "day": 122,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 5.73,
+    "Orange": 8.24,
+    "Mango": 6.7,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.86,
+    "C-power 1L": 2.63,
+    "Mango 1L": 2.06,
+    "Orange PET": 3.68,
+    "C-power PET": 3.56,
+    "Mango PET": 5.22
+   },
+   "rmHours": 5.7,
+   "fgHours": 23.48
+  },
+  {
+   "day": 123,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 5.73,
+    "Orange": 8.24,
+    "Mango": 6.7,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.27,
+    "C-power 1L": 2.63,
+    "Mango 1L": 2.06,
+    "Orange PET": 3.68,
+    "C-power PET": 3.56,
+    "Mango PET": 5.22
+   },
+   "rmHours": 6.8,
+   "fgHours": 20.08
+  },
+  {
+   "day": 124,
+   "rmWeeks": {
+    "Pack": 2.07,
+    "PET": 4.12,
+    "Orange": 8.04,
+    "Mango": 6.7,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.54,
+    "C-power 1L": 1.65,
+    "Mango 1L": 1.99,
+    "Orange PET": 3.3,
+    "C-power PET": 5.21,
+    "Mango PET": 4.99
+   },
+   "rmHours": 23.16,
+   "fgHours": 13.35
+  },
+  {
+   "day": 125,
+   "rmWeeks": {
+    "Pack": 7.54,
+    "PET": 4.12,
+    "Orange": 7.95,
+    "Mango": 4.79,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.54,
+    "C-power 1L": 1.65,
+    "Mango 1L": 3.98,
+    "Orange PET": 3.24,
+    "C-power PET": 5.21,
+    "Mango PET": 4.99
+   },
+   "rmHours": 22.56,
+   "fgHours": 18.93
+  },
+  {
+   "day": 126,
+   "rmWeeks": {
+    "Pack": 7.54,
+    "PET": 4.12,
+    "Orange": 7.46,
+    "Mango": 4.79,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.43,
+    "C-power 1L": 1.47,
+    "Mango 1L": 3.69,
+    "Orange PET": 3.24,
+    "C-power PET": 5.21,
+    "Mango PET": 4.88
+   },
+   "rmHours": 35.36,
+   "fgHours": 22.02
+  },
+  {
+   "day": 127,
+   "rmWeeks": {
+    "Pack": 7.54,
+    "PET": 4.12,
+    "Orange": 7.46,
+    "Mango": 4.79,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.43,
+    "C-power 1L": 4.06,
+    "Mango 1L": 3.62,
+    "Orange PET": 2.81,
+    "C-power PET": 4.87,
+    "Mango PET": 4.62
+   },
+   "rmHours": 22.56,
+   "fgHours": 15.47
+  },
+  {
+   "day": 128,
+   "rmWeeks": {
+    "Pack": 7.54,
+    "PET": 4.12,
+    "Orange": 7.05,
+    "Mango": 4.79,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 0,
+    "C-power 1L": 4.06,
+    "Mango 1L": 3.62,
+    "Orange PET": 5.16,
+    "C-power PET": 4.87,
+    "Mango PET": 4.62
+   },
+   "rmHours": 41.26,
+   "fgHours": 23.05
+  },
+  {
+   "day": 129,
+   "rmWeeks": {
+    "Pack": 6.81,
+    "PET": 4.12,
+    "Orange": 7.05,
+    "Mango": 4.79,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 1.13,
+    "C-power 1L": 4.06,
+    "Mango 1L": 3.62,
+    "Orange PET": 5.16,
+    "C-power PET": 3.77,
+    "Mango PET": 4.62
+   },
+   "rmHours": 4,
+   "fgHours": 27.02
+  },
+  {
+   "day": 130,
+   "rmWeeks": {
+    "Pack": 6.81,
+    "PET": 3.86,
+    "Orange": 6.97,
+    "Mango": 4.79,
+    "Vitamin C": 4.88
+   },
+   "fgWeeks": {
+    "Orange 1L": 0.95,
+    "C-power 1L": 4.06,
+    "Mango 1L": 3.21,
+    "Orange PET": 4.57,
+    "C-power PET": 2.83,
+    "Mango PET": 3.19
+   },
+   "rmHours": 37.6,
+   "fgHours": 15.68
+  }
+ ],
+ "dailyStats": {
+  "rmFixedHoursPerDay": 40,
+  "fgFixedHoursPerDay": 32,
+  "rmDaysAboveFixed": 12,
+  "fgDaysAboveFixed": 6,
+  "stockoutDays": {
+   "Pack": 6,
+   "PET": 2,
+   "Orange": 6,
+   "Mango": 0,
+   "Vitamin C": 31,
+   "Orange 1L": 11,
+   "C-power 1L": 25,
+   "Mango 1L": 0,
+   "Orange PET": 2,
+   "C-power PET": 16,
+   "Mango PET": 0
+  }
+ },
+ "weekly": {
+  "weeks": [
+   {
+    "week": 0,
+    "demand": {
+     "Orange 1L": 46320,
+     "C-power 1L": 5280,
+     "Mango 1L": 15360,
+     "Orange PET": 144288,
+     "C-power PET": 47232,
+     "Mango PET": 87840
+    }
+   },
+   {
+    "week": 1,
+    "demand": {
+     "Orange 1L": 46320,
+     "C-power 1L": 5280,
+     "Mango 1L": 15360,
+     "Orange PET": 144288,
+     "C-power PET": 47232,
+     "Mango PET": 87840
+    }
+   },
+   {
+    "week": 2,
+    "demand": {
+     "Orange 1L": 59640,
+     "C-power 1L": 3600,
+     "Mango 1L": 87600,
+     "Orange PET": 182016,
+     "C-power PET": 12960,
+     "Mango PET": 29376
+    }
+   },
+   {
+    "week": 3,
+    "demand": {
+     "Orange 1L": 131400,
+     "C-power 1L": 25680,
+     "Mango 1L": 21360,
+     "Orange PET": 79776,
+     "C-power PET": 13248,
+     "Mango PET": 23328
+    }
+   },
+   {
+    "week": 4,
+    "demand": {
+     "Orange 1L": 17760,
+     "C-power 1L": 2520,
+     "Mango 1L": 33240,
+     "Orange PET": 78048,
+     "C-power PET": 1152,
+     "Mango PET": 8064
+    }
+   },
+   {
+    "week": 5,
+    "demand": {
+     "Orange 1L": 68760,
+     "C-power 1L": 12360,
+     "Mango 1L": 16800,
+     "Orange PET": 108000,
+     "C-power PET": 15264,
+     "Mango PET": 94176
+    }
+   },
+   {
+    "week": 6,
+    "demand": {
+     "Orange 1L": 39000,
+     "C-power 1L": 2760,
+     "Mango 1L": 29640,
+     "Orange PET": 118080,
+     "C-power PET": 31680,
+     "Mango PET": 31680
+    }
+   },
+   {
+    "week": 7,
+    "demand": {
+     "Orange 1L": 64800,
+     "C-power 1L": 31680,
+     "Mango 1L": 52560,
+     "Orange PET": 137376,
+     "C-power PET": 31104,
+     "Mango PET": 50976
+    }
+   },
+   {
+    "week": 8,
+    "demand": {
+     "Orange 1L": 86880,
+     "C-power 1L": 2400,
+     "Mango 1L": 29160,
+     "Orange PET": 132480,
+     "C-power PET": 14112,
+     "Mango PET": 102816
+    }
+   },
+   {
+    "week": 9,
+    "demand": {
+     "Orange 1L": 156000,
+     "C-power 1L": 7680,
+     "Mango 1L": 40800,
+     "Orange PET": 241632,
+     "C-power PET": 864,
+     "Mango PET": 45792
+    }
+   },
+   {
+    "week": 10,
+    "demand": {
+     "Orange 1L": 111000,
+     "C-power 1L": 8640,
+     "Mango 1L": 12600,
+     "Orange PET": 94464,
+     "C-power PET": 21888,
+     "Mango PET": 16416
+    }
+   },
+   {
+    "week": 11,
+    "demand": {
+     "Orange 1L": 63360,
+     "C-power 1L": 11520,
+     "Mango 1L": 33360,
+     "Orange PET": 55872,
+     "C-power PET": 17280,
+     "Mango PET": 35136
+    }
+   },
+   {
+    "week": 12,
+    "demand": {
+     "Orange 1L": 33360,
+     "C-power 1L": 4800,
+     "Mango 1L": 46680,
+     "Orange PET": 84672,
+     "C-power PET": 27072,
+     "Mango PET": 43488
+    }
+   },
+   {
+    "week": 13,
+    "demand": {
+     "Orange 1L": 38280,
+     "C-power 1L": 13080,
+     "Mango 1L": 23160,
+     "Orange PET": 68832,
+     "C-power PET": 4896,
+     "Mango PET": 21024
+    }
+   },
+   {
+    "week": 14,
+    "demand": {
+     "Orange 1L": 90360,
+     "C-power 1L": 16680,
+     "Mango 1L": 58800,
+     "Orange PET": 194976,
+     "C-power PET": 38880,
+     "Mango PET": 65088
+    }
+   },
+   {
+    "week": 15,
+    "demand": {
+     "Orange 1L": 48720,
+     "C-power 1L": 8160,
+     "Mango 1L": 44520,
+     "Orange PET": 107424,
+     "C-power PET": 11808,
+     "Mango PET": 39168
+    }
+   },
+   {
+    "week": 16,
+    "demand": {
+     "Orange 1L": 103560,
+     "C-power 1L": 8520,
+     "Mango 1L": 67560,
+     "Orange PET": 174240,
+     "C-power PET": 7200,
+     "Mango PET": 106272
+    }
+   },
+   {
+    "week": 17,
+    "demand": {
+     "Orange 1L": 60240,
+     "C-power 1L": 9360,
+     "Mango 1L": 57840,
+     "Orange PET": 91296,
+     "C-power PET": 28224,
+     "Mango PET": 24480
+    }
+   },
+   {
+    "week": 18,
+    "demand": {
+     "Orange 1L": 94080,
+     "C-power 1L": 10440,
+     "Mango 1L": 67320,
+     "Orange PET": 104256,
+     "C-power PET": 10944,
+     "Mango PET": 20160
+    }
+   },
+   {
+    "week": 19,
+    "demand": {
+     "Orange 1L": 55680,
+     "C-power 1L": 0,
+     "Mango 1L": 15840,
+     "Orange PET": 60768,
+     "C-power PET": 24192,
+     "Mango PET": 34272
+    }
+   },
+   {
+    "week": 20,
+    "demand": {
+     "Orange 1L": 129000,
+     "C-power 1L": 10200,
+     "Mango 1L": 31680,
+     "Orange PET": 196704,
+     "C-power PET": 11520,
+     "Mango PET": 51552
+    }
+   },
+   {
+    "week": 21,
+    "demand": {
+     "Orange 1L": 25200,
+     "C-power 1L": 14160,
+     "Mango 1L": 40800,
+     "Orange PET": 88704,
+     "C-power PET": 15552,
+     "Mango PET": 41472
+    }
+   },
+   {
+    "week": 22,
+    "demand": {
+     "Orange 1L": 26640,
+     "C-power 1L": 25440,
+     "Mango 1L": 16440,
+     "Orange PET": 127008,
+     "C-power PET": 2304,
+     "Mango PET": 29376
+    }
+   },
+   {
+    "week": 23,
+    "demand": {
+     "Orange 1L": 19440,
+     "C-power 1L": 8280,
+     "Mango 1L": 60960,
+     "Orange PET": 92448,
+     "C-power PET": 32256,
+     "Mango PET": 58464
+    }
+   },
+   {
+    "week": 24,
+    "demand": {
+     "Orange 1L": 46320,
+     "C-power 1L": 8640,
+     "Mango 1L": 89760,
+     "Orange PET": 184896,
+     "C-power PET": 8928,
+     "Mango PET": 78336
+    }
+   },
+   {
+    "week": 25,
+    "demand": {
+     "Orange 1L": 137760,
+     "C-power 1L": 11040,
+     "Mango 1L": 18840,
+     "Orange PET": 107712,
+     "C-power PET": 11232,
+     "Mango PET": 11520
+    }
+   },
+   {
+    "week": 26,
+    "demand": {
+     "Orange 1L": 81360,
+     "C-power 1L": 2040,
+     "Mango 1L": 32280,
+     "Orange PET": 119232,
+     "C-power PET": 22752,
+     "Mango PET": 92160
+    }
+   }
+  ],
+  "mean": {
+   "Orange 1L": 70573.84615,
+   "C-power 1L": 10190.76923,
+   "Mango 1L": 40190.76923,
+   "Orange PET": 122123.0769,
+   "C-power PET": 17867.07692,
+   "Mango PET": 47785.84615
+  },
+  "std": {
+   "Orange 1L": 38978.04419,
+   "C-power 1L": 7672.640705,
+   "Mango 1L": 22035.47484,
+   "Orange PET": 47775.75261,
+   "C-power PET": 11937.37752,
+   "Mango PET": 29298.29796
+  },
+  "cv": {
+   "Orange 1L": 0.5523015439,
+   "C-power 1L": 0.7529010353,
+   "Mango 1L": 0.5482720351,
+   "Orange PET": 0.3912098664,
+   "C-power PET": 0.6681214602,
+   "Mango PET": 0.613116651
+  }
+ },
+ "rules": [
+  {
+   "topic": "Chung",
+   "rule": "1 round = 6 tháng (26 tuần), tuần 5 ngày làm việc. Điểm xếp hạng = ROI = Operating profit / Investment.",
+   "opsImpact": null
+  },
+  {
+   "topic": "Chung",
+   "rule": "Điểm từng role: Purchasing = contract index trung bình (thấp là tốt); Ops = (chi phí sản xuất + kho) / doanh thu; Sales = doanh thu; Supply Chain = giá trị tồn kho (thấp là tốt).",
+   "opsImpact": "Ops được chấm bằng tỷ lệ chi phí trên doanh thu"
+  },
+  {
+   "topic": "Chung",
+   "rule": "Không carry-over giữa các round. Vòng trial và vòng chính thức tách biệt.",
+   "opsImpact": null
+  },
+  {
+   "topic": "Purchasing",
+   "rule": "Contract index là hệ số nhân giá gốc. Đòi hỏi NCC càng cao (giao chính xác, nhanh) thì càng đắt.",
+   "opsImpact": null
+  },
+  {
+   "topic": "Purchasing",
+   "rule": "Free capacity thấp hoặc không certification thì NCC hay giao trễ, chất lượng không đều.",
+   "opsImpact": "Hàng về thất thường, khó xếp nhân công kho NL"
+  },
+  {
+   "topic": "Purchasing",
+   "rule": "Quality Poor của bao bì gây hỏng dây chuyền. Thành phẩm không đạt kiểm tra bị hủy.",
+   "opsImpact": "Cân nhắc inspection, bảo trì, dây chuyền tolerance rộng"
+  },
+  {
+   "topic": "Purchasing",
+   "rule": "Trade unit lớn (FTL, tank) rẻ hơn và ít lần nhận, nhưng tồn kho và chỗ chứa tăng.",
+   "opsImpact": "Cần thêm pallet kho NL, ít giờ nhận hàng hơn"
+  },
+  {
+   "topic": "Purchasing",
+   "rule": "Delivery window rộng rẻ hơn nhưng hàng về lệch ngày nhiều hơn. Tàu biển rẻ nhưng chậm, xe tải nhanh nhưng đắt.",
+   "opsImpact": "Khó lên lịch nhận hàng"
+  },
+  {
+   "topic": "Purchasing",
+   "rule": "Không chọn NCC cho một component thì sản phẩm dùng component đó không sản xuất được.",
+   "opsImpact": null
+  },
+  {
+   "topic": "Sales",
+   "rule": "Service level type: units (dễ đạt nhất), order lines, orders (khó nhất). Hứa cao thì giá cao, không đạt bị phạt; vượt thì được thưởng nhỏ.",
+   "opsImpact": "Plan adherence thấp kéo service level xuống"
+  },
+  {
+   "topic": "Sales",
+   "rule": "Shelf life yêu cầu từ 40% đến 85%. Hạn sản phẩm 20 tuần, yêu cầu 75% nghĩa là hàng chỉ được nằm kho tối đa 5 tuần.",
+   "opsImpact": "Quá hạn phải hủy, tốn công kho TP"
+  },
+  {
+   "topic": "Sales",
+   "rule": "Order deadline muộn thì contract index cao hơn nhưng kho TP phải soạn gấp.",
+   "opsImpact": "Cần thêm FTE kho TP"
+  },
+  {
+   "topic": "Sales",
+   "rule": "Trade unit của khách nhỏ (layer, thùng) thì contract index cao hơn nhưng soạn hàng lâu hơn.",
+   "opsImpact": "Cần thêm FTE kho TP"
+  },
+  {
+   "topic": "Sales",
+   "rule": "Promotional pressure: Low thêm 0,5–1% sản lượng, Middle 1,5–2%, High 4–5,5%. Khách Value for money gấp đôi. Khuyến mãi làm giảm contract index.",
+   "opsImpact": "Sản lượng và đỉnh tải tăng"
+  },
+  {
+   "topic": "Sales",
+   "rule": "Promotion horizon dài thì biết trước đợt khuyến mãi, dễ lên kế hoạch. Bonus policy làm đơn hàng to và khó đoán hơn.",
+   "opsImpact": null
+  },
+  {
+   "topic": "Sales",
+   "rule": "Shortage rule: Proportional, First-come-first-served, Customer priority.",
+   "opsImpact": null
+  },
+  {
+   "topic": "Supply Chain",
+   "rule": "Safety stock tính bằng tuần nhu cầu dự báo. Lot size NL tính bằng tuần và có thể bị trade unit làm vượt.",
+   "opsImpact": "Quyết định số pallet cần ở 2 kho"
+  },
+  {
+   "topic": "Supply Chain",
+   "rule": "Production interval: 1 = hàng ngày, 5 = hàng tuần, 10 = 2 tuần/lần, 15 = 3 tuần/lần.",
+   "opsImpact": "Ngắn thì nhiều changeover; lô dưới mẻ tối thiểu của máy trộn bị làm tròn lên"
+  },
+  {
+   "topic": "Supply Chain",
+   "rule": "Frozen period khóa lịch sản xuất N tuần: dài thì ổn định nhưng chậm phản ứng khi nhu cầu tăng đột ngột.",
+   "opsImpact": "Lịch đều, ít đột biến"
+  },
+  {
+   "topic": "Supply Chain",
+   "rule": "Production interval tool tính theo quyết định của Ops (SMED, tốc độ, số ca) và forecast của Sales. Chỉ để thử, không tự lưu quyết định.",
+   "opsImpact": "Báo SC biết Ops đổi gì trước khi họ chốt interval"
+  }
+ ],
+ "glossary": [
+  {
+   "term": "ROI",
+   "full": "Return on Investment",
+   "explain": "Operating profit / Investment, chỉ số xếp hạng chính"
+  },
+  {
+   "term": "COGS",
+   "full": "Cost of Goods Sold",
+   "explain": "Giá vốn: tiền mua NL + chi phí sản xuất"
+  },
+  {
+   "term": "GM",
+   "full": "Gross margin",
+   "explain": "Lãi gộp = doanh thu trừ COGS"
+  },
+  {
+   "term": "CI",
+   "full": "Contract index",
+   "explain": "Hệ số nhân giá trong hợp đồng (1,05 = đắt hơn 5%)"
+  },
+  {
+   "term": "SL",
+   "full": "Service level",
+   "explain": "% giao đủ, đúng hạn"
+  },
+  {
+   "term": "OTIF",
+   "full": "On Time In Full",
+   "explain": "Giao đúng hạn và đủ số lượng"
+  },
+  {
+   "term": "OSA",
+   "full": "On-shelf availability",
+   "explain": "% thời gian hàng có trên kệ"
+  },
+  {
+   "term": "SKU",
+   "full": "Stock Keeping Unit",
+   "explain": "Một mã sản phẩm (TFC có 6 SKU)"
+  },
+  {
+   "term": "BOM",
+   "full": "Bill of Materials",
+   "explain": "Công thức pha: cần bao nhiêu NL cho 1 đơn vị"
+  },
+  {
+   "term": "FTE",
+   "full": "Full-Time Equivalent",
+   "explain": "1 nhân viên cố định làm 40 giờ/tuần"
+  },
+  {
+   "term": "NL / RM",
+   "full": "Nguyên liệu / Raw materials",
+   "explain": "Bao bì, cam, xoài, vitamin C"
+  },
+  {
+   "term": "TP / FG",
+   "full": "Thành phẩm / Finished goods",
+   "explain": "Nước ép đã đóng chai"
+  },
+  {
+   "term": "NCC",
+   "full": "Nhà cung cấp",
+   "explain": "Supplier"
+  },
+  {
+   "term": "DC",
+   "full": "Distribution Center",
+   "explain": "Kho phân phối (TFC dùng DC Netherlands)"
+  },
+  {
+   "term": "PET",
+   "full": "Polyethylene terephthalate",
+   "explain": "Chai nhựa 0,3 L"
+  },
+  {
+   "term": "Pack 1L",
+   "full": "Hộp giấy 1 lít",
+   "explain": "Bao bì của 3 SKU 1 lít"
+  },
+  {
+   "term": "Drum / IBC / Tank",
+   "full": "Thùng 250 L / bồn 1.000 L / xe bồn 30.000 L",
+   "explain": "Đơn vị giao nguyên liệu lỏng"
+  },
+  {
+   "term": "FTL",
+   "full": "Full Truck Load",
+   "explain": "Nguyên xe tải (30 pallet)"
+  },
+  {
+   "term": "Trade unit",
+   "full": "Đơn vị giao dịch",
+   "explain": "Đơn vị đặt hàng nhỏ nhất, đặt theo bội số của nó"
+  },
+  {
+   "term": "Lead time",
+   "full": "Thời gian giao hàng",
+   "explain": "Từ lúc đặt tới lúc hàng về"
+  },
+  {
+   "term": "Delivery window",
+   "full": "Khoảng giao hàng",
+   "explain": "Khoảng thời gian NCC được giao lệch"
+  },
+  {
+   "term": "Free capacity",
+   "full": "Công suất còn trống của NCC",
+   "explain": "Thấp thì NCC dễ giao trễ"
+  },
+  {
+   "term": "Rejection",
+   "full": "Tỷ lệ loại",
+   "explain": "% nguyên liệu giao tới không dùng được"
+  },
+  {
+   "term": "Safety stock",
+   "full": "Tồn kho an toàn",
+   "explain": "Hàng dự phòng, tính bằng tuần nhu cầu"
+  },
+  {
+   "term": "Lot size",
+   "full": "Cỡ lô đặt hàng",
+   "explain": "Mỗi lần đặt NL đủ dùng bao nhiêu tuần"
+  },
+  {
+   "term": "Production interval",
+   "full": "Chu kỳ sản xuất",
+   "explain": "Bao nhiêu ngày làm việc sản xuất 1 SKU một lần"
+  },
+  {
+   "term": "Frozen period",
+   "full": "Giai đoạn khóa lịch",
+   "explain": "Số tuần lịch sản xuất không sửa được"
+  },
+  {
+   "term": "Changeover",
+   "full": "Chuyển đổi",
+   "explain": "Dừng máy để đổi sản phẩm (formula: đổi vị; size: đổi bao bì)"
+  },
+  {
+   "term": "SMED",
+   "full": "Single Minute Exchange of Die",
+   "explain": "Dự án rút ngắn thời gian chuyển đổi 30%"
+  },
+  {
+   "term": "PM",
+   "full": "Preventive maintenance",
+   "explain": "Bảo trì phòng ngừa để giảm hỏng máy"
+  },
+  {
+   "term": "Start-up loss",
+   "full": "Hao hụt khởi động",
+   "explain": "Năng suất giảm trong giờ đầu sau mỗi changeover"
+  },
+  {
+   "term": "Plan adherence",
+   "full": "Production plan adherence",
+   "explain": "% lịch sản xuất chạy đúng kế hoạch"
+  },
+  {
+   "term": "Overflow",
+   "full": "Kho tràn",
+   "explain": "Kho thuê tạm khi hết chỗ, €3/pallet/ngày"
+  },
+  {
+   "term": "Obsolete",
+   "full": "Hàng lỗi thời",
+   "explain": "Hàng không còn đủ hạn để giao, phải hủy"
+  },
+  {
+   "term": "MAPE",
+   "full": "Mean Absolute Percentage Error",
+   "explain": "Sai số dự báo trung bình (%)"
+  },
+  {
+   "term": "Promotion horizon",
+   "full": "Thời gian báo trước khuyến mãi",
+   "explain": "Khách báo trước đợt khuyến mãi bao lâu"
+  },
+  {
+   "term": "Value for money",
+   "full": "Khách hàng nhạy giá",
+   "explain": "Hiệu ứng khuyến mãi gấp đôi"
+  },
+  {
+   "term": "VMI",
+   "full": "Vendor Managed Inventory",
+   "explain": "NCC tự theo dõi và bổ sung tồn kho"
+  }
+ ]
+}

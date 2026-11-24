@@ -1,0 +1,177 @@
+import type { ComponentKey, SkuKey } from '../data/types';
+
+export type PM = 'None' | 'Minimal' | 'Extensive';
+
+export interface OpsInputs {
+  rmInspection: Record<ComponentKey, boolean>;
+  rmPalletLocations: number;
+  rmFte: number;
+  intakeDays: number;
+  mixer: string;
+  preventiveMaintenance: PM;
+  breakdownTraining: boolean;
+  bottlingLine: string;
+  shifts: number;
+  smed: boolean;
+  increaseSpeed: boolean;
+  fgPalletLocations: number;
+  fgFte: number;
+}
+
+export interface ScInputs {
+  components: Record<ComponentKey, { safetyStockWeeks: number; lotSizeWeeks: number }>;
+  products: Record<SkuKey, { productionIntervalDays: number; safetyStockWeeks: number }>;
+  frozenPeriodWeeks: number;
+}
+
+export interface PurchasingInputs {
+  /** NCC đang chọn cho từng nguyên liệu (tên như trong bảng thị trường). */
+  suppliers: Record<ComponentKey, string>;
+}
+
+export interface Inputs {
+  ops: OpsInputs;
+  sc: ScInputs;
+  purchasing: PurchasingInputs;
+}
+
+/** Một con số kết quả có thể kèm nhãn nguồn gốc để UI gắn badge. */
+export type Basis = 'rule' | 'calibrated' | 'estimate' | 'r0';
+
+export interface SkuProduction {
+  sku: SkuKey;
+  demandUnits: number; // đv/tuần
+  prodUnits: number; // đv/tuần (gồm phần dư cho obsolete/reject)
+  prodLiters: number;
+  intervalDays: number;
+  batchesPerWeek: number;
+  batchLiters: number;
+  mixerLotsPerBatch: number;
+  mixerLotL: number;
+  excessLitersPerBatch: number; // do làm tròn lên mẻ tối thiểu
+  availability: number; // tích availability NL (R0)
+  adherence: number;
+  startupLossEur: number; // cả round
+}
+
+export interface DailySeries {
+  pallets: number[];
+  overflow: number[];
+  hours: number[];
+}
+
+export interface WarehouseResult {
+  capacity: number;
+  avgPallets: number;
+  peakPallets: number;
+  utilization: number;
+  avgOverflowPallets: number;
+  overflowShare: number;
+  overflowCost: number;
+  hoursPerWeek: number;
+  hoursBreakdown: Record<string, number>; // giờ/tuần theo hạng mục
+  fixedHoursPerWeek: number;
+  flexHours: number; // cả round
+  flexCost: number;
+  peakDayHours: number;
+  daysAboveFixed: number;
+  palletsInPerWeek: number;
+  orderLinesPerWeek: number;
+  daily: DailySeries;
+}
+
+export interface ComponentFlow {
+  key: ComponentKey;
+  supplier: string;
+  tradeUnit: string;
+  usagePerWeek: number;
+  purchasedPerWeek: number;
+  orderUnits: number;
+  deliveriesPerRound: number;
+  avgStockUnits: number;
+  avgStockWeeks: number;
+  storage: 'pallet' | 'tank';
+  avgLocations: number; // pallet hoặc tank
+  palletsPerDelivery: number;
+}
+
+export interface CostLine {
+  id: string;
+  label: string;
+  group: 'production' | 'warehouse';
+  value: number;
+  basis: Basis;
+}
+
+export interface OpsResults {
+  production: SkuProduction[];
+  prodFactor: number;
+  line: {
+    name: string;
+    speedLph: number;
+    regularHours: number;
+    run: number;
+    changeover: number;
+    breakdown: number;
+    maintenance: number;
+    unused: number;
+    overtime: number;
+    outsourced: number;
+    needHours: number;
+    sigmaHours: number;
+    changeoversPerWeek: number;
+    avgChangeoverH: number;
+    capacityAdherence: number;
+    planAdherence: number;
+    startupLossEur: number;
+    freeHours: number; // 168 − nhu cầu trung bình: còn bao nhiêu giờ có thể thêm (kể cả overtime)
+    bottleneck: boolean;
+  };
+  mixer: {
+    name: string;
+    lotsPerWeek: number;
+    avgLotL: number;
+    mixHours: number;
+    cleanHours: number;
+    cleaningShare: number;
+    utilization: number;
+    excessLitersPerWeek: number;
+    bottleneck: boolean;
+  };
+  rm: WarehouseResult;
+  fg: WarehouseResult;
+  components: ComponentFlow[];
+  tankYard: { avgTanks: number; peakTanks: number; tankDays: number; receipts: number; deliveries: number; cost: number };
+  costs: CostLine[];
+  productionCost: number;
+  warehouseCost: number;
+  machinesInvestment: number;
+}
+
+export interface FinanceRow {
+  id: string;
+  group: string;
+  label: string;
+  r0: number | null;
+  value: number;
+  modeled: boolean; // true: tính từ model; false: giữ số R0
+  isTotal?: boolean;
+  isNew?: boolean;
+}
+
+export interface FinanceResults {
+  rows: FinanceRow[];
+  realizedRevenue: number;
+  cogs: number;
+  grossMargin: number;
+  indirectCost: number;
+  operatingProfit: number;
+  investment: number;
+  roi: number;
+  opsScore: number; // (chi phí sản xuất + kho) / doanh thu
+}
+
+export interface Results {
+  ops: OpsResults;
+  finance: FinanceResults;
+}

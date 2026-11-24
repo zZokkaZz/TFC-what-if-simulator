@@ -1,0 +1,25 @@
+{
+  "name": "tfc-what-if-simulator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "data": "tsx scripts/build-data.ts",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "report": "tsx scripts/calibration-report.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-singlefile": "^2.2.0",
+    "vitest": "^3.2.4",
+    "xlsx": "^0.18.5"
+  },
+  "dependencies": {
+    "preact": "^10.26.9"
+  }
+}
