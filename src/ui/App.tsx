@@ -3,15 +3,21 @@ import rawData from '../data/round0.json';
 import type { Round0Data } from '../data/types';
 import type { Inputs, OpsInputs } from '../model/types';
 import { baselineInputs, simulate } from '../model/simulate';
+import { withEst } from '../model/assumptions';
+import type { Dept } from '../sync/types';
+import { DEPT_SHORT, ROLE_LABEL } from '../sync/types';
 import { loadInputs, loadTab, saveInputs, saveTab } from './state';
+import { loadEst, loadSession, saveEst, saveSession, useMockBackend, type Session } from './session';
+import { useSync } from './useSync';
 import { changedPaths } from './trace';
 import { eur, pct, signed } from './format';
 import { OpsTab } from './OpsTab';
 import { AssumptionsTab, FinanceTab, PurchasingTab, SalesTab, SupplyChainTab } from './OtherTabs';
+import { TeamTab, statusText } from './TeamTab';
+import { Gate } from './Gate';
 
 const data = rawData as unknown as Round0Data;
 const BASE = baselineInputs(data);
-const BASE_RES = simulate(BASE, data);
 
 const TABS = [
   { id: 'ops', label: 'Ops' },
@@ -19,6 +25,7 @@ const TABS = [
   { id: 'pur', label: 'Purchasing' },
   { id: 'sales', label: 'Sales' },
   { id: 'fin', label: 'Finance' },
+  { id: 'team', label: 'Nhóm' },
   { id: 'info', label: 'Giả định & R0' },
 ] as const;
 
@@ -33,46 +40,116 @@ function Kpi({ label, value, delta, cls, sub }: { label: string; value: string; 
 }
 
 export function App() {
-  const [inputs, setInputs] = useState<Inputs>(() => loadInputs(BASE));
+  const [session, setSession] = useState<Session | null>(() => loadSession());
+  const [gateOpen, setGateOpen] = useState(() => !loadSession());
   const [tab, setTab] = useState<string>(() => loadTab('ops'));
-  useEffect(() => saveInputs(inputs), [inputs]);
+  const [estOver, setEstOver] = useState<Record<string, number>>(() => loadEst());
+  const [solo, setSolo] = useState<Inputs>(() => loadInputs(BASE));
   useEffect(() => saveTab(tab), [tab]);
+  useEffect(() => saveInputs(solo), [solo]);
+  useEffect(() => saveEst(estOver), [estOver]);
 
-  const res = useMemo(() => simulate(inputs, data), [inputs]);
+  const { ctl, state } = useSync(session, BASE);
+  const team = ctl && state ? { ctl, state } : null;
+  // Thông báo loại "info" tự ẩn sau 6 giây
+  const infoIds = (state?.notices ?? []).filter((n) => n.kind === 'info').map((n) => n.id).join(',');
+  useEffect(() => {
+    if (!ctl || !infoIds) return;
+    const t = setTimeout(() => infoIds.split(',').forEach((id) => ctl.dismissNotice(Number(id))), 6000);
+    return () => clearTimeout(t);
+  }, [ctl, infoIds]);
+  const est = useMemo(() => withEst(estOver), [estOver]);
+  const baseRes = useMemo(() => simulate(BASE, data, est), [est]);
+  const inputs: Inputs = team ? team.state.local ?? team.state.shared : solo;
+  const res = useMemo(() => simulate(inputs, data, est), [inputs, est]);
   const changed = useMemo(() => changedPaths(BASE, inputs), [inputs]);
-  const f = res.finance, fb = BASE_RES.finance;
+
+  const isLocal = !!team?.state.local;
+  const editable = (dept: Dept) => !team || isLocal || team.state.role === dept;
+  const setDept = (dept: Dept, value: unknown) => {
+    if (!team) { setSolo((i) => ({ ...i, [dept]: value }) as Inputs); return; }
+    if (team.state.local) team.ctl.editLocal({ ...team.state.local, [dept]: value } as Inputs);
+    else team.ctl.editShared(dept, value);
+  };
+  const setOps = (patch: Partial<OpsInputs>) => setDept('ops', { ...inputs.ops, ...patch });
+
+  const resetAll = () => {
+    if (!team) { setSolo(BASE); return; }
+    if (isLocal) { team.ctl.editLocal(BASE); return; }
+    const role = team.state.role;
+    if (role === 'viewer') return;
+    if (confirm(`Đưa phần ${DEPT_SHORT[role]} trên BẢN CHUNG về Round 0? Cả nhóm sẽ thấy thay đổi này.`)) team.ctl.editShared(role, structuredClone(BASE[role]));
+  };
+  const push = async () => {
+    if (!team) return;
+    const skipped = team.ctl.localDiffDepts().filter((d) => d !== team.state.role);
+    if (skipped.length && !confirm(`Chỉ đẩy được phần ${DEPT_SHORT[team.state.role as Dept] ?? ''} của bạn. Số bạn thử ở ${skipped.map((d) => DEPT_SHORT[d]).join(', ')} sẽ bị bỏ. Tiếp tục?`)) return;
+    await team.ctl.pushLocal();
+  };
+
+  const f = res.finance, fb = baseRes.finance;
   const dRoi = f.roi - fb.roi, dOp = f.operatingProfit - fb.operatingProfit, dInv = f.investment - fb.investment;
   const cls = (x: number, upGood = true) => (Math.abs(x) < 1e-9 ? 'neutral' : (x > 0) === upGood ? 'good' : 'bad');
+  const canReset = team ? (isLocal ? changed.length > 0 : team.state.role !== 'viewer' && changedPaths(BASE, inputs).some((p) => p.startsWith(`${team.state.role}.`))) : changed.length > 0;
 
-  const setOps = (patch: Partial<OpsInputs>) => setInputs((i) => ({ ...i, ops: { ...i.ops, ...patch } }));
+  if (gateOpen) {
+    return <Gate initial={session} onDone={(s) => { saveSession(s); setSession(s); setGateOpen(false); }} onCancel={session ? () => setGateOpen(false) : undefined} />;
+  }
 
   return (
     <div class="app">
       <header class="topbar">
         <div class="brand">
           <b>TFC What-if</b>
-          <span>Round 0 baseline · M1 (Ops)</span>
+          <span>M1 (Ops) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
         <Kpi label="ROI (mô hình)" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 thật ${pct(data.finance.totals.roi, 2)} · baseline mô hình ${pct(fb.roi, 2)}`} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} />
         <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={cls(dInv, false)} />
         <div class="top-actions">
-          {changed.length > 0 && <span class="chg">{changed.length} quyết định khác R0</span>}
-          <button class="btn" disabled={changed.length === 0} onClick={() => setInputs(BASE)}>Reset về Round 0</button>
+          {team && (
+            <>
+              <span class={`conn conn-${team.state.status}`} title={statusText(team.state)}><i />{statusText(team.state).split(' — ')[0]}</span>
+              <button class="chip" title="Đổi vai trò hoặc mã đội" onClick={() => setGateOpen(true)}>{ROLE_LABEL[team.state.role]} ▾</button>
+              {isLocal ? (
+                <>
+                  <span class="chg">Kịch bản riêng{team.state.sharedChangedWhileLocal && ' · bản chung vừa đổi'}</span>
+                  <button class="btn primary" disabled={team.state.role === 'viewer'} onClick={() => void push()}>Đẩy lên bản chung</button>
+                  <button class="btn" onClick={() => team.ctl.discardLocal()}>Lấy lại bản chung</button>
+                </>
+              ) : (
+                <button class="btn" onClick={() => team.ctl.enterLocal()} title="Thử số trên máy mình, không đổi bản chung">Tách kịch bản riêng</button>
+              )}
+            </>
+          )}
+          {!team && <button class="chip" onClick={() => setGateOpen(true)}>Vào nhóm…</button>}
+          {changed.length > 0 && <span class="chg">{changed.length} ô khác R0</span>}
+          <button class="btn" disabled={!canReset} onClick={resetAll} title={team && !isLocal ? 'Chỉ đặt lại phần của vai trò bạn' : 'Đặt lại mọi quyết định'}>Reset về R0</button>
         </div>
       </header>
       <nav class="tabs" role="tablist">
-        {TABS.map((t) => (
+        {TABS.filter((t) => t.id !== 'team' || team).map((t) => (
           <button role="tab" aria-selected={tab === t.id} class={tab === t.id ? 'on' : ''} onClick={() => setTab(t.id)}>{t.label}</button>
         ))}
       </nav>
+      {team && team.state.notices.length > 0 && (
+        <div class="toasts" aria-live="polite">
+          {team.state.notices.map((n) => (
+            <div class={`toast toast-${n.kind}`}>
+              <span>{n.text}</span>
+              <button class="x" aria-label="Đóng" onClick={() => team.ctl.dismissNotice(n.id)}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
       <main>
-        {tab === 'ops' && <OpsTab data={data} inputs={inputs} base={BASE} res={res} baseRes={BASE_RES} changed={changed} setOps={setOps} resetOps={() => setInputs((i) => ({ ...i, ops: structuredClone(BASE.ops) }))} />}
+        {tab === 'ops' && <OpsTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setOps={setOps} resetOps={() => setDept('ops', structuredClone(BASE.ops))} editable={editable('ops')} lockReason={team && !editable('ops') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Ops chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} est={est} />}
         {tab === 'sc' && <SupplyChainTab data={data} />}
         {tab === 'pur' && <PurchasingTab data={data} />}
         {tab === 'sales' && <SalesTab data={data} />}
-        {tab === 'fin' && <FinanceTab res={res} baseRes={BASE_RES} roiR0={data.finance.totals.roi} />}
-        {tab === 'info' && <AssumptionsTab data={data} />}
+        {tab === 'fin' && <FinanceTab res={res} baseRes={baseRes} roiR0={data.finance.totals.roi} />}
+        {tab === 'team' && team && <TeamTab data={data} est={est} ctl={team.ctl} state={team.state} res={res} />}
+        {tab === 'info' && <AssumptionsTab data={data} estOver={estOver} setEstOver={setEstOver} />}
       </main>
       <footer class="foot">Simulator để thử quyết định, không phải engine của game. Số có nhãn <i>ước lượng</i> / <i>hiệu chỉnh R0</i> là giả định — xem tab "Giả định & R0". Dữ liệu: {data.meta.source}.</footer>
     </div>

@@ -1,100 +1,126 @@
 # ASSUMPTIONS — Giả định & hiệu chỉnh của TFC Simulator
 
-Phiên bản: **M1 (Ops)**. Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
-Trên giao diện:
-- badge **ước lượng**: giả định không có trong luật game;
-- badge **hiệu chỉnh R0**: chỉ số được dùng để tính hệ số, nên khớp R0 do cấu tạo;
-- badge **số R0**: dòng giữ nguyên số Round 0, chưa mô hình hóa.
+Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm)**. Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
 
-Xem đầy đủ ở tab "Giả định & R0" trong app.
+Nhãn trên giao diện:
+- **ước lượng**: giả định không có trong luật game.
+- **hiệu chỉnh R0**: chỉ số dùng để tính hệ số, nên khớp R0 do cấu tạo. Không phải bằng chứng là mô hình đúng.
+- **số R0**: dòng giữ nguyên số Round 0, chưa mô hình hóa.
+- **R0 suy ra**: số R0 dựng lại từ tab 11, game không in trực tiếp.
 
-## 0. Ghi chú về dữ liệu
+Tab "Giả định & R0" trong app cho phép chỉnh các giả định ước lượng. Chỉnh ở đó chỉ có tác dụng trên máy của người chỉnh.
+
+## 0. Ghi chú dữ liệu
 
 - File gốc tên `TFC Round Trial.xlsx`, đã `git mv` thành `data/TFC_Round0.xlsx`.
-- Tab luật trong file có tên `Luật for ops and others phòng b` (Excel giới hạn tên tab 31 ký tự), không phải `8_Luật game`. `build-data.ts` chấp nhận cả hai tên.
-- Cột "Start-up loss/mẻ (€)" ở tab 7 thực ra là **tổng cả round** của từng SKU: cộng 6 SKU = 8.434 ≈ 8.435.
-- Tuần 0 (tab 12) và ngày 0 (tab 11) trùng tuần 1 và ngày 1. Thống kê dùng tuần 1–26.
-- Breakdown dây chuyền ghi 10,8 giờ/tuần ở tab 5 và 11,0 ở tab 10. App dùng 10,8 (tab 5).
+- Tab luật có tên `Luật for ops and others phòng b`, không phải `8_Luật game`, vì Excel giới hạn tên tab 31 ký tự.
+- Cột "Start-up loss/mẻ (€)" ở tab 7 thực ra là **tổng cả round** của từng SKU: cộng 6 SKU ra 8.434.
+- Tuần 0 / ngày 0 (tab 12 / tab 11) trùng tuần 1 / ngày 1, nên bị bỏ.
+- Breakdown dây chuyền: tab 5 ghi 10,8, tab 10 ghi 11,0. App dùng 10,8.
+- **"Tồn (tuần)" ở tab 7 và tab 11 tính theo nhu cầu dự báo của các tuần tới**, không theo nhu cầu trung bình:
+  - Nếu quy ra pallet bằng nhu cầu trung bình: kho TP không ngày nào vượt 1.500 chỗ (đỉnh 1.362). Không giải thích được overflow 0,1% của game.
+  - Nếu quy bằng proxy "trung bình nhu cầu thực tuần này và tuần sau" (tab 12): ra lại phí overflow của **cả hai kho** (kho NL €37.676 so với €35.423; kho TP €555 so với €607).
+  - App dùng proxy này. Proxy là ước lượng, vì dự báo thật của game không có trong file.
 
 ## 1. Luật đã biết (dùng như chắc chắn)
 
 Lấy từ CLAUDE.md mục 6 và tab 5_Operations "Định mức", nằm trong `src/model/rules.ts`. `tests/rules.test.ts` đối chiếu từng con số với chuỗi định mức trong Excel.
 
-## 2. Công thức suy ra từ dữ liệu R0 (khớp mà không cần hiệu chỉnh)
+Tab luật **không nêu giới hạn số giờ thời vụ** và **không định nghĩa "cube utilization"**.
+
+## 2. Công thức suy ra từ dữ liệu R0 (dự báo độc lập, không hiệu chỉnh)
 
 | Chỉ số | Công thức | R0 thật → mô hình |
 |---|---|---|
 | Run time | lít cần đóng ÷ tốc độ + số changeover × start-up loss × 1 giờ | 62,6 → 62,7 |
-| Start-up loss € | Σ SKU: số mẻ × (start-up loss × tốc độ × 1 giờ ÷ lít/đv) × giá vốn/đv (giá vốn = giá bán TB − GM/đv) | 8.435 → 8.442 |
-| Cleaning máy trộn | vệ sinh 1 lần mỗi lần đổi SKU; tỷ lệ = giờ vệ sinh ÷ (giờ trộn + vệ sinh) | 14,5% → 14,6% |
+| Start-up loss € | Σ SKU: số mẻ × (start-up loss × tốc độ × 1 giờ ÷ lít/đv) × giá vốn/đv | 8.435 → 8.442 |
+| Cleaning máy trộn | vệ sinh 1 lần mỗi lần đổi SKU; tỷ lệ = vệ sinh ÷ (trộn + vệ sinh) | 14,5% → 14,6% |
 | Lô trung bình | mỗi mẻ SKU chia thành ⌈lít ÷ mẻ tối đa⌉ lô, lô ≥ mẻ tối thiểu | 11.022 → 11.058 L |
-| Mixer variable cost | (giờ trộn + giờ vệ sinh) × €/giờ | 144.569 → 143.910 |
-| Pallet kho NL | tồn TB = SS × dùng/tuần + ½ cỡ đơn; PET 1.080/pallet, Pack 17.280/pallet, IBC = 1 pallet | 93,4% → 93,1% |
-| Giờ kho NL | 4 giờ/ngày + nhận hàng + cấp sản xuất + chuyển overflow | 74 → 70,6 giờ/tuần |
-| Giờ kho TP | 4 giờ/ngày + nhập từ sản xuất + soạn hàng + hủy obsolete | 100 → 98,1 giờ/tuần |
-| Thời vụ kho NL | Σ ngày max(0, giờ cần − FTE × 8) × €42 | 6.753 → 6.792 |
+| Mixer variable cost | (giờ trộn + vệ sinh) × €/giờ | 144.569 → 143.910 |
+| Giờ kho NL (TB) | 4 giờ/ngày + nhận hàng + cấp sản xuất + chuyển overflow | 74 → 71,9 giờ/tuần |
+| Giờ kho TP (TB) | 4 giờ/ngày + nhập từ sản xuất + soạn hàng + hủy obsolete | 100 → 98,6 giờ/tuần |
+| Tồn NL lý thuyết | SS × dùng/tuần + ½ cỡ đơn (PET R0: 4,20 tuần = đúng số tab 7) | — |
+| Tank yard TB | tank theo ngày (làm tròn lên) | 6 → 5,97 tank |
 
-**Cách hiểu chỉ số kho (diễn giải, chưa xác nhận):** utilization = số pallet TB (kể cả phần ở overflow) ÷ pallet location. Overflow % = pallet TB ở overflow ÷ số pallet TB. Lý do chọn cách hiểu này: phí overflow R0 €35.423 ÷ €3 ÷ 130 ngày = 91 pallet/ngày ≈ 10,8% × 840.
+## 3. Dao động theo ngày: replay tab 11 (thay cho lịch đều trước đây)
 
-## 3. Hệ số hiệu chỉnh (tự tính trong `src/model/calibration.ts`)
+Bản trước mô phỏng lịch đều, không ngẫu nhiên, nên đỉnh tải và số ngày vượt lệch nhiều so với game. Bản này:
 
-Các hệ số này không gõ tay: code tính từ số R0 mỗi lần chạy. Chỉ số dùng để tính hệ số thì **khớp R0 do cấu tạo, nên không phải bằng chứng là mô hình đúng**.
+- **Tồn theo ngày** của từng NL/SKU = mức TB mô hình + (tồn R0 ngày đó − TB R0) × (cỡ lô mới ÷ cỡ lô R0).
+  - Mức TB mô hình = tồn lý thuyết × (TB tab 11 ÷ lý thuyết R0).
+  - Cỡ lô: NL = cỡ đơn, TP = cỡ mẻ (∝ production interval).
+- **Giờ công theo ngày** = 4 giờ cố định + giờ biến đổi TB mô hình + dao động R0 × a.
+  - a = Σ (phần giờ mô hình × hệ số hình dạng) ÷ Σ phần giờ baseline.
+  - Hệ số hình dạng: nhận hàng ∝ cỡ lô NL (pallet) × (intake R0 ÷ intake)^0,5 <sup>ước lượng</sup>; nhập TP / cấp NL ∝ cỡ mẻ; các phần khác = 1.
+- **Thời vụ** = Σ ngày max(0, giờ cần − FTE × 8) × €42 × **hệ số năng suất thời vụ 1,30**:
+  - Hệ số lấy từ dây chuyền: 66.670 ÷ (9,4 giờ × 26 × 5 × €42).
+  - Kho TP xác nhận độc lập: 68,1 giờ vượt (tab 11) × €42 × 1,30 = €3.718 so với P&L €3.725.
+  - Kho NL ra €5.848 so với €6.753 (−13%).
+- Giới hạn: khi đổi production interval hay lot size, **biên độ** dao động co giãn nhưng **nhịp** vẫn theo lịch R0 (ví dụ chu kỳ 10 ngày).
+
+Vì vậy đỉnh pallet, số ngày vượt sức chứa, đỉnh giờ và số ngày vượt giờ cố định ở baseline **khớp R0 gần như do cấu tạo**, và được gắn nhãn hiệu chỉnh. Kiểm chứng độc lập là phí overflow và chi phí thời vụ (so với P&L, không dùng để hiệu chỉnh).
+
+## 4. Utilization và overflow (trả lời câu hỏi "70,7% mà vẫn overflow")
+
+- Tab luật và tab Analysis không định nghĩa "cube utilization". Về số liệu, ở cả hai kho: utilization = usage ÷ capacity (840/900 = 93,3%; 1.061/1.500 = 70,7%). Tức là **trung bình**.
+- Overflow tính theo **pallet từng ngày**. Ngày đỉnh vượt sức chứa thì tràn, dù trung bình thấp. Hai việc này không mâu thuẫn: kho TP trung bình ~1.000 pallet nhưng có 4 ngày vượt 1.500 (đỉnh ~1.608).
+- Mô hình: utilization = pallet TB theo ngày ÷ capacity; overflow % = pallet TB ở overflow ÷ pallet TB.
+- **Còn lệch:** "usage" game in ra cao hơn TB dựng từ tab 11 khoảng 5% ở cả hai kho (840 so với 799; 1.061 so với 1.003). Có thể do pallet lẻ chiếm trọn 1 chỗ, hoặc dự báo thật khác proxy. Chưa rõ nên **không hiệu chỉnh**. Kết quả: utilization mô hình thấp hơn: kho NL 88,8% (−4,6 điểm), kho TP 66,9% (−3,8 điểm).
+- Bỏ nhãn "hiệu chỉnh" ở utilization kho TP. Bản trước khớp 70,6% vì lấy tồn từ tab 7; giờ chỉ số này là kiểm chứng độc lập.
+
+## 5. Hệ số hiệu chỉnh (tự tính trong `src/model/calibration.ts`)
 
 | Hệ số | Giá trị | Cách tính | Khớp do cấu tạo |
 |---|---|---|---|
-| Sản lượng sản xuất / nhu cầu | 1,0935 | Bao bì tiêu thụ R0 ÷ nhu cầu 6 SKU. Phần dư gồm obsolete, reject và bù tồn | — |
-| Cỡ đơn NL / (lot size × mua/tuần) | Pack 1,13 · PET 1,10 · Orange 1,20 · Mango 1,22 · VitC 1,38 | Cỡ đơn thực tế R0 ÷ (4 tuần × lượng mua/tuần) | — |
-| Tồn TP thực tế / lý thuyết | 0,58–0,85 theo SKU | Tồn R0 ÷ (SS + ½ chu kỳ = 4 tuần). Lý thuyết cao hơn thực tế vì hết hàng và plan adherence thấp | Kho TP utilization |
-| Tỷ lệ changeover tính như size changeover | 100% | R0: 12,1 giờ ÷ 3 lần/tuần = 4,03 giờ ≈ size changeover 4 giờ | Changeover |
-| Giờ hỏng / giờ chạy | 0,1725 | 10,8 ÷ 62,6, ở điều kiện R0 (PET Poor, Middle, không PM/training/inspection) | Breakdown |
-| CV giờ tải tuần | 18,4% | Giờ tải ~ phân phối chuẩn; chọn CV để unused = 3,9. Overtime suy ra = 9,4 | Unused, Overtime |
-| Độ nhạy plan adherence k | 0,706 | Adherence = [1 − k × (breakdown + overtime) ÷ (giờ ca + overtime)] × availability NL của SKU | Plan adherence |
-| Hệ số chi phí thời vụ dây chuyền | 1,30 | 66.670 ÷ (9,4 giờ × 26 × 5 người × €42). Có thể do thời vụ năng suất thấp hơn | Flexible manpower (bottling) |
+| Sản lượng / nhu cầu | 1,0935 | Bao bì tiêu thụ ÷ nhu cầu 6 SKU | — |
+| Cỡ đơn NL / (lot × mua/tuần) | 1,10–1,38 | Cỡ đơn R0 ÷ (4 tuần × mua/tuần) | — |
+| Dao động theo ngày | replay tab 11 | Mục 3 | Đỉnh pallet, ngày vượt sức chứa, đỉnh giờ, ngày vượt giờ cố định |
+| Tỷ lệ changeover tính như size changeover | 100% | 12,1 ÷ 3 lần = 4,03 giờ ≈ size 4 giờ | Changeover |
+| Giờ hỏng / giờ chạy | 0,1725 | 10,8 ÷ 62,6 | Breakdown |
+| CV giờ tải tuần | 18,4% | chọn để unused = 3,9 (overtime suy ra 9,4) | Unused, Overtime |
+| Độ nhạy plan adherence | 0,706 | adherence = [1 − k × (breakdown + overtime) ÷ (giờ ca + overtime)] × availability NL | Plan adherence |
+| Năng suất thời vụ | 1,30 | Mục 3 | Flexible manpower (bottling) |
 
-Kiểm chứng độc lập cho công thức plan adherence: các SKU C-power có adherence ≈ 0,70 ≈ 0,84 × availability Vitamin C 0,843. Các SKU còn lại ≈ 0,83.
+## 6. Giả định ước lượng (`src/model/assumptions.ts`, chỉnh được trên giao diện)
 
-## 4. Giả định ước lượng (`src/model/assumptions.ts`)
-
-Các giả định dưới đây chỉ đổi **độ nhạy** khi thử kịch bản. Baseline không đổi vì mọi hệ số đều tính tương đối so với điều kiện R0.
-
-| Giả định | Đang dùng | Vì sao |
+| Giả định | Mặc định | Vì sao |
 |---|---|---|
-| Hỏng máy theo chất lượng bao bì | High ×1 · Middle ×1,25 · Poor ×1,6 (trung bình theo lít Pack/PET) | Luật chỉ nói "Poor gây hỏng", không cho độ lớn |
-| RM inspection lên hỏng máy | Giảm 50% phần hỏng do bao bì kém | Luật không cho độ lớn |
+| Hỏng máy theo chất lượng bao bì | High ×1 · Middle ×1,25 · Poor ×1,6 (trung bình theo lít Pack/PET) | Luật chỉ nói "Poor gây hỏng". **Nguồn của PET 10,8 → 10,0 giờ khi bật inspection:** PET chiếm ~32% số lít; phần dư Poor (0,6) giảm 50% → hệ số chất lượng 1,190 → 1,095 (×0,92) |
+| RM inspection giảm phần hỏng do bao bì kém | 50% | Luật không cho độ lớn |
 | Tolerance dây chuyền | Narrow ×1,25 · Middle ×1 · Wide ×0,8 | Luật chỉ gợi ý |
+| Intake time | Chỉ dàn đỉnh giờ nhận hàng (mũ 0,5). **Tác động lên component availability chưa mô hình** (có cảnh báo trên ô) | Sẽ làm ở M2 |
+| Giới hạn thời vụ | Không giới hạn. Cảnh báo khi giờ vượt > 50% tổng giờ công kho | Luật không nêu giới hạn. Với 0 FTE, mô hình tính toàn bộ bằng thời vụ (€42 × 1,30), nên 0 FTE ≈ 5 FTE về chi phí và tối ưu là 2 FTE kho NL. Kết quả có thể quá lạc quan |
+| Gợi ý số pallet location | Hai số: (a) đỉnh mô hình + 10% biên; (b) số chỗ tối ưu theo chi phí (€100/chỗ/round so với €3/pallet/ngày). Nhãn "ước lượng – có thể quá lạc quan" | Đỉnh thật phụ thuộc nhu cầu ngẫu nhiên. Chưa tính giờ chuyển overflow. **Gợi ý cũ "kho TP thừa ~357 chỗ ≈ €35.653" đã bỏ:** đỉnh mới ~1.608 > 1.500, tức kho TP không thừa ở ngày đỉnh |
 | Drum/IBC ra pallet | 4 drum = 1 pallet · 1 IBC = 1 pallet · tank → tank yard | Không có quy đổi |
-| Giờ chuyển overflow | 6 phút cho mỗi pallet vào overflow (không tính lần ra) | Định mức "ra/vào" chưa rõ tính 1 hay 2 lần. Nếu tính 2 lần: giờ kho NL ≈ 78,6 thay vì 70,6 (vẫn trong ±15%) |
-| Soạn hàng | Phần chẵn soạn theo pallet; mỗi dòng đơn lẻ TB nửa pallet, soạn theo layer/thùng | Nếu tính mọi layer là 1 lần soạn thì giờ kho TP ≈ 200 giờ/tuần, gấp đôi số R0 100 |
-| Thuê ngoài > 168 giờ | 2 × (công nhân/ca × €42)/giờ | "Gấp 2" nhưng không nói gấp 2 của gì |
+| Chuyển overflow | 6 phút cho mỗi pallet vào overflow | "ra/vào" chưa rõ tính 1 hay 2 lần |
+| Soạn hàng | Phần chẵn soạn theo pallet; mỗi dòng đơn lẻ TB nửa pallet, soạn theo layer/thùng | Nếu tính mọi layer là 1 lần soạn → ~200 giờ/tuần, gấp đôi R0 |
+| Thuê ngoài > 168 giờ | 2 × (công nhân/ca × €42)/giờ | "Gấp 2" không nói gấp 2 của gì |
 | Training | €400 × công nhân/ca × số ca, trả 1 lần/round | Không rõ số người |
-| Giờ máy trộn sẵn có | = giờ dây chuyền (giờ ca + overtime) | Không có số ca riêng cho máy trộn |
-| Chi phí đổi máy trộn/dây chuyền | 0 € (chỉ đổi phí năm, đầu tư, thông số) | Không có dữ liệu |
-| Cỡ đơn NL | Không làm tròn theo trade unit | Cỡ đơn R0 (vd PET 951.612 cái) không phải bội số pallet/drum |
-| Tank yard | €25 × số tank mỗi ngày (130 ngày làm việc) + €10/tank nhận + €100/tank giao cho sản xuất | Cách game đếm tank-ngày và "lần giao" chưa rõ |
-| Availability NL, nhu cầu, order lines, obsolete | Giữ số R0 | Sẽ mô hình ở M2/M3 |
-| Mô phỏng theo ngày | Lịch đều, không ngẫu nhiên: lô NL về đúng chu kỳ, các SKU sản xuất so le trong chu kỳ, nhận hàng dàn đều trong intake time | Game có ngẫu nhiên nên đỉnh và số ngày vượt khác thực tế |
-| Intake time | Chỉ dàn giờ nhận hàng; chưa làm NL sẵn sàng muộn hơn | Ảnh hưởng availability sẽ làm ở M2 |
-| Finance M1 | Thay các dòng Ops trong P&L R0 bằng số mô hình; doanh thu, mua NL, lãi vay, phân phối, tồn kho, payment terms giữ R0 | M2–M4 |
+| Giờ máy trộn | = giờ dây chuyền (giờ ca + overtime) | Không có dữ liệu |
+| Đổi máy trộn/dây chuyền | Chi phí chuyển đổi = 0. App hiện dòng "Thay đổi đầu tư: ±€X" (Investment → ROI) | Không có dữ liệu |
+| Cỡ đơn NL | Không làm tròn theo trade unit | Cỡ đơn R0 không phải bội số pallet/drum |
+| Tank yard | €25 × tank mỗi ngày (130 ngày) + €10/tank nhận + €100/tank giao | Cách đếm của game chưa rõ |
+| Availability NL, nhu cầu, order lines, obsolete | Giữ số R0 | M2/M3 |
+| Finance | Thay các dòng Ops trong P&L R0; các dòng khác giữ R0 | M2–M4 |
 
-## 5. Chỉ số còn lệch (baseline R0)
+## 7. Bảng đối chiếu baseline (sau sửa)
 
-Mọi chỉ số Ops ở mục 7 của CLAUDE.md đều **đạt** sai số. Các chỗ còn lệch đáng chú ý:
+Tất cả 27 chỉ số trong bảng đối chiếu (mục 7 của CLAUDE.md và 11 dòng theo ngày mới thêm) đều đạt sai số. Sai số gợi ý cho dòng mới: đỉnh ±15%, số ngày ±max(3; 30%), thời vụ ±25%. Các chỗ còn lệch:
 
-| Chỉ số | R0 thật | Mô hình | Ghi chú |
+| Chỉ số | R0 | Mô hình | Ghi chú |
 |---|---|---|---|
-| Kho NL overflow | 10,8% | 9,2% | −1,6 điểm % (trong ±5) |
-| Phí overflow kho NL | €35.423 | €30.105 | −15%. Lịch nhận hàng đều thì ít dồn đỉnh hơn game |
-| Giờ công kho NL | 74 | 70,6 | −4,6% |
-| Ngày vượt giờ cố định kho NL / đỉnh | 12 ngày / 65 giờ | 7 ngày / 82 giờ | Không ngẫu nhiên, nên phân bố đỉnh khác game |
-| Ngày vượt giờ cố định kho TP | 6 ngày | 13 ngày | Mô hình dồn giờ nhập TP vào ngày sản xuất |
-| Thời vụ kho TP | €3.725 | €2.694 | −28% |
-| Overflow kho TP | €607 | €0 | Đỉnh mô hình 1.143 < 1.500 pallet |
-| Tank yard | €25.282 | €21.566 | −15% (ước lượng) |
-| Indirect cost (dòng Ops thay, còn lại R0) | €1.209.651 | €1.199.021 | −0,9% |
-| ROI (dòng không phải Ops giữ R0) | −7,68% | −7,41% | +0,27 điểm % (trong ±1,5) |
+| Kho NL utilization | 93,4% | 88,8% | Mục 4 (−4,6 điểm, sát mép ±5) |
+| Kho NL overflow | 10,8% | 12,1% | Phí €37.723 so với €35.423 (+6,5%) |
+| Thời vụ kho NL | €6.753 | €5.697 | −15,6% |
+| Kho TP utilization | 70,7% | 66,9% | Mục 4 |
+| Tank yard | €25.282 | €22.790 | −9,9% (ước lượng) |
+| Indirect cost (dòng Ops thay, còn lại R0) | €1.209.651 | €1.208.417 | −0,1% |
+| ROI | −7,68% | −7,64% | +0,04 điểm % |
 
-## 6. Giới hạn đã biết
+## 8. Đồng bộ nhóm: giới hạn bảo mật (mã đội)
 
-- Plan adherence chưa nối sang service level, doanh thu và penalty (M3).
-- Thay đổi Ops chưa làm đổi tồn kho, lãi vay hay Investment Stock (M2/M4).
-- Đổi dây chuyền chỉ đổi tốc độ, changeover, start-up loss, tolerance, nhân công, phí và đầu tư. Hệ số hỏng máy vẫn lấy theo R0, nhân với hệ số tolerance (ước lượng).
+- Ai biết **mã đội** đều đọc/ghi được dữ liệu đội đó. Anonymous Auth không xác định danh tính; nó chỉ chặn truy cập không qua SDK. Mã đội đóng vai trò như mật khẩu chung.
+- Rules chặn: liệt kê danh sách teams, đọc document gốc, mã < 8 ký tự, giả uid, ghi sai phòng, trường lạ, sai kiểu, xóa/sửa nhật ký. Rules **không** chặn được người có mã ghi số vô lý trong phạm vi hợp lệ, hoặc ghi phần của phòng khác bằng cách tự sửa code (vai trò chỉ kiểm tra ở giao diện; rules chỉ buộc trường `role` khớp tên phòng).
+- `apiKey` web Firebase công khai theo thiết kế. Có thể giới hạn API key theo HTTP referrer trong Google Cloud Console, nhưng làm vậy thì mở file trực tiếp (`file://`) sẽ không đồng bộ được.
+- Nên dùng mã dài (≥ 16 ký tự ngẫu nhiên) và gửi qua kênh riêng. Khi lộ mã: đổi sang mã mới (dữ liệu cũ vẫn nằm trên Firestore dưới mã cũ, xóa thủ công trong Console nếu cần).
+- Nhật ký không xóa được qua app (rules). App chỉ hiện 50 dòng mới nhất; dòng cũ vẫn chiếm dung lượng nhưng rất nhỏ so với 1 GiB của gói Spark.

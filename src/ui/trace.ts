@@ -80,3 +80,14 @@ export function causesFor(driverKey: string, changed: string[]): Cause[] {
   }
   return out;
 }
+
+/** Nhãn dễ đọc cho một đường dẫn quyết định, vd "sc.components.PET.lotSizeWeeks" → "lot size NL (PET)". */
+export function describePath(path: string): { dept: Dept; label: string } {
+  const l = LABELS.find(([re]) => re.test(path));
+  const parts = path.split('.');
+  const detail = parts.length >= 4 ? parts[2] : parts[0] === 'ops' && parts[1] === 'rmInspection' ? parts[2] : parts[0] === 'purchasing' ? parts[2] : '';
+  if (!l) return { dept: 'Ops', label: path };
+  return { dept: l[1], label: detail ? `${l[2]} (${detail})` : l[2] };
+}
+
+export { flatten };

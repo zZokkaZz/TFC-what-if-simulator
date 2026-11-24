@@ -13,6 +13,7 @@ Build một **web app what-if cho game The Fresh Connection (TFC)** để team 4
 - Thấy rõ **phòng ban nào bị ảnh hưởng và vì sao** (ví dụ: tăng safety stock TP → tồn kho tăng → pallet kho TP tăng → overflow → indirect cost tăng → ROI giảm).
 - So sánh nhiều kịch bản cạnh nhau.
 - 4 người ở 4 máy, 4 mạng khác nhau, **không dùng chung tài khoản Claude** vẫn dùng được.
+- **Đồng bộ realtime** (từ M1.5): mỗi VP sửa phần của phòng mình trên một "bộ quyết định chung", 3 người còn lại thấy ngay; có nhật ký, kịch bản riêng, bản chụp có tên.
 
 **Không phải mục tiêu:** tái tạo chính xác 100% engine của game (game có nhu cầu ngẫu nhiên theo tuần). Mục tiêu là **đúng hướng và sát độ lớn**, được hiệu chỉnh theo số Round 0 thật.
 
@@ -49,27 +50,29 @@ Build một **web app what-if cho game The Fresh Connection (TFC)** để team 4
 ## 3. Ràng buộc cứng
 
 1. **Không** truy cập, scrape hay đăng nhập vào `game.thefreshconnection.eu`. Không có API. Dữ liệu chỉ lấy từ file trong `data/`.
-2. **Không** cần backend, không cần tài khoản, không có API key trong code.
-3. App phải chạy được khi **mở trực tiếp file HTML** (double-click, `file://`) và khi host tĩnh (GitHub Pages).
+2. **Backend duy nhất được phép: Firebase gói Spark miễn phí** (project `tfc-group`) — Firestore (asia-southeast1) + Anonymous Auth, chỉ để đồng bộ bộ quyết định giữa các thành viên. Không Cloud Functions, không Firebase Hosting, không Analytics, không tài khoản người dùng (đăng nhập ẩn danh). Cấu hình web Firebase (công khai theo thiết kế) nằm ở `src/sync/firebaseConfig.ts`. **Mã đội không bao giờ ghi trong code hay repo**: người dùng tự nhập trong app, lưu trên máy; dữ liệu nằm ở `teams/{mãĐội}/...`. Quyền truy cập do `firestore.rules` quyết định (có trong repo).
+3. App phải chạy được khi **mở trực tiếp file HTML** (double-click, `file://`) và khi host tĩnh (GitHub Pages). Mất mạng / không vào nhóm thì vẫn chạy được (chế độ "một mình" hoặc số đã cache).
 4. Mọi giả định chưa chắc chắn phải **hiển thị trên giao diện** (badge "ước lượng") và ghi trong `ASSUMPTIONS.md`. Không bịa công thức game rồi trình bày như chắc chắn.
 
 ## 4. Kiến trúc kỹ thuật
 
-- **Một file `index.html` build ra cuối cùng**, tự chứa (JS, CSS, dữ liệu inline). Không phụ thuộc CDN lúc chạy (người dùng có thể offline).
+- **Một file `index.html` build ra cuối cùng**, tự chứa (JS, CSS, dữ liệu inline, **SDK Firebase bundle vào file**). Không tải script từ CDN lúc chạy; mạng chỉ dùng để gọi API Firebase khi đồng bộ.
 - Được phép dùng Vite + TypeScript + một framework nhẹ (Preact hoặc Svelte) **nếu** build ra 1 file (dùng `vite-plugin-singlefile`). Nếu không cần thì vanilla TS là đủ.
 - Tách rõ 3 lớp:
   - `src/data/` — dữ liệu Round 0 (sinh từ file Excel, xem mục 5).
   - `src/model/` — **hàm thuần** `simulate(inputs, data) → results`, không đụng DOM. Mỗi phòng ban một file: `ops.ts`, `supplyChain.ts`, `purchasing.ts`, `sales.ts`, `finance.ts`.
+  - `src/sync/` — đồng bộ nhóm: `controller.ts` (bản chung, kịch bản riêng, ghi trễ ~500 ms, nhật ký, snapshot, xung đột) không phụ thuộc Firebase; `firebaseBackend.ts` (Firestore + Anonymous Auth, cache offline); `mockBackend.ts` (giả lập cho test và `?mock=1`).
   - `src/ui/` — giao diện.
 - Có **unit test** (Vitest) cho model, trong đó test quan trọng nhất là **test hiệu chỉnh**: nhập quyết định Round 0 → kết quả phải gần số Round 0 thật (mục 7).
-- Trạng thái lưu `localStorage` (bọc try/catch) để F5 không mất.
+- Trạng thái lưu `localStorage` (bọc try/catch) để F5 không mất (chế độ một mình); chế độ nhóm lấy từ Firestore (có cache offline).
+- Test đồng bộ: `tests/sync.test.ts` (giả lập); `scripts/test-rules.mjs` (Firestore Emulator); `scripts/firebase-smoke.ts` (2 phiên thật hoặc emulator).
 
 ## 5. Dữ liệu đầu vào
 
 Nguồn: Google Sheet của team "TFC Round 0 – Dữ liệu gốc 4 phòng ban" (đã được tổng hợp đầy đủ từ game).
 **Claude Code không có quyền đọc Google Sheet.** Người dùng sẽ tải về và đặt vào repo:
 
-- `data/TFC_Round0.xlsx` (Google Sheets → File → Download → .xlsx)
+- `data/TFC_Round0.xlsx` (Google Sheets → File → Download → .xlsx). Bản đầu tiên tên `TFC Round Trial.xlsx`, đã `git mv` vào đường dẫn này.
 
 Viết script `scripts/build-data.ts` (dùng thư viện `xlsx`/SheetJS) đọc file này → sinh `src/data/round0.json`. Đọc **theo tiêu đề cột**, không hard-code tọa độ ô (bố cục có thể đổi). Lưu ý số kiểu Việt Nam trong sheet: dấu chấm = phân cách hàng nghìn, dấu phẩy = thập phân (khi đọc giá trị đã format).
 
@@ -85,7 +88,7 @@ Các tab trong file:
 | `5_Operations` | Quyết định Ops hiện tại, kết quả kho và dây chuyền Round 0, bảng 3 máy trộn, 4 dây chuyền, định mức thời gian/chi phí |
 | `6_Sales` | 3 hợp đồng khách hàng, kết quả theo khách, sản phẩm, khách × sản phẩm |
 | `7_Supply Chain` | Quyết định SC hiện tại, kết quả tồn kho NL và TP |
-| `8_Luật game` | Luật từ Info Center |
+| `8_Luật game` | Luật từ Info Center. Trong file thực tế tab tên `Luật for ops and others phòng b` (Excel cắt tên 31 ký tự) — `build-data.ts` chấp nhận cả hai |
 | `9_Viết tắt` | Thuật ngữ |
 | `10_R0 Analysis` | Bảng Analysis của game (NL, NCC, dây chuyền, máy trộn, khách, sản phẩm, kho…) |
 | `11_R0 Theo ngày` | 130 ngày: tồn kho (tuần) 5 NL + 6 TP; giờ công/ngày kho NL và kho TP |
@@ -163,6 +166,7 @@ Nếu một chỉ số không hiệu chỉnh được trong sai số, **báo l�
 - **Kịch bản:** lưu nhiều kịch bản có tên, bảng so sánh cạnh nhau, nút reset về Round 0.
 - **Chia sẻ:** nút "Copy link kịch bản" (mã hóa input vào URL hash, base64 nén) và "Xuất/Nhập JSON". Đồng đội mở link là thấy đúng bộ quyết định.
 - Thiết kế gọn, đọc trên laptop là chính, dùng được trên điện thoại.
+- **Nhóm (realtime):** vào app nhập mã đội + chọn vai trò (Purchasing / Operations / Sales / Supply Chain / Xem), nhớ trên máy, có nút đổi. Mỗi phòng ghi document riêng `teams/{mã}/decisions/{phòng}` (2 phòng sửa song song không ghi đè nhau); cùng vai trò thì bản ghi sau thắng và báo cho người kia. Vai trò chỉ sửa ô phòng mình, "Xem" không sửa. Trạng thái kết nối, nhật ký ~50 dòng ("Ops đổi số ca 2 → 3 · 5 phút trước"), "Tách kịch bản riêng" / "Đẩy lên bản chung" / "Lấy lại bản chung", "Chụp lại bản chung" (snapshot có tên) để so sánh và mở lại.
 
 ## 9. Lộ trình
 
@@ -173,16 +177,20 @@ Nếu một chỉ số không hiệu chỉnh được trong sai số, **báo l�
 5. **M4 — Finance:** P&L + Investment + ROI đầy đủ; test hiệu chỉnh ROI.
 6. **M5:** kịch bản, so sánh, chia sẻ link; build 1 file; hướng dẫn deploy GitHub Pages.
 
+Đã làm thêm **M1.5 — đồng bộ realtime bằng Firebase** (trước M2). M2 làm kèm **bảng cảnh báo chéo phòng**.
+
 Sau mỗi mốc: chạy test, build, mở thử, báo ngắn gọn cái gì đã khớp và cái gì còn lệch.
 
 ## 10. Chia sẻ cho team
 
 - Cách 1: gửi file `dist/index.html` vào nhóm chat, mở bằng trình duyệt.
-- Cách 2: GitHub Pages (repo public, hoặc private nếu có GitHub Pro). **Hỏi người dùng trước khi push lên repo public**, vì ai có link cũng xem được dữ liệu.
+- Cách 2: GitHub Pages (repo public, hoặc private nếu có GitHub Pro). **Hỏi người dùng trước khi push lên repo public**, vì ai có link cũng xem được dữ liệu. Pages phục vụ `docs/index.html` (bản sao của `dist/index.html`, `npm run build` tự chép).
+- Đồng bộ: gửi link app + **mã đội qua kênh riêng** (không đăng mã lên repo/nhóm công khai).
 
 ## 11. Không làm
 
-- Không thêm backend, đăng nhập, database, Firebase ở giai đoạn này.
-- Không gọi API ngoài, không CDN lúc chạy.
+- Không thêm backend nào khác ngoài Firebase (Firestore + Anonymous Auth, gói Spark). Không Cloud Functions, không Firebase Hosting, không Analytics, không tài khoản/mật khẩu người dùng.
+- Không gọi API ngoài nào khác Firebase; không tải script từ CDN lúc chạy.
+- Không ghi mã đội vào code, repo, log hay commit.
 - Không tự bịa luật game ngoài mục 6 mà không đánh dấu "ước lượng".
 - Không viết lại dữ liệu bằng tay nếu đã có trong file Excel.

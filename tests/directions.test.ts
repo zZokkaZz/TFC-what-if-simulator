@@ -87,6 +87,27 @@ describe('Hướng tác động Ops', () => {
     const r = run((i) => { for (const k of Object.keys(i.sc.products)) i.sc.products[k as keyof typeof i.sc.products].productionIntervalDays = 5; });
     expect(r.ops.line.changeover).toBeCloseTo(b.ops.line.changeover * 2, 6);
   });
+  it('0 FTE kho NL → bật cảnh báo thời vụ > 50%', () => {
+    const r = run((i) => { i.ops.rmFte = 0; });
+    expect(r.ops.rm.flexWarn).toBe(true);
+    expect(b.ops.rm.flexWarn).toBe(false);
+  });
+  it('lot size NL lớn hơn → đỉnh giờ công kho NL cao hơn', () => {
+    const r = run((i) => { for (const k of Object.keys(i.sc.components)) i.sc.components[k as keyof typeof i.sc.components].lotSizeWeeks = 8; });
+    expect(r.ops.rm.peakDayHours).toBeGreaterThan(b.ops.rm.peakDayHours);
+    expect(r.ops.rm.peakPallets).toBeGreaterThan(b.ops.rm.peakPallets);
+  });
+  it('production interval dài hơn → đỉnh pallet kho TP cao hơn', () => {
+    const r = run((i) => { for (const k of Object.keys(i.sc.products)) i.sc.products[k as keyof typeof i.sc.products].productionIntervalDays = 15; });
+    expect(r.ops.fg.peakPallets).toBeGreaterThan(b.ops.fg.peakPallets);
+  });
+  it('đổi dây chuyền MultiFlex 1 → đầu tư máy giảm', () => {
+    const r = run((i) => { i.ops.bottlingLine = 'MultiFlex 1'; });
+    expect(r.ops.machinesInvestment - b.ops.machinesInvestment).toBe(425_000 - 490_000);
+  });
+  it('số chỗ tối ưu chi phí không đắt hơn số chỗ hiện tại', () => {
+    for (const w of [b.ops.rm, b.ops.fg]) expect(w.costAtOptimal).toBeLessThanOrEqual(w.capacity * 100 + w.overflowCost + 1e-6);
+  });
   it('baseline lặp lại đúng (hàm thuần)', () => {
     expect(simulate(base, d).finance.roi).toBe(b.finance.roi);
   });

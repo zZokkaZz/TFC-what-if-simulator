@@ -1,18 +1,9 @@
-// Lưu/đọc bộ quyết định trong localStorage (bọc try/catch: trình duyệt chặn storage vẫn chạy được).
+// Lưu/đọc bộ quyết định chế độ một mình trong localStorage (bọc try/catch).
 import type { Inputs } from '../model/types';
+import { merge } from '../sync/sanitize';
 
 const KEY = 'tfc-sim:inputs:v1';
 const TAB_KEY = 'tfc-sim:tab';
-
-/** Ghép dữ liệu đã lưu lên baseline: chỉ nhận khóa đã biết & đúng kiểu, tránh hỏng khi đổi phiên bản. */
-function merge<T>(base: T, saved: unknown): T {
-  if (saved === null || saved === undefined) return base;
-  if (typeof base !== 'object' || base === null) return (typeof saved === typeof base ? saved : base) as T;
-  if (typeof saved !== 'object') return base;
-  const out: Record<string, unknown> = Array.isArray(base) ? [...(base as unknown[])] as unknown as Record<string, unknown> : { ...(base as Record<string, unknown>) };
-  for (const k of Object.keys(out)) out[k] = merge(out[k], (saved as Record<string, unknown>)[k]);
-  return out as T;
-}
 
 export function loadInputs(base: Inputs): Inputs {
   try {

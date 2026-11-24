@@ -78,7 +78,7 @@ export function Grid({ children }: { children: ComponentChildren }) {
 }
 
 // ---------- ô quyết định ----------
-interface FieldBase { label: string; unit?: string; hint?: string; changed?: boolean }
+interface FieldBase { label: string; unit?: string; hint?: ComponentChildren; changed?: boolean; disabled?: boolean }
 
 export function NumberField(p: FieldBase & { value: number; min?: number; max?: number; step?: number; onChange: (v: number) => void }) {
   return (
@@ -86,6 +86,7 @@ export function NumberField(p: FieldBase & { value: number; min?: number; max?: 
       <span class="f-label">{p.label}{p.unit && <em> ({p.unit})</em>}</span>
       <input
         type="number"
+        disabled={p.disabled}
         inputMode="decimal"
         value={p.value}
         min={p.min}
@@ -106,6 +107,7 @@ export function SelectField<T extends string | number>(p: FieldBase & { value: T
     <label class={`field${p.changed ? ' changed' : ''}`}>
       <span class="f-label">{p.label}{p.unit && <em> ({p.unit})</em>}</span>
       <select
+        disabled={p.disabled}
         value={String(p.value)}
         onChange={(e) => {
           const raw = (e.currentTarget as HTMLSelectElement).value;

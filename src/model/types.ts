@@ -29,10 +29,14 @@ export interface PurchasingInputs {
   suppliers: Record<ComponentKey, string>;
 }
 
+/** Sales — M3 sẽ thêm service level, shelf life… (giữ chỗ để đồng bộ theo phòng). */
+export type SalesInputs = Record<string, number | string | boolean>;
+
 export interface Inputs {
   ops: OpsInputs;
   sc: ScInputs;
   purchasing: PurchasingInputs;
+  sales: SalesInputs;
 }
 
 /** Một con số kết quả có thể kèm nhãn nguồn gốc để UI gắn badge. */
@@ -71,8 +75,15 @@ export interface WarehouseResult {
   hoursPerWeek: number;
   hoursBreakdown: Record<string, number>; // giờ/tuần theo hạng mục
   fixedHoursPerWeek: number;
-  flexHours: number; // cả round
+  excessHours: number; // giờ vượt giờ cố định, cộng theo ngày (cả round)
+  flexHours: number; // giờ thời vụ trả tiền = giờ vượt × hệ số năng suất thời vụ
   flexCost: number;
+  flexShare: number; // giờ vượt / tổng giờ công cần
+  flexWarn: boolean;
+  daysOverCapacity: number;
+  recommendedCapacity: number; // đỉnh pallet × (1 + biên an toàn)
+  costOptimalCapacity: number; // số chỗ làm (phí chỗ + phí overflow) nhỏ nhất, với chuỗi pallet hiện tại
+  costAtOptimal: number; // phí chỗ + overflow tại số chỗ tối ưu (cả round)
   peakDayHours: number;
   daysAboveFixed: number;
   palletsInPerWeek: number;

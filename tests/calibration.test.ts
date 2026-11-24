@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import data from '../src/data/round0.json';
 import type { Round0Data } from '../src/data/types';
 import { baselineInputs, simulate } from '../src/model/simulate';
-import { opsChecks } from '../src/model/acceptance';
+import { allowed, opsChecks } from '../src/model/acceptance';
 
 const d = data as unknown as Round0Data;
 const res = simulate(baselineInputs(d), d);
@@ -11,7 +11,7 @@ const checks = opsChecks(d, res);
 
 describe('Hiệu chỉnh Ops theo Round 0', () => {
   it.each(checks.map((c) => [c.label, c] as const))('%s nằm trong sai số', (_label, c) => {
-    const tol = c.tol.abs !== undefined ? c.tol.abs : (c.tol.rel ?? 0) * Math.abs(c.r0);
+    const tol = allowed(c);
     expect(Math.abs(c.model - c.r0), `${c.label}: model ${c.model} vs R0 ${c.r0}`).toBeLessThanOrEqual(tol + 1e-9);
   });
 

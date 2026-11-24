@@ -1,7 +1,7 @@
 // Các tab chưa có quyết định trong M1: hiển thị dữ liệu Round 0 thô (M0) + P&L + giả định.
 import type { Round0Data } from '../data/types';
 import type { Results } from '../model/types';
-import { ASSUMPTIONS } from '../model/assumptions';
+import { ASSUMPTIONS, EDITABLE_EST, EST } from '../model/assumptions';
 import { getCalibration } from '../model/simulate';
 import { Badge, Card, Table } from './components';
 import { eur, num, pct, signed } from './format';
@@ -118,10 +118,39 @@ export function FinanceTab({ res, baseRes, roiR0 }: { res: Results; baseRes: Res
   );
 }
 
-export function AssumptionsTab({ data }: { data: Round0Data }) {
+const estDefault = (path: string): number => {
+  const [a, b] = path.split('.');
+  const v = (EST as unknown as Record<string, unknown>)[a];
+  return b ? (v as Record<string, number>)[b] : (v as number);
+};
+
+export function AssumptionsTab({ data, estOver, setEstOver }: { data: Round0Data; estOver: Record<string, number>; setEstOver: (f: (o: Record<string, number>) => Record<string, number>) => void }) {
   const cal = getCalibration(data);
+  const anyOver = Object.keys(estOver).length > 0;
   return (
     <div class="single">
+      <Card title="Chỉnh giả định ước lượng (chỉ trên máy bạn)" extra={<button class="btn small" disabled={!anyOver} onClick={() => setEstOver(() => ({}))}>Về mặc định</button>}>
+        <p class="muted">Các hệ số này không có trong luật game. Đổi ở đây chỉ ảnh hưởng máy của bạn (đồng đội vẫn dùng mặc định) và chỉ đổi độ nhạy khi thử kịch bản — baseline R0 không đổi.</p>
+        <div class="est-grid">
+          {EDITABLE_EST.map((e) => {
+            const def = estDefault(e.path);
+            const v = estOver[e.path] ?? def;
+            return (
+              <label class={`field${estOver[e.path] !== undefined ? ' changed' : ''}`}>
+                <span class="f-label">{e.label}</span>
+                <input type="number" value={v} min={e.min} max={e.max} step={e.step}
+                  onInput={(ev) => {
+                    const x = Number((ev.currentTarget as HTMLInputElement).value);
+                    if (!Number.isFinite(x)) return;
+                    const c = Math.min(e.max, Math.max(e.min, x));
+                    setEstOver((o) => { const n = { ...o }; if (Math.abs(c - def) < 1e-12) delete n[e.path]; else n[e.path] = c; return n; });
+                  }} />
+                <span class="f-hint">Mặc định {num(def, 2)}</span>
+              </label>
+            );
+          })}
+        </div>
+      </Card>
       <Card title="Hệ số hiệu chỉnh (tự tính từ số Round 0)">
         <Table head={['Hệ số', 'Giá trị', 'Cách tính', 'Chỉ số khớp R0 do cấu tạo']} rows={cal.notes.map((n) => [n.label, n.value, n.derivation, n.matchesByConstruction.join(', ') || '—'])} />
       </Card>

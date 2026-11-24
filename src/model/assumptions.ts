@@ -10,27 +10,61 @@ export interface Assumption {
   why: string;
 }
 
-export const EST = {
+export interface Est {
   /** Hệ số hỏng máy theo chất lượng bao bì (High = 1). */
-  qualityBreakdownMult: { High: 1, Middle: 1.25, Poor: 1.6 } as Record<string, number>,
-  /** RM inspection trên NCC bao bì làm giảm một nửa phần hỏng máy do chất lượng kém. */
-  inspectionQualityRelief: 0.5,
+  qualityBreakdownMult: Record<string, number>;
+  /** RM inspection trên NCC bao bì giảm phần hỏng máy do chất lượng kém đi tỷ lệ này. */
+  inspectionQualityRelief: number;
   /** Hệ số hỏng máy theo tolerance của dây chuyền (Middle = 1). */
-  toleranceMult: { Narrow: 1.25, Middle: 1, Wide: 0.8 } as Record<string, number>,
-  /** Số drum (250 L) trên 1 pallet location; IBC chiếm 1 pallet location. */
+  toleranceMult: Record<string, number>;
+  drumsPerPallet: number;
+  ibcPerPallet: number;
+  /** Một pallet đi qua overflow tính bao nhiêu lần di chuyển (6 phút/lần). */
+  overflowMovesPerPallet: number;
+  /** Soạn hàng: phần lẻ TB mỗi dòng đơn (tính bằng pallet), soạn theo layer/thùng. */
+  pickRemainderPallet: number;
+  /** Độ dàn đỉnh giờ nhận hàng theo intake time: dao động × (intake R0 / intake)^mũ. */
+  intakeSmoothingExp: number;
+  /** Cảnh báo khi giờ thời vụ vượt tỷ lệ này của tổng giờ công kho. */
+  flexWarnShare: number;
+  /** Biên an toàn khi gợi ý giảm pallet location (trên đỉnh pallet mô hình). */
+  capacityMargin: number;
+}
+
+export const EST: Est = {
+  qualityBreakdownMult: { High: 1, Middle: 1.25, Poor: 1.6 },
+  inspectionQualityRelief: 0.5,
+  toleranceMult: { Narrow: 1.25, Middle: 1, Wide: 0.8 },
   drumsPerPallet: 4,
   ibcPerPallet: 1,
-  /** Một pallet đi qua overflow tính 1 lần di chuyển (6 phút). */
   overflowMovesPerPallet: 1,
-  /** Soạn hàng: phần lẻ trung bình mỗi dòng đơn = nửa pallet (soạn theo layer/thùng); phần chẵn soạn theo pallet. */
   pickRemainderPallet: 0.5,
-  /** Thuê ngoài > 168 giờ: đơn giá = 2 × (công nhân/ca × €42/giờ). */
-  outsourcingBase: 'flex',
-  /** Training: số người = công nhân/ca × số ca, trả 1 lần trong round. */
-  trainingPeople: 'workersPerShift×shifts',
-  /** Máy trộn chạy cùng giờ với dây chuyền (giờ ca + overtime). */
-  mixerSharesLineHours: true,
-} as const;
+  intakeSmoothingExp: 0.5,
+  flexWarnShare: 0.5,
+  capacityMargin: 0.1,
+};
+
+/** Các giả định cho phép chỉnh trên giao diện (tab Giả định), lưu trên máy từng người. */
+export const EDITABLE_EST: { path: string; label: string; min: number; max: number; step: number }[] = [
+  { path: 'qualityBreakdownMult.Poor', label: 'Hỏng máy khi bao bì Poor (× so với High)', min: 1, max: 3, step: 0.05 },
+  { path: 'qualityBreakdownMult.Middle', label: 'Hỏng máy khi bao bì Middle (× so với High)', min: 1, max: 3, step: 0.05 },
+  { path: 'inspectionQualityRelief', label: 'RM inspection giảm phần hỏng do bao bì kém (0–1)', min: 0, max: 1, step: 0.05 },
+  { path: 'toleranceMult.Narrow', label: 'Hỏng máy dây chuyền tolerance Narrow (× so với Middle)', min: 0.5, max: 2, step: 0.05 },
+  { path: 'toleranceMult.Wide', label: 'Hỏng máy dây chuyền tolerance Wide (× so với Middle)', min: 0.5, max: 2, step: 0.05 },
+  { path: 'intakeSmoothingExp', label: 'Mũ dàn đỉnh theo intake time', min: 0, max: 1, step: 0.1 },
+  { path: 'capacityMargin', label: 'Biên an toàn khi gợi ý giảm pallet location (0–1)', min: 0, max: 0.5, step: 0.05 },
+];
+
+export function withEst(over: Record<string, number> | undefined): Est {
+  const e: Est = structuredClone(EST);
+  for (const [path, v] of Object.entries(over ?? {})) {
+    if (!EDITABLE_EST.some((x) => x.path === path) || !Number.isFinite(v)) continue;
+    const [a, b] = path.split('.');
+    if (b) (e as unknown as Record<string, Record<string, number>>)[a][b] = v;
+    else (e as unknown as Record<string, number>)[a] = v;
+  }
+  return e;
+}
 
 export const ASSUMPTIONS: Assumption[] = [
   { id: 'qualityBreakdown', label: 'Hỏng máy theo chất lượng bao bì', value: 'High ×1 · Middle ×1,25 · Poor ×1,6', why: 'Luật chỉ nói "Quality Poor gây hỏng dây chuyền", không cho độ lớn.' },
@@ -45,5 +79,9 @@ export const ASSUMPTIONS: Assumption[] = [
   { id: 'lineChange', label: 'Chi phí đổi máy trộn/dây chuyền', value: 'Chưa tính (0 €); chỉ đổi phí năm, đầu tư, thông số', why: 'Dữ liệu không có chi phí chuyển đổi.' },
   { id: 'availability', label: 'Availability nguyên liệu (cho plan adherence)', value: 'Giữ số R0 (Vitamin C 84,3%…) cho tới M2/M3', why: 'Availability phụ thuộc NCC và safety stock NL — sẽ mô hình ở M2/M3.' },
   { id: 'demand', label: 'Nhu cầu, order lines, obsolete', value: 'Giữ số R0 cho tới M2/M3', why: 'Thuộc Sales/SC, chưa mô hình trong M1.' },
-  { id: 'daily', label: 'Mô phỏng theo ngày', value: 'Lịch đều, không ngẫu nhiên: lô NL về đúng chu kỳ, các SKU sản xuất so le trong chu kỳ', why: 'Game có ngẫu nhiên (nhu cầu, NCC giao trễ) nên đỉnh giờ công thật cao hơn mô hình.' },
+  { id: 'daily', label: 'Dao động theo ngày', value: 'Replay 130 ngày tab 11 (tồn tuần × nhu cầu dự báo ≈ TB tuần này + tuần sau), co giãn biên độ theo cỡ lô mới', why: 'Nhịp dao động giữ theo lịch R0 khi đổi interval/lot size; proxy dự báo là ước lượng.' },
+  { id: 'intake', label: 'Intake time', value: 'Chỉ dàn đỉnh giờ nhận hàng (dao động × (intake R0/intake)^0,5)', why: 'Tác động lên component availability CHƯA mô hình (M2).' },
+  { id: 'flexLimit', label: 'Giới hạn thời vụ', value: 'Không giới hạn; cảnh báo khi giờ vượt > 50% tổng giờ công kho', why: 'Info Center không nêu giới hạn — 0 FTE có thể trông rẻ một cách không thực tế.' },
+  { id: 'utilization', label: 'Utilization', value: 'Pallet TB theo ngày ÷ pallet location; overflow tính theo từng ngày', why: '"Cube utilization" không được định nghĩa; usage game in ra cao hơn TB dựng từ tab 11 ~5% (chưa rõ vì sao, không hiệu chỉnh).' },
+  { id: 'capacity', label: 'Gợi ý số pallet location', value: 'Đỉnh + 10% biên; và số chỗ tối ưu chi phí (chỗ vs overflow)', why: 'Đỉnh thật phụ thuộc nhu cầu ngẫu nhiên — có thể quá lạc quan.' },
 ];
