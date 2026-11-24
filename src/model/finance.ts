@@ -1,7 +1,7 @@
 // Finance — M1 (tạm thời): P&L R0, thay các dòng Ops bằng số model; các dòng khác GIỮ SỐ R0
 // (đánh dấu modeled=false) cho tới M2–M4. ROI = Operating profit / Investment.
 import type { Round0Data } from '../data/types';
-import type { FinanceResults, FinanceRow, OpsResults } from './types';
+import type { FinanceResults, FinanceRow, OpsResults, RoiNode } from './types';
 
 /** Dòng P&L trong tab 2_Finance ↔ id chi phí trong model Ops */
 const OPS_LINE_MAP: { re: RegExp; ids: string[] }[] = [
@@ -73,5 +73,44 @@ export function simulateFinance(data: Round0Data, ops: OpsResults): FinanceResul
     realizedRevenue, cogs, grossMargin, indirectCost, operatingProfit, investment,
     roi: operatingProfit / investment,
     opsScore: (ops.productionCost + ops.warehouseCost) / realizedRevenue,
+    breakdown: buildBreakdown(rows, operatingProfit, investment, data),
   };
+}
+
+/** Gom các dòng P&L thành cây: nút cha "mixed" nếu có cả dòng mô hình và dòng giữ R0. */
+function node(id: string, label: string, rows: FinanceRow[], note?: string, sign = 1): RoiNode {
+  const value = sign * rows.reduce((s, r) => s + r.value, 0);
+  const r0 = sign * rows.reduce((s, r) => s + (r.r0 ?? 0), 0);
+  const m = rows.filter((r) => r.modeled).length;
+  return { id, label, value, r0, status: m === 0 ? 'r0' : m === rows.length ? 'modeled' : 'mixed', note, children: rows.length > 1 ? rows.map((r) => ({ id: r.id, label: r.label, value: sign * r.value, r0: r.r0 === null ? null : sign * r.r0, status: r.modeled ? 'modeled' : 'r0' })) : undefined };
+}
+const parent = (id: string, label: string, children: RoiNode[], note?: string): RoiNode => {
+  const st = new Set(children.map((c) => c.status));
+  return {
+    id, label, note, children,
+    value: children.reduce((s, c) => s + (c.value ?? 0), 0),
+    r0: children.reduce((s, c) => s + (c.r0 ?? 0), 0),
+    status: st.size === 1 ? [...st][0] : 'mixed',
+  };
+};
+
+function buildBreakdown(rows: FinanceRow[], operatingProfit: number, investment: number, data: Round0Data) {
+  const g = (re: RegExp) => rows.filter((r) => re.test(r.group));
+  const lab = (re: RegExp) => rows.filter((r) => re.test(r.label));
+  const revenue = node('rev', 'Realized revenue (doanh thu thực nhận)', g(/^Doanh thu/), 'Hợp đồng trừ penalty service level');
+  const purchase = node('pur', 'Purchase value (mua NL)', g(/mua NL/), undefined, -1);
+  const production = node('prod', 'Production costs (sản xuất)', g(/sản xuất/), undefined, -1);
+  const cogs = parent('cogs', 'COGS (giá vốn)', [purchase, production]);
+  const gm = parent('gm', 'Gross margin (lãi gộp)', [revenue, cogs]);
+  const indirectGroups = [...new Set(g(/^Indirect/).map((r) => r.group))];
+  const opex = parent('opex', 'Operating expense = Indirect cost', indirectGroups.map((grp) => node(`ind-${grp}`, grp, rows.filter((r) => r.group === grp), undefined, -1)));
+  const op: RoiNode = { ...parent('op', 'Operating profit', [gm, opex]), value: operatingProfit };
+  const fixed = node('fixed', 'Fixed assets', [...lab(/^Fixed$/), ...lab(/^Machines$/)], 'Fixed (tòa nhà…) + Machines (máy trộn + dây chuyền)');
+  const stock = node('stock', 'Tồn kho (Stock)', lab(/^Stock$/), 'NL + TP; chưa đổi theo quyết định (M2/M4)');
+  const pt = node('pt', 'Payment terms = Phải thu (AR) − Phải trả (AP)', lab(/^Payment terms$/), 'Game chỉ in số ròng');
+  const ar: RoiNode = { id: 'ar', label: 'Phải thu khách (AR)', value: null, r0: null, status: 'missing', note: 'Thiếu dữ liệu: file chỉ có số ròng AR − AP' };
+  const ap: RoiNode = { id: 'ap', label: 'Phải trả NCC (AP)', value: null, r0: null, status: 'missing', note: 'Thiếu dữ liệu: file chỉ có số ròng AR − AP' };
+  const wc = parent('wc', 'Working capital', [stock, { ...pt, children: [ar, ap] }]);
+  const inv: RoiNode = { ...parent('inv', 'Investment', [fixed, wc]), value: investment, r0: data.finance.totals.investment };
+  return { roi: operatingProfit / investment, operatingProfit: op, investment: inv };
 }

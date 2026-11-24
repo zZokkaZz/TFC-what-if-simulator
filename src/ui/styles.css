@@ -268,3 +268,6 @@ button.conn { border: 1px solid var(--border); background: var(--surface-2); bor
 .status-panel { position: fixed; top: 64px; right: 16px; z-index: 25; width: min(560px, calc(100vw - 32px)); max-height: 70vh; overflow: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2); }
 .sp-head { display: flex; justify-content: space-between; align-items: center; }
 .small-text { font-size: 12px; color: var(--ink-2); }
+.roi-formula { font-size: 15px; margin: 4px 0 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+.roi-formula .big { font-size: 22px; font-weight: 700; }
+.pnl tr.sub td { font-weight: 600; }

@@ -180,6 +180,24 @@ export interface FinanceResults {
   investment: number;
   roi: number;
   opsScore: number; // (chi phí sản xuất + kho) / doanh thu
+  breakdown: RoiBreakdown;
+}
+
+/** Một nút trong cây phân rã ROI. `status`: modeled = tính từ model; r0 = giữ số Round 0; missing = file không có số tách riêng. */
+export interface RoiNode {
+  id: string;
+  label: string;
+  value: number | null;
+  r0: number | null;
+  status: 'modeled' | 'r0' | 'mixed' | 'missing';
+  note?: string;
+  children?: RoiNode[];
+}
+
+export interface RoiBreakdown {
+  roi: number;
+  operatingProfit: RoiNode;
+  investment: RoiNode;
 }
 
 export interface Results {
