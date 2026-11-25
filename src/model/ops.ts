@@ -13,6 +13,7 @@ import type { Est } from './assumptions';
 import { BOTTLING, FG_NORMS, RM_NORMS, ROUND, TANK_YARD, WAREHOUSE } from './rules';
 import { expectedAbove, expectedBelow } from './stats';
 import { activeSupplier, COMPONENTS, type ActiveSupplier } from './purchasing';
+import { COEFFS } from './assumptions';
 import { componentFlows, componentRisk, fgTheoryUnits, type ComponentRisk } from './supplyChain';
 import { customerPicking, demandBySku, obsoleteBySku, SKUS, unitCostBySku } from './sales';
 import { baselineInputs } from './baseline';
@@ -131,7 +132,9 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, b
     const prod = data.products.find((x) => x.key === p.sku)!;
     p.availability = COMPONENTS.filter((c) => prod.bom[c] > 0).reduce((acc, c) => acc * componentAvailability[c], 1);
   }
-  const capacityAdherence = Math.min(1, Math.max(0, 1 - cal.adherenceK * (breakdown + overtime + outsourced) / (C + overtime)));
+  // Giờ PM đã nằm trong needHours (→ overtime). Có tính PM như "gián đoạn" giống hỏng đột xuất không: COEFFS (mặc định 0)
+  const pmDisruption = COEFFS.maintenanceDisruptionWeight.value * maintenance;
+  const capacityAdherence = Math.min(1, Math.max(0, 1 - cal.adherenceK * (breakdown + pmDisruption + overtime + outsourced) / (C + overtime)));
   for (const p of production) p.adherence = capacityAdherence * p.availability;
   const wSum = production.reduce((s, p) => s + p.batchesPerWeek, 0);
   const planAdherence = production.reduce((s, p) => s + p.adherence * p.batchesPerWeek, 0) / wSum;

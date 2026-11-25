@@ -67,8 +67,9 @@ describe('C2: tuổi tồn → obsolete → Costs of scrap (ước lượng, hi�
       expect(w.severity).toBe('critical');
       expect(w.roi[0].delta).toBeGreaterThan(0);
     });
-    it('với hệ số hiện tại: ROI interval 20 ≤ R0 (trước C2 là −3,68% > R0)', () => {
-      if (COEFFS.obsoleteAgeSpreadScale.value === 1 && COEFFS.scrapObsoleteElasticity.value === 1) expect(r.finance.roi).toBeLessThan(b.finance.roi);
+    it('với hệ số đã chọn (phân tán ≤ 2, co giãn scrap = 1): ROI interval 20 < R0 (trước C2 là −3,68% > R0)', () => {
+      // Hệ số người dùng chọn 25/11: obsoleteAgeSpreadScale = 2 → ROI −9,37%. Nới hệ số ra ngoài vùng này thì xem lại kỳ vọng.
+      if (COEFFS.obsoleteAgeSpreadScale.value <= 2 && COEFFS.scrapObsoleteElasticity.value === 1) expect(r.finance.roi).toBeLessThan(b.finance.roi);
     });
   });
   it('đổi SS / interval làm tuổi tồn ngắn hơn → obsolete giảm, scrap giảm (SS TP 3 → 1, interval 10 → 5)', () => {

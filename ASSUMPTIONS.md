@@ -305,7 +305,13 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 - **KPI Obsolete products** = 8,1% (tab 1) + (TB gia quyền nhu cầu của obsolete mới − R0).
 - **Cảnh báo ĐỎ** khi tuổi tồn lớn nhất (S + P) > A, kèm số Costs of scrap.
 - **Chưa mô hình:** hàng hủy làm giảm hàng bán / phải sản xuất bù (giờ dây chuyền, NL); giờ hủy hàng kho TP vẫn theo obsolete R0.
-- **Hệ quả cần biết:** σ hiệu chỉnh nhỏ (~0,4 tuần) vì R0 nằm đúng mép (S + P = A = 5 tuần) → obsolete đổi rất dốc khi tuổi tồn vượt 5 tuần: interval 15 → 33%, interval 20 → 50%, SS TP 5 → ~92%; interval 5 hoặc SS TP 1 → ~0%. Với `obsoleteAgeSpreadScale` = 2: 18% / 25% / 42%; = 3: 13% / 18% / 27%. Hệ số này chờ dữ liệu trial.
+- **`obsoleteAgeSpreadScale` = 2 (người dùng chọn 25/11, vẫn "chưa xác minh").** Lý do: R0 nằm sát mép (SS 3 + chu kỳ 2 = 5 tuần = tuổi cho phép) nên hiệu chỉnh từ 1 điểm cho σ quá nhỏ (~0,4 tuần) → obsolete đổi rất dốc; MAPE dự báo 47–61% (tab 7) cho thấy tuổi hàng phải phân tán rộng hơn. Độ nhạy (obsolete Orange 1L, R0 8,4%):
+
+| Hệ số phân tán | σ (tuần) | Interval 15 | Interval 20 | SS TP 4 | SS TP 5 | Interval 5 |
+|---|---|---|---|---|---|---|
+| 1 | 0,42 | 33,4% | 50,0% | 50,0% | 91,6% | 0,1% |
+| **2 (đang dùng)** | 0,84 | 17,6% | 25,2% | 25,2% | 42,0% | 2,3% |
+| 3 | 1,26 | 13,3% | 17,7% | 17,7% | 27,1% | 4,4% |
 
 ### V1 (ước lượng) — người dùng chọn phương án B làm số chính, C làm cận dưới
 
@@ -314,18 +320,26 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 - **Phần capacity** (R0 không có điểm dữ liệu): bão hòa mũ trên tỷ lệ thiếu hàng: `thiếu mới = thiếu × e^(−(độ dốc ÷ 0,0778) × Δ capacity)`; 0,0778 = tỷ lệ thiếu TB R0 (1 − SL pieces, 6 SKU) → độ dốc tại R0 = `capacitySlopeB` (0,5, **số chính**) hoặc `capacitySlopeC` (0,25).
 - **"Thận trọng"** = SL thấp hơn giữa B và C từng SKU → doanh thu & ROI thận trọng **luôn ≤ số chính**. Khi capacity giảm (vd 1 ca), C cho SL cao hơn B nên thận trọng = B (C không phải cận dưới khi capacity giảm). Hiện "(thận trọng: x%)" cạnh ROI (thanh trên, Dashboard) và doanh thu thận trọng ở tab Sales khi phần capacity thay đổi.
 
-### Bảng kịch bản trước / sau (ROI; trước = main b59c6a4)
+### PM — giờ bảo trì và plan adherence (kiểm tra 25/11)
 
-| Kịch bản | Trước | Sau (số chính B) | Thận trọng |
-|---|---|---|---|
-| R0 | −7,68% | −7,68% | −7,68% |
-| 2 → 1 ca | −58,88% | −55,55% | −55,55% |
-| 2 → 3 ca | −0,44% | −3,38% | −5,59% |
-| SMED | −4,09% | −6,49% | −6,99% |
-| PM Minimal | −1,06% | −5,14% | −6,22% |
-| PM Extensive | +0,13% | −4,14% | −5,64% |
-| Interval 10 → 5 | −26,47% | −15,96% | −15,96% |
-| Interval 10 → 15 | −3,93% | −9,75% | −10,32% |
-| Interval 10 → 20 | −3,68% | −12,40% | −13,20% |
-| SS TP 3 → 1 | −23,33% | −22,30% | −22,30% |
-| SS TP 3 → 5 | −8,60% | −18,70% | −18,70% |
+- Giờ bảo trì **có** trừ vào công suất: giờ tải = run + changeover + breakdown + giờ bảo trì → overtime, chi phí thời vụ. Lời giờ ròng gần bằng nhau: Minimal 2,25 giờ/tuần (giảm hỏng 3,24 − bảo trì 1), Extensive 2,41 giờ/tuần (5,41 − 3); overtime 7,90 so với 7,79 giờ/tuần.
+- Plan adherence = 1 − k × (breakdown + `maintenanceDisruptionWeight` × giờ bảo trì + overtime + thuê ngoài) ÷ (giờ ca + overtime), k hiệu chỉnh R0 (R0 không có PM). Mặc định hệ số = **0**: giờ bảo trì là việc có kế hoạch, không tính như hỏng đột xuất → Extensive có adherence cao hơn Minimal 1,7 điểm (89,4% so với 87,6% phần capacity) → penalty ít hơn ~€39k → ROI hơn ~1 điểm. Đặt hệ số = 1 nếu coi mọi giờ mất như nhau: hai mức gần bằng nhau (có test). Chờ dữ liệu trial.
+
+### Bảng kịch bản trước / sau (ROI; trước = main b59c6a4; sau = phân tán tuổi tồn × 2, PM hệ số 0)
+
+| Kịch bản | Trước | Sau (số chính B) | Thận trọng | Plan adherence | Penalty | Costs of scrap |
+|---|---|---|---|---|---|---|
+| R0 | −7,68% | −7,68% | −7,68% | 78,7% | −€322.708 | €40.203 |
+| 2 → 1 ca | −58,88% | −55,55% | −55,55% | 50,1% | −€2.077.153 | €40.203 |
+| 2 → 3 ca | −0,44% | −3,38% | −5,59% | 87,6% | −€117.239 | €40.203 |
+| SMED | −4,09% | −6,49% | −6,99% | 80,1% | −€282.015 | €40.203 |
+| PM Minimal | −1,06% | −5,14% | −6,22% | 82,0% | −€232.183 | €40.203 |
+| PM Extensive | +0,13% | −4,14% | −5,64% | 83,7% | −€193.090 | €40.203 |
+| Training | +0,22% | −4,05% | −5,54% | 83,7% | −€194.025 | €40.203 |
+| Training + PM Minimal | +0,91% | −2,99% | −4,85% | 85,5% | −€155.639 | €40.203 |
+| Training + PM Minimal + SMED | +1,00% | −2,29% | −4,38% | 86,8% | −€131.191 | €40.203 |
+| Training + PM Extensive | +0,84% | −2,72% | −4,71% | 86,2% | −€142.087 | €40.203 |
+| Interval 10 → 5 | −26,47% | −16,21% | −16,21% | 72,7% | −€540.084 | €10.599 |
+| Interval 10 → 15 | −3,93% | −7,81% | −8,37% | 80,3% | −€280.370 | €86.071 |
+| Interval 10 → 20 | −3,68% | −9,37% | −10,17% | 81,0% | −€264.369 | €123.807 |
+| SS TP 3 → 5 | −8,60% | −12,70% | −12,70% | 78,7% | −€306.284 | €207.410 |
