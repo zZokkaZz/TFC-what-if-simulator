@@ -89,7 +89,7 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
         <fieldset>
           <legend>Lập kế hoạch sản xuất</legend>
           <NumberField label="Frozen period of production" unit="tuần" value={sc.frozenPeriodWeeks} limit={SC_LIMITS.frozenPeriodWeeks} disabled={dis} changed={sc.frozenPeriodWeeks !== b.frozenPeriodWeeks}
-            hint={<>Dùng trong gợi ý safety stock TP và service level dự kiến <Badge basis="estimate" />. Tác động lên giờ dây chuyền <span class="warn-text">chưa mô hình</span>.</>}
+            hint={<><Badge basis="r0" /> <b class="warn-text">chưa mô hình</b>: đổi ô này không đổi số nào (gợi ý SS, service level, doanh thu, giờ dây chuyền dùng frozen R0 = {data.supplyChain.frozenPeriodWeeks} tuần).</>}
             onChange={(v) => setSc({ ...sc, frozenPeriodWeeks: v })} />
         </fieldset>
       </aside>
@@ -185,7 +185,7 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
             </table>
           </div>
           <p class="muted">
-            Cột "Start up productivity loss": game ghi "per batch" nhưng 6 SKU cộng lại = €8.434 = tổng cả round → là tổng/SKU. Service level (pieces) kịch bản = SL R0 − (tỷ lệ thiếu mới − baseline) <Badge basis="estimate" />, <b class="warn-text">chưa đưa vào doanh thu/penalty (Sales — M3)</b>. Plan adherence kịch bản = số R0 × (mô hình mới ÷ mô hình baseline). Tuổi tồn cho phép = hạn dùng {data.productShelfLifeWeeks ?? 'thiếu dữ liệu'} tuần × (1 − shelf life khách đòi).
+            Cột "Start up productivity loss": game ghi "per batch" nhưng 6 SKU cộng lại = €8.434 = tổng cả round → là tổng/SKU. Service level (pieces) kịch bản = SL R0 − (tỷ lệ thiếu mới − baseline) <Badge basis="estimate" />, + 0,97 × thay đổi plan adherence (hồi quy 6 SKU R0) <Badge basis="estimate" />, đã đưa vào penalty/doanh thu (tab Sales). Service level (order lines) = số R0 + cùng thay đổi. Plan adherence kịch bản = số R0 × (mô hình mới ÷ mô hình baseline). Tuổi tồn cho phép = hạn dùng {data.productShelfLifeWeeks ?? 'thiếu dữ liệu'} tuần × (1 − shelf life khách đòi).
           </p>
         </Card>
 
@@ -194,8 +194,8 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
             ['Lot size NL', 'Cỡ đơn, số lần nhận hàng, đỉnh pallet & giờ công kho NL, overflow, availability (nhiều chu kỳ hơn)', 'Ops, Finance', <span class="ok">✔ đã nối</span>],
             ['Safety stock NL', 'Pallet kho NL, giá trị tồn, lãi tồn NL, availability → plan adherence', 'Ops, Finance', <span class="ok">✔ đã nối</span>],
             ['Production interval', 'Changeover, overtime, start-up loss, máy trộn (mẻ tối thiểu), đỉnh pallet kho TP, giờ nhập kho TP, tuổi tồn', 'Ops, Finance, Sales', <span class="ok">✔ đã nối</span>],
-            ['Safety stock TP', 'Pallet kho TP, giá trị tồn, lãi tồn TP, SL dự kiến, tuổi tồn/hạn dùng', 'Ops, Finance, Sales', <span>✔ kho & tồn · <span class="warn-text">SL → doanh thu/penalty: M3</span></span>],
-            ['Frozen period', 'Gợi ý SS TP, SL dự kiến', 'Sales, Ops, Purchasing', <span class="warn-text">một phần (giờ dây chuyền chưa mô hình)</span>],
+            ['Safety stock TP', 'Pallet kho TP, giá trị tồn, lãi tồn TP, SL dự kiến, tuổi tồn/hạn dùng', 'Ops, Finance, Sales', <span>✔ kho & tồn · ✔ SL → penalty/doanh thu (ước lượng)</span>],
+            ['Frozen period', '(luật: ổn định lịch sản xuất, phản ứng chậm với nhu cầu)', 'Sales, Ops, Purchasing', <span class="warn-text">chưa mô hình — không đổi số nào</span>],
             ['(từ Purchasing) NCC: lead time, reliability, trade unit, rejection', 'Availability NL, SS gợi ý, cỡ đơn, cách chứa (pallet/tank)', 'SC, Ops', <span>theo NCC & điều kiện đang chọn ở tab Purchasing</span>],
             ['(từ Sales) SL hứa, shelf life, biến động nhu cầu', 'z cho SS gợi ý, tuổi tồn cho phép, σ nhu cầu', 'SC', <span>dùng hợp đồng R0 · <span class="warn-text">đổi hợp đồng: M3</span></span>],
           ]} />

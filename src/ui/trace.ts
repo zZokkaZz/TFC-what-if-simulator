@@ -53,7 +53,7 @@ export const DRIVERS: Record<string, RegExp[]> = {
   lineLoad: LINE_ALL,
   adherence: [...LINE_ALL, /^sc\.components\./, /^ops\.intakeDays$/, PUR],
   avail: [/^sc\.components\./, /^ops\.intakeDays$/, PUR],
-  scStock: [/^sc\./, /^ops\.mixer$/, PUR],
+  scStock: [/^sc\.(components|products)\./, /^ops\.mixer$/, PUR],
   startup: [/^ops\.bottlingLine$/, /^ops\.increaseSpeed$/, INTERVAL],
   mixer: [/^ops\.mixer$/, INTERVAL],
   rmStock: RM_STOCK,
@@ -66,6 +66,8 @@ export const DRIVERS: Record<string, RegExp[]> = {
   // M3 Purchasing
   purchase: [PUR, /^sc\.components\./, /^ops\.mixer$/, INTERVAL],
   trips: [/^sc\.components\..*\.lotSizeWeeks$/, PUR, /^ops\.mixer$/, INTERVAL],
+  // M3 Sales: SL dự kiến ← safety stock TP, interval (SC) + plan adherence (Ops, NL, NCC); frozen period chưa mô hình
+  sales: [/^sc\.(components|products)\./, ...LINE_ALL, /^ops\.intakeDays$/, PUR],
   payterm: [/^purchasing\.terms\..*\.paymentTermWeeks$/, PUR, /^sc\.components\./],
 };
 

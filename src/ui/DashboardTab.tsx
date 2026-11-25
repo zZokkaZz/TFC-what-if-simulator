@@ -68,7 +68,7 @@ function Tile({ k }: { k: Kpi }) {
           // Chênh lệch làm tròn về 0 → không vẽ mũi tên (tránh "▲ ±0,0")
           return <span class={`arrow ${txt.startsWith('±') ? 'neutral' : cls}`}>{txt.startsWith('±') ? '≈' : d > 0 ? '▲' : '▼'} {txt}</span>;
         })() : <span class="muted">= R0 (chưa đổi)</span>}
-        {k.scenarioBasis !== 'model' && <span class={`badge ${k.scenarioBasis === 'estimate' ? 'badge-estimate' : 'badge-r0'}`} title={k.scenarioBasis === 'estimate' ? 'Thay đổi theo kịch bản là ước lượng' : 'Chưa mô hình — giữ số R0 (M3)'}>{k.scenarioBasis === 'estimate' ? 'ước lượng' : 'chưa mô hình'}</span>}
+        {k.scenarioBasis !== 'model' && <span class={`badge ${k.scenarioBasis === 'estimate' ? 'badge-estimate' : 'badge-r0'}`} title={k.scenarioBasis === 'estimate' ? 'Thay đổi theo kịch bản là ước lượng' : 'Chưa mô hình — giữ số R0'}>{k.scenarioBasis === 'estimate' ? 'ước lượng' : 'chưa mô hình'}</span>}
       </div>
       {k.target && v !== null && (
         <div class="kt-target">

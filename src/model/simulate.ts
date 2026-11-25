@@ -6,6 +6,7 @@ import { EST, type Est } from './assumptions';
 import { simulateOps } from './ops';
 import { simulateFinance } from './finance';
 import { simulateSupplyChain } from './supplyChain';
+import { simulateSales } from './sales';
 import { baselineInputs } from './baseline';
 import { anchorOps } from './anchor';
 import { activeSupplier, COMPONENTS, simulatePurchasing, type ActiveSupplier } from './purchasing';
@@ -37,10 +38,12 @@ export function simulate(inputs: Inputs, data: Round0Data, est: Est = EST): Resu
   // Số hiển thị neo vào số đề bài: R0 + (mô hình − mô hình baseline)
   const ops = anchorOps(opsRaw, base, data);
   const sc = simulateSupplyChain(inputs, data, opsRaw, base);
-  // Doanh thu chưa mô hình (Sales — M3 phần sau) → dùng realized revenue R0
-  const rev = data.finance.totals.realizedRevenue;
+  // M3 Sales: service level TP → penalty → realized revenue
+  const sales = simulateSales(data, sc);
+  const rev = sales.realizedRevenue;
+  const rev0 = data.finance.totals.realizedRevenue;
   const supOf = (i: Inputs) => Object.fromEntries(COMPONENTS.map((c) => [c, activeSupplier(i, data, c)])) as Record<ComponentKey, ActiveSupplier>;
-  const purchasing = simulatePurchasing(data, supOf(inputs), opsRaw.components, supOf(baselineInputs(data)), base.components, rev, rev);
-  const finance = simulateFinance(data, ops, sc, purchasing);
-  return { ops, opsRaw, sc, purchasing, finance };
+  const purchasing = simulatePurchasing(data, supOf(inputs), opsRaw.components, supOf(baselineInputs(data)), base.components, rev, rev0);
+  const finance = simulateFinance(data, ops, sc, purchasing, sales);
+  return { ops, opsRaw, sc, purchasing, sales, finance };
 }

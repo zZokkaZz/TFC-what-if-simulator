@@ -74,13 +74,15 @@ describe('SC → Ops / Finance / cảnh báo', () => {
     expect(w.some((x) => x.id === 'sc-age')).toBe(true);
     expect(w.some((x) => x.id === 'stock-fin')).toBe(true);
   });
-  it('giảm safety stock TP 3 → 1 → SL dự kiến ↓ và cảnh báo nói rõ ROI chưa trừ penalty', () => {
+  // Trước M3 Sales: cảnh báo ghi "ROI CHƯA trừ penalty". M3 Sales: penalty đã trừ vào doanh thu (ước lượng).
+  it('giảm safety stock TP 3 → 1 → SL dự kiến ↓ và cảnh báo có số penalty tăng (M3 Sales)', () => {
     const { i, r } = run((x) => allProd(x, { safetyStockWeeks: 1 }));
     expect(r.sc.products.every((p, k) => p.slPiecesEst < b.sc.products[k].slPiecesEst)).toBe(true);
     const w = crossWarnings(d, base, i, r, b).find((x) => x.id === 'sc-sl')!;
     expect(w.severity).toBe('critical');
-    expect(w.detail).toContain('CHƯA trừ penalty');
-    expect(w.roi.every((x) => x.delta === null)).toBe(true);
+    expect(w.detail).not.toContain('CHƯA trừ penalty');
+    expect(w.detail).toMatch(/ước lượng/);
+    expect(w.roi.find((x) => /^Penalty service level/.test(x.label))!.delta).toBeLessThan(0);
   });
   it('intake time dài hơn → lead time hiệu dụng ↑ → availability NL ↓ (Ops → SC)', () => {
     const { r } = run((x) => { x.ops.intakeDays = 15; });

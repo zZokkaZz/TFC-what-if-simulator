@@ -13,7 +13,8 @@ import { changedPaths } from './trace';
 import { eur, pct, signed } from './format';
 import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
 import { OpsTab } from './OpsTab';
-import { AssumptionsTab, FinanceTab, SalesTab } from './OtherTabs';
+import { AssumptionsTab, FinanceTab } from './OtherTabs';
+import { SalesTab } from './SalesTab';
 import { PurchasingTab } from './PurchasingTab';
 import { SupplyChainTab } from './SupplyChainTab';
 import { DashboardTab } from './DashboardTab';
@@ -109,7 +110,7 @@ export function App() {
       <header class="topbar">
         <div class="brand">
           <b>TFC What-if</b>
-          <span>Ops + SC + Purchasing · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
+          <span>Ops + SC + Purchasing + Sales (SL) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
         <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}`} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} sub={r0TwoSources(data, 'operatingProfit')} subTitle={R0_SOURCE_NOTE} />
@@ -186,7 +187,7 @@ export function App() {
         {tab === 'ops' && <OpsTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setOps={setOps} resetOps={() => setDept('ops', structuredClone(BASE.ops))} editable={editable('ops')} lockReason={team && !editable('ops') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Ops chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} est={est} warnings={warnings} />}
         {tab === 'sc' && <SupplyChainTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setSc={(v) => setDept('sc', v)} editable={editable('sc')} lockReason={team && !editable('sc') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Supply Chain chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} warnings={warnings} />}
         {tab === 'pur' && <PurchasingTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setPur={(v) => setDept('purchasing', v)} editable={editable('purchasing')} lockReason={team && !editable('purchasing') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Purchasing chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} warnings={warnings} />}
-        {tab === 'sales' && <SalesTab data={data} />}
+        {tab === 'sales' && <SalesTab data={data} res={res} baseRes={baseRes} changed={changed} warnings={warnings} />}
         {tab === 'fin' && <FinanceTab data={data} res={res} baseRes={baseRes} roiR0={data.finance.totals.roi} />}
         {tab === 'team' && team && <TeamTab data={data} est={est} ctl={team.ctl} state={team.state} res={res} />}
         {tab === 'info' && <AssumptionsTab data={data} estOver={estOver} setEstOver={setEstOver} />}

@@ -48,11 +48,12 @@ function changed(base: Inputs, cur: Inputs, pick: (i: Inputs) => unknown) {
 
 export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: Results, baseRes: Results): Warning[] {
   const out: Warning[] = [];
+  // Δ của (tổng) các dòng P&L khớp regex — vd /^Penalty service level/ cộng 3 khách
   const row = (re: RegExp) => {
-    const r = res.finance.rows.find((x) => re.test(x.label));
-    const b = baseRes.finance.rows.find((x) => re.test(x.label));
-    return r && b ? r.value - b.value : 0;
+    const sum = (rows: Results['finance']['rows']) => rows.filter((x) => !x.isTotal && re.test(x.label)).reduce((s, x) => s + x.value, 0);
+    return sum(res.finance.rows) - sum(baseRes.finance.rows);
   };
+  const PEN = /^Penalty service level/;
   // Dấu theo ROI: chi phí tăng = xấu; ở đây trả Δ của dòng (chi phí dương), UI tô màu theo loại dòng
   const imp = (label: string, re: RegExp, note?: string): RoiImpact => ({ label, delta: row(re), note });
   const notModeled = (label: string, note: string): RoiImpact => ({ label, delta: null, note });
@@ -164,7 +165,7 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
         id: `avail-${c.key}`, severity: c.availability < 0.9 ? 'critical' : 'warn', from: purChanged(c.key) ? 'Purchasing' : 'SC', to: ['Ops', 'Sales'],
         title: `Availability ${c.key} giảm ${pct(b.availability)} → ${pct(c.availability)}`,
         detail: `Safety stock ${n1(c.safetyStockWeeks)} tuần (gợi ý ≥ ${n1(c.recommendedSsWeeks)} tuần cho 99%), lead time ${n1(c.leadTimeWeeks)} tuần, reliability NCC ${pct(c.reliability)}. Thiếu NL làm plan adherence ${pct(baseRes.ops.line.planAdherence)} → ${pct(o.line.planAdherence)} và service level TP giảm.`,
-        roi: [notModeled('Penalty service level (doanh thu)', 'Sales — M3 chưa mô hình'), notModeled('Costs of scrap', 'chưa mô hình')],
+        roi: [imp('Penalty service level (tổng 3 khách, mọi nguyên nhân — ước lượng)', PEN), notModeled('Costs of scrap', 'chưa mô hình')],
       });
     }
   }
@@ -176,7 +177,8 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
         title: `${c.key}: availability chỉ ${pct(c.availability)}${c.stockoutDaysR0 ? ` (R0 hết hàng ${c.stockoutDaysR0}/130 ngày)` : ''}`,
         detail: `NCC ${c.supplier}: lead time ${n1(c.leadTimeWeeks)} tuần, reliability ${pct(c.reliability)}. Safety stock đang ${n1(c.safetyStockWeeks)} tuần, gợi ý ≥ ${n1(c.recommendedSsWeeks)} tuần (ước lượng) — hoặc Purchasing đổi NCC nhanh/tin cậy hơn (tab Purchasing).`,
         roi: [
-          notModeled('Penalty service level', 'Sales — M3'),
+          // Dòng penalty chỉ khi availability NL này thực sự đổi (tránh gán penalty do nguyên nhân khác cho cảnh báo R0)
+          ...(Math.abs(c.availability - c.availabilityR0) > 1e-9 ? [imp('Penalty service level (tổng 3 khách, mọi nguyên nhân — ước lượng)', PEN)] : [notModeled('Penalty service level', 'R0 đã gồm — đổi availability để thấy thay đổi')]),
           ...(cur.sc.components[c.key].safetyStockWeeks > base.sc.components[c.key].safetyStockWeeks ? [imp('Interest on components (do tăng SS)', /^Interest on components/)] : []),
         ],
       });
@@ -222,13 +224,29 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
     });
   }
   // --- SC → Sales: service level & hạn dùng ---
+  const slFrom: WDept = changed(base, cur, (i) => i.sc) ? 'SC' : changed(base, cur, (i) => i.purchasing) ? 'Purchasing' : 'Ops';
+  const slLine = (list: typeof res.sc.products) => list.map((p) => `${p.sku} ${pct(baseRes.sc.products.find((x) => x.sku === p.sku)!.slPiecesEst)} → ${pct(p.slPiecesEst)}`).join('; ');
+  const custLine = res.sales.customers.map((c) => {
+    const cb = baseRes.sales.customers.find((x) => x.customer === c.customer)!;
+    return `${c.customer} ${pct(cb.slOrderLines)} → ${pct(c.slOrderLines)} (hứa ${pct(c.promised, 0)}), penalty −€${n0(-cb.penalty)} → −€${n0(-c.penalty)}`;
+  }).join('; ');
+  const slNote = 'SL dự kiến = SL R0 − thay đổi thiếu hàng (safety stock TP, interval) + 0,97 × thay đổi plan adherence (hồi quy 6 SKU R0); penalty = penalty R0 từng khách × (mức thiếu mới ÷ mức thiếu R0) — ước lượng, game không công bố công thức.';
   const slDrop = res.sc.products.filter((p) => { const b = baseRes.sc.products.find((x) => x.sku === p.sku)!; return p.slPiecesEst < b.slPiecesEst - 0.005; });
   if (slDrop.length) {
     out.push({
-      id: 'sc-sl', severity: 'critical', from: 'SC', to: ['Sales'],
-      title: `Service level TP dự kiến giảm ở ${slDrop.length} SKU`,
-      detail: `${slDrop.map((p) => `${p.sku} ${pct(baseRes.sc.products.find((x) => x.sku === p.sku)!.slPiecesEst)} → ${pct(p.slPiecesEst)}`).join('; ')} (hứa ${pct(slDrop[0].targetServiceLevel, 0)}). ⚠ ROI hiện CHƯA trừ penalty/doanh thu mất (Sales — M3), nên ROI có thể trông tốt hơn thực tế.`,
-      roi: [notModeled('Penalty service level', 'M3 — chưa tính'), notModeled('Contracted sales', 'M3 — chưa tính')],
+      id: 'sc-sl', severity: 'critical', from: slFrom, to: ['Sales', 'Finance'],
+      title: `Service level TP dự kiến giảm ở ${slDrop.length} SKU → penalty tăng €${n0(-row(PEN))}`,
+      detail: `${slLine(slDrop)}. Theo khách (order lines): ${custLine}. ${slNote}`,
+      roi: [imp('Penalty service level (3 khách)', PEN), notModeled('Contracted sales', 'giữ R0 — nhu cầu, giá chưa mô hình')],
+    });
+  }
+  const slUp = res.sc.products.filter((p) => { const b = baseRes.sc.products.find((x) => x.sku === p.sku)!; return p.slPiecesEst > b.slPiecesEst + 0.005; });
+  if (slUp.length && !slDrop.length) {
+    out.push({
+      id: 'sc-sl-up', severity: 'info', from: slFrom, to: ['Sales', 'Finance'],
+      title: `Service level TP dự kiến tăng ở ${slUp.length} SKU → penalty giảm €${n0(row(PEN))}`,
+      detail: `${slLine(slUp)}. Theo khách (order lines): ${custLine}. Đạt SL hứa thì penalty = 0; thưởng khi vượt (luật: "thưởng nhỏ") CHƯA tính. ${slNote}`,
+      roi: [imp('Penalty service level (3 khách)', PEN)],
     });
   }
   const old = res.sc.products.filter((p) => p.allowedAgeWeeks !== null && p.maxAgeWeeks > p.allowedAgeWeeks + 1e-9);
@@ -237,15 +255,15 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
       id: 'sc-age', severity: 'warn', from: 'SC', to: ['Sales', 'Ops'],
       title: `Hàng có thể quá hạn giao (${old.length} SKU)`,
       detail: `Tuổi tồn lớn nhất ≈ safety stock + chu kỳ sản xuất = ${n1(old[0].maxAgeWeeks)} tuần > ${n1(old[0].allowedAgeWeeks!)} tuần cho phép (hạn dùng ${data.productShelfLifeWeeks ?? '?'} tuần, khách đòi còn ≥ ${pct(Math.max(...data.sales.contracts.map((c) => c.shelfLife)), 0)}). Nguy cơ obsolete tăng (R0 đã 8,1%), kho TP tốn giờ hủy hàng.`,
-      roi: [notModeled('Costs of scrap', 'chưa mô hình theo tuổi tồn'), notModeled('Penalty / doanh thu', 'M3')],
+      roi: [notModeled('Costs of scrap', 'chưa mô hình theo tuổi tồn'), notModeled('Penalty do shelf life', 'chưa mô hình')],
     });
   }
   if (scFrozen) {
     out.push({
       id: 'sc-frozen', severity: 'info', from: 'SC', to: ['Ops', 'Purchasing', 'Sales'],
       title: `Frozen period ${base.sc.frozenPeriodWeeks} → ${cur.sc.frozenPeriodWeeks} tuần`,
-      detail: 'Dài hơn: lịch sản xuất ổn định hơn nhưng phản ứng chậm với nhu cầu → cần safety stock TP cao hơn (đã tính vào gợi ý SS & SL dự kiến). Tác động lên giờ dây chuyền/overtime CHƯA mô hình (ước lượng).',
-      roi: [notModeled('Flexible manpower (bottling)', 'chưa mô hình theo frozen period')],
+      detail: 'Frozen period CHƯA mô hình: đổi ô này KHÔNG đổi số nào (gợi ý SS, service level, doanh thu, giờ dây chuyền giữ như frozen R0). Luật: dài hơn thì lịch sản xuất ổn định hơn nhưng phản ứng chậm với nhu cầu → thường cần safety stock TP cao hơn.',
+      roi: [notModeled('Service level / penalty', 'frozen period chưa mô hình'), notModeled('Flexible manpower (bottling)', 'frozen period chưa mô hình')],
     });
   }
   // --- Tồn kho → Finance ---
@@ -254,7 +272,7 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
     out.push({
       id: 'stock-fin', severity: 'info', from: 'SC', to: ['Finance'],
       title: `Giá trị tồn kho ${dStock > 0 ? 'tăng' : 'giảm'} €${n0(Math.abs(dStock))}`,
-      detail: `NL €${n0(baseRes.sc.stockValue.components)} → €${n0(res.sc.stockValue.components)}; TP €${n0(baseRes.sc.stockValue.products)} → €${n0(res.sc.stockValue.products)}. ${investmentRoiNote(res.finance.operatingProfit, res.finance.investment, baseRes.finance.investment)} (Chưa tính rủi ro service level.)`,
+      detail: `NL €${n0(baseRes.sc.stockValue.components)} → €${n0(res.sc.stockValue.components)}; TP €${n0(baseRes.sc.stockValue.products)} → €${n0(res.sc.stockValue.products)}. ${investmentRoiNote(res.finance.operatingProfit, res.finance.investment, baseRes.finance.investment)} Service level/penalty do tồn TP thay đổi: xem cảnh báo service level.`,
       roi: [imp('Investment: Stock', /^Stock$/), imp('Interest on components', /^Interest on components/), imp('Interest on products', /^Interest on products/)],
     });
   }

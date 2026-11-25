@@ -229,7 +229,38 @@ export interface Results {
   opsRaw: OpsResults;
   sc: ScResults;
   purchasing: PurchasingResults;
+  sales: SalesResults;
   finance: FinanceResults;
+}
+
+export interface SalesCustomerResult {
+  customer: string;
+  contractIndex: number;
+  serviceLevelType: string;
+  promised: number; // SL hứa (tab 6)
+  slOrderLinesR0: number;
+  slOrderLines: number; // ước lượng kịch bản (= R0 khi không đổi gì)
+  slPiecesR0: number;
+  slPieces: number;
+  shortfallR0: number; // max(0, hứa − SL R0)
+  shortfall: number;
+  contracted: number; // Contracted sales (tab 2) — giữ R0 (nhu cầu, giá chưa mô hình)
+  penaltyR0: number; // âm, tab 2
+  penalty: number; // âm
+  revenueR0: number;
+  revenue: number;
+  attainedCiR0: number;
+  attainedCi: number; // = attained CI R0 × (revenue ÷ revenue R0)
+}
+
+export interface SalesResults {
+  customers: SalesCustomerResult[];
+  realizedRevenue: number;
+  penaltyTotal: number;
+  /** Service level outbound order lines (dashboard) = R0 + (TB gia quyền order lines mới − baseline) */
+  slOutbound: number | null;
+  /** Độ dốc SL theo plan adherence (hồi quy 6 SKU R0) */
+  adherenceSlope: { slope: number; r2: number };
 }
 
 /** Nguồn của một số Purchasing: sheet (= R0), game (đội nhập), estimate (ước lượng), scaled (R0 × tỷ lệ mô hình). */
