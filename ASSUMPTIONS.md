@@ -1,6 +1,6 @@
 # ASSUMPTIONS — Giả định & hiệu chỉnh của TFC Simulator
 
-Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm)**. Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
+Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing** (Sales chưa làm). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
 
 Nhãn trên giao diện:
 - **ước lượng**: giả định không có trong luật game.
@@ -100,7 +100,7 @@ Vì vậy đỉnh pallet, số ngày vượt sức chứa, đỉnh giờ và s�
 | Đổi máy trộn/dây chuyền | Chi phí chuyển đổi = 0. App hiện dòng "Thay đổi đầu tư: ±€X" (Investment → ROI) | Không có dữ liệu |
 | Cỡ đơn NL | Không làm tròn theo trade unit | Cỡ đơn R0 không phải bội số pallet/drum |
 | Tank yard | €25 × tank mỗi ngày (130 ngày) + €10/tank nhận + €100/tank giao | Cách đếm của game chưa rõ |
-| Availability NL, nhu cầu, order lines, obsolete | Giữ số R0 | M2/M3 |
+| Availability NL, nhu cầu, order lines, obsolete | Availability: mô hình ở M2 (SC) + M3 (NCC, mục 15); nhu cầu, order lines khách, obsolete: giữ số R0 | Sales chưa làm |
 | Finance | Thay các dòng Ops trong P&L R0; các dòng khác giữ R0 | M2–M4 |
 
 ## 7. Bảng đối chiếu baseline (sau sửa)
@@ -196,3 +196,36 @@ KPI giống dashboard game: Purchasing (rejection, raw material costs, delivery 
   - Dòng "Interest on components" trong cảnh báo Vitamin C chỉ hiện khi **tăng safety stock** của NL đó (trước đây luôn hiện, gây hiểu nhầm khi đổi interval).
 - **Hai nguồn số R0 của dòng TỔNG tab 2.** `build-data.ts` đọc thêm số game in từ cột Ghi chú ("Game: …") → `finance.gamePrinted`: Operating profit −306.503, Indirect cost 1.209.651. App dùng **tổng dòng sheet** (−306.505 / 1.209.653, = ô TỔNG tab 2) để tính ROI; thanh trên cùng và tab Finance hiện cả hai và ghi rõ nguồn. Có test đọc thẳng file Excel.
 - Định dạng chênh lệch: dấu theo số đã làm tròn (không còn "−0,00 điểm %", hiện "±0,00").
+
+## 15. M3 — Purchasing (25/11/2026)
+
+Ô quyết định mỗi nguyên liệu (đúng tab 4 "Lựa chọn khi đàm phán"): Supplier (23 NCC thị trường), Transport (chỉ đổi được với NCC có cả Truck/Boat), Trade unit, Quality, Delivery window, Payment term (tuần), Agreed delivery reliability, và 3 ô **số game** bỏ trống được: *CI game hiển thị*, *Reliability thực tế*, *Rejection thực tế*. Đổi NCC → các ô đặt lại về điều kiện niêm yết của NCC mới (bảng thị trường). Giới hạn chống nhập nhầm (không phải luật game): payment term 0–52 tuần (số nguyên), reliability cam kết 50–100%, CI 0,5–2, reliability thực tế 0–100%, rejection 0–50% (`src/sync/limits.ts` = `firestore.rules`).
+
+**Không đổi gì → mọi số = đúng sheet** (test `tests/sheet-fidelity.test.ts` đọc thẳng file): reliability, rejection, purchase value, transport cost, giá thực trả từng NCC (tab 4); 5 dòng mua NL, Inbound order lines/orders, Payment terms, Purchase value (tab 2); KPI rejection 2,9%, reliability 92,1%, raw material costs 39,5%; contract index TB 0,9968; ROI −7,68%.
+
+**Đã kiểm chứng bằng số R0 (dùng như công thức):**
+- **Purchase value = giá cơ bản × contract index × lượng mua + phí vận chuyển** — khớp cả 5 NCC, lệch ≤ €1. (ROADMAP cũ ghi "giá thực trả ≠ giá × CI, tỷ lệ 1,04–3,26": vì giá thực trả đã gồm phí vận chuyển.)
+- KPI dashboard: rejection TB và reliability TB = **trung bình gia quyền theo purchase value** (2,93% / 92,1%); raw material costs = purchase value ÷ realized revenue (39,5%).
+- Số kịch bản neo R0: tiền hàng = (PV R0 − phí vận chuyển R0) × (lượng mua mô hình ÷ baseline) × (giá cơ bản × CI ÷ của R0). Giá thực trả = số sheet × (giá/đv mới ÷ giá/đv R0).
+
+**Ước lượng (badge "ước lượng" trên giao diện):**
+
+| Giả định | Đang dùng | Vì sao |
+|---|---|---|
+| Phí vận chuyển | Phí R0 × (mô hình mới ÷ mô hình baseline). Mô hình = số chuyến × (phí mỗi chuyến + phí đơn vị × số đơn vị/chuyến làm tròn lên). Pallet/drum/IBC dùng "phí / Pallet-Drum-IBC"; FTL/tank dùng "phí / FTL-Tank" × số xe/bồn (30 pallet = 1 FTL, đọc từ ghi chú tab 3). Pallet layer (PET) tính như pallet tương đương | Công thức mô hình lệch R0: Pack +3,5%, PET +8,6%, Orange −5,7%, Mango −7,1%, Vitamin C +3,4% → chỉ dùng tỷ lệ |
+| FTL | Mỗi chuyến tính đủ số xe (làm tròn lên); **cỡ đơn không làm tròn** theo xe | Luật: "lot size có thể bị trade unit làm vượt" — game làm tròn thế nào chưa rõ; cỡ đơn R0 không phải bội số pallet/tank. Hệ quả: Pack lot 4 tuần ≈ 35,9 pallet/chuyến → FTL 2 xe đắt hơn pallet lẻ; lot 3,3 tuần (~30 pallet) → FTL rẻ hơn |
+| Phí đơn hàng nhập | Inbound order lines (€271) và Inbound orders (€1.353) × (tổng số chuyến mới ÷ baseline 27,1) ≈ €10/order line, €50/đơn | Suy ra từ R0, game không công bố đơn giá |
+| Contracted suppliers (€100.000) | Giữ R0 | Luôn 5 NCC (1 NCC/nguyên liệu) |
+| Payment term NCC | Phải trả ≈ purchase value/tuần × payment term; Investment: Payment terms = R0 − (phải trả mới − phải trả baseline). Bỏ qua "start payment term" (When ordering / At delivery) | Cách game tính AR/AP chưa biết (M4) |
+| Contract index khi đổi điều kiện / NCC mới | Dùng CI niêm yết (hợp đồng R0 hoặc bảng thị trường) cho tới khi đội nhập "CI game hiển thị"; có cảnh báo "Chưa nhập số game" | Game chỉ hiện CI mới sau Calculate |
+| Reliability thực tế | NCC R0: số R0 + (cam kết mới − cam kết R0). NCC mới: cam kết − 4,72 điểm (chênh lệch TB cam kết − thực tế của 5 NCC R0). Nhập số game thì dùng số game | Sheet chỉ có reliability cam kết của NCC mới |
+| Rejection | NCC mới hoặc đổi quality: = rejection R0 của nguyên liệu đó (Pack 3,6%, PET 5,9%, Orange 1,0%, Mango 0,5%, Vitamin C 1,2%) | Không có dữ liệu rejection NCC mới. (Bản M1 dùng High 1% / Middle 3% / Poor 6% — đã bỏ vì tự đặt) |
+| Quality bao bì → hỏng dây chuyền | Giữ hệ số mục 6 (Poor ×1,6, Middle ×1,25 so với High) | Luật chỉ nói "Poor gây hỏng" |
+| Lead time | Theo phương tiện đang chọn (tab 4 thông số chi tiết) | Có trong sheet |
+
+**Chỉ cảnh báo, KHÔNG đưa vào số (theo duyệt của người dùng):**
+- Delivery window: rộng hơn → "hàng về lệch ngày nhiều hơn" (luật) — không có độ lớn.
+- Quality Orange/Mango/Vitamin C khác High → "thành phẩm không đạt kiểm tra bị hủy" (luật) — không có độ lớn.
+- NCC mới không certification / free capacity < 10% → hay giao trễ (luật) — nên nhập reliability thực tế.
+
+**Firestore rules:** thêm `validTerms` cho `terms` (5 nguyên liệu × 9 trường). Firestore chỉ cho **1.000 biểu thức mỗi request**: bản viết đầy đủ (`is number`, hàm phụ) làm ghi hợp lệ đủ 5 nguyên liệu bị chặn oan → viết tối giản, dựa vào việc so sánh khác kiểu là lỗi = bị chặn. `scripts/test-rules.mjs`: 40/40 trên emulator, gồm ca tốn biểu thức nhất (5 nguyên liệu, điền đủ ô số game). **Người dùng cần Publish lại rules.**

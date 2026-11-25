@@ -111,9 +111,9 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
         </fieldset>
 
         <details class="ctx">
-          <summary>Thông số từ phòng khác đang dùng (R0 · sửa ở M2/M3)</summary>
+          <summary>Thông số từ phòng khác đang dùng (sửa ở tab Supply Chain / Purchasing)</summary>
           <p>SC: safety stock NL {inputs.sc.components.PET.safetyStockWeeks} tuần, lot size {inputs.sc.components.PET.lotSizeWeeks} tuần · production interval {inputs.sc.products['Orange 1L'].productionIntervalDays} ngày · safety stock TP {inputs.sc.products['Orange 1L'].safetyStockWeeks} tuần · frozen {inputs.sc.frozenPeriodWeeks} tuần.</p>
-          <p>NCC: {data.purchasing.contracts.map((s) => `${COMP_LABEL[s.component]} ${s.supplier} (${s.quality}, ${s.tradeUnit})`).join(' · ')}.</p>
+          <p>NCC: {res.purchasing.components.map((s) => `${COMP_LABEL[s.key]} ${s.supplier} (${s.quality}, ${s.tradeUnit})`).join(' · ')}.</p>
         </details>
       </aside>
 

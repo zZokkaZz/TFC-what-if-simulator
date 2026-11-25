@@ -196,7 +196,7 @@ export function SupplyChainTab({ data, inputs, base, res, baseRes, changed, setS
             ['Production interval', 'Changeover, overtime, start-up loss, máy trộn (mẻ tối thiểu), đỉnh pallet kho TP, giờ nhập kho TP, tuổi tồn', 'Ops, Finance, Sales', <span class="ok">✔ đã nối</span>],
             ['Safety stock TP', 'Pallet kho TP, giá trị tồn, lãi tồn TP, SL dự kiến, tuổi tồn/hạn dùng', 'Ops, Finance, Sales', <span>✔ kho & tồn · <span class="warn-text">SL → doanh thu/penalty: M3</span></span>],
             ['Frozen period', 'Gợi ý SS TP, SL dự kiến', 'Sales, Ops, Purchasing', <span class="warn-text">một phần (giờ dây chuyền chưa mô hình)</span>],
-            ['(từ Purchasing) NCC: lead time, reliability, trade unit, rejection', 'Availability NL, SS gợi ý, cỡ đơn, cách chứa (pallet/tank)', 'SC, Ops', <span>dùng NCC hiện tại · <span class="warn-text">đổi NCC: M3</span></span>],
+            ['(từ Purchasing) NCC: lead time, reliability, trade unit, rejection', 'Availability NL, SS gợi ý, cỡ đơn, cách chứa (pallet/tank)', 'SC, Ops', <span>theo NCC & điều kiện đang chọn ở tab Purchasing</span>],
             ['(từ Sales) SL hứa, shelf life, biến động nhu cầu', 'z cho SS gợi ý, tuổi tồn cho phép, σ nhu cầu', 'SC', <span>dùng hợp đồng R0 · <span class="warn-text">đổi hợp đồng: M3</span></span>],
           ]} />
         </Card>

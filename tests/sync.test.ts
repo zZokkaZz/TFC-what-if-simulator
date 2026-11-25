@@ -136,7 +136,7 @@ describe('Kịch bản riêng & snapshot', () => {
   });
 });
 
-import { validateDept, OPS_LIMITS } from '../src/sync/limits';
+import { validateDept, OPS_LIMITS, PUR_LIMITS, PUR_TEXT, PUR_TEXT_MAX, PUR_COMPONENTS } from '../src/sync/limits';
 import { readFileSync } from 'node:fs';
 
 describe('Báo lỗi rõ ràng', () => {
@@ -201,6 +201,21 @@ describe('Báo lỗi rõ ràng', () => {
     expect(ops.getState().saves.ops.state).toBe('saved');
   });
 
+  it('giới hạn Purchasing trong app khớp với firestore.rules', () => {
+    const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
+    for (const [k, lim] of Object.entries(PUR_LIMITS)) expect(rules, k).toContain(`t.${k} >= ${lim.min} && t.${k} <= ${lim.max}`);
+    expect(rules).toContain('t.paymentTermWeeks is int');
+    for (const k of PUR_TEXT) expect(rules, k).toContain(`t.${k}.size() <= ${PUR_TEXT_MAX}`);
+    for (const c of PUR_COMPONENTS) expect(rules, c).toContain(`validTerms(m['${c}'])`);
+  });
+  it('validateDept purchasing: chặn số ngoài giới hạn, nhận ô bỏ trống (null)', () => {
+    const t = { transport: 'Truck', tradeUnit: 'Pallet', quality: 'High', deliveryWindow: '1 day', paymentTermWeeks: 4, agreedReliability: 0.95, ciGame: null, reliabilityActual: null, rejectionActual: null };
+    expect(validateDept('purchasing', { suppliers: {}, terms: { PET: t } })).toEqual([]);
+    expect(validateDept('purchasing', { suppliers: {}, terms: { PET: { ...t, ciGame: 1.02 } } })).toEqual([]);
+    expect(validateDept('purchasing', { suppliers: {}, terms: { PET: { ...t, ciGame: 5 } } })[0].path).toBe('purchasing.terms.PET.ciGame');
+    expect(validateDept('purchasing', { suppliers: {}, terms: { PET: { ...t, paymentTermWeeks: 4.5 } } })[0].message).toMatch(/số nguyên/);
+    expect(validateDept('purchasing', { suppliers: {}, terms: { Sugar: t } })[0].message).toMatch(/nguyên liệu/);
+  });
   it('giới hạn trong app khớp với firestore.rules', () => {
     const rules = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
     for (const [k, lim] of Object.entries(OPS_LIMITS)) {

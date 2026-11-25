@@ -114,8 +114,8 @@ export function componentRisk(inputs: Inputs, data: Round0Data, cal: Calibration
   for (const f of flows) {
     const c = f.key;
     const s = sup[c];
-    const r0 = data.purchasing.results.find((r) => r.supplier === s.supplier && r.component === c);
-    const reliability = r0?.reliability ?? s.agreedReliability;
+    // Reliability thực tế: NCC R0 = số sheet; NCC mới / đổi cam kết = ước lượng hoặc số đội nhập (purchasing.ts)
+    const reliability = s.reliability;
     const sigmaWeek = Math.sqrt(production.reduce((acc, p) => {
       const bom = data.products.find((x) => x.key === p.sku)!.bom[c];
       const sd = (data.weekly.std[p.sku] ?? 0) * cal.prodFactor * bom;

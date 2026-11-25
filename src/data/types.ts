@@ -260,6 +260,8 @@ export interface Round0Data {
     gamePrinted: { operatingProfit: number | null; indirectCost: number | null };
   };
   products: Product[];
+  /** Số pallet / 1 xe tải FTL (ghi chú tab 3); null = thiếu dữ liệu */
+  palletsPerFtl: number | null;
   /** Hạn dùng sản phẩm (tuần), đọc từ tiêu đề bảng tab 3; null = thiếu dữ liệu */
   productShelfLifeWeeks: number | null;
   components: Component[];

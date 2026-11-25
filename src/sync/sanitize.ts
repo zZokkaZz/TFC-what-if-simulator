@@ -3,7 +3,11 @@ import type { Inputs } from '../model/types';
 import type { Dept } from './types';
 
 export function merge<T>(base: T, saved: unknown): T {
-  if (saved === null || saved === undefined) return base;
+  // Ô "bỏ trống được" (baseline null, vd CI game hiển thị): nhận số hữu hạn hoặc null
+  if (base === null) return (typeof saved === 'number' && Number.isFinite(saved) ? saved : null) as T;
+  if (saved === undefined) return base;
+  // Ô số bỏ trống được mà người dùng đã điền rồi xóa: baseline là số chỉ khi là ô bắt buộc → null không hợp lệ
+  if (saved === null) return base;
   if (typeof base !== 'object' || base === null) {
     if (typeof saved !== typeof base) return base;
     if (typeof saved === 'number' && !Number.isFinite(saved)) return base;

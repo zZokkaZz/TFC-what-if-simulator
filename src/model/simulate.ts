@@ -8,6 +8,8 @@ import { simulateFinance } from './finance';
 import { simulateSupplyChain } from './supplyChain';
 import { baselineInputs } from './baseline';
 import { anchorOps } from './anchor';
+import { activeSupplier, COMPONENTS, simulatePurchasing, type ActiveSupplier } from './purchasing';
+import type { ComponentKey } from '../data/types';
 
 export { baselineInputs } from './baseline';
 
@@ -35,6 +37,10 @@ export function simulate(inputs: Inputs, data: Round0Data, est: Est = EST): Resu
   // Số hiển thị neo vào số đề bài: R0 + (mô hình − mô hình baseline)
   const ops = anchorOps(opsRaw, base, data);
   const sc = simulateSupplyChain(inputs, data, opsRaw, base);
-  const finance = simulateFinance(data, ops, sc);
-  return { ops, opsRaw, sc, finance };
+  // Doanh thu chưa mô hình (Sales — M3 phần sau) → dùng realized revenue R0
+  const rev = data.finance.totals.realizedRevenue;
+  const supOf = (i: Inputs) => Object.fromEntries(COMPONENTS.map((c) => [c, activeSupplier(i, data, c)])) as Record<ComponentKey, ActiveSupplier>;
+  const purchasing = simulatePurchasing(data, supOf(inputs), opsRaw.components, supOf(baselineInputs(data)), base.components, rev, rev);
+  const finance = simulateFinance(data, ops, sc, purchasing);
+  return { ops, opsRaw, sc, purchasing, finance };
 }

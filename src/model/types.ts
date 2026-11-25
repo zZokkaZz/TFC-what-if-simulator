@@ -24,9 +24,25 @@ export interface ScInputs {
   frozenPeriodWeeks: number;
 }
 
+/** Điều kiện hợp đồng của một nguyên liệu (ô đàm phán trong game, tab 4 "Lựa chọn khi đàm phán"). */
+export interface PurchasingTerms {
+  transport: string; // Truck / Boat (chỉ đổi được với NCC có cả hai)
+  tradeUnit: string;
+  quality: string;
+  deliveryWindow: string;
+  paymentTermWeeks: number;
+  agreedReliability: number; // 0–1
+  /** Số đội nhập từ game (sau đàm phán/Calculate). null = bỏ trống → dùng số trước đàm phán / ước lượng. */
+  ciGame: number | null;
+  reliabilityActual: number | null; // 0–1
+  rejectionActual: number | null; // 0–1
+}
+
 export interface PurchasingInputs {
   /** NCC đang chọn cho từng nguyên liệu (tên như trong bảng thị trường). */
   suppliers: Record<ComponentKey, string>;
+  /** Điều kiện hợp đồng từng nguyên liệu. Đổi NCC → giao diện đặt lại về điều kiện mặc định của NCC mới. */
+  terms: Record<ComponentKey, PurchasingTerms>;
 }
 
 /** Sales — M3 sẽ thêm service level, shelf life… (giữ chỗ để đồng bộ theo phòng). */
@@ -212,7 +228,57 @@ export interface Results {
   /** Số mô hình thô (dùng đo độ chính xác của mô hình so với R0) */
   opsRaw: OpsResults;
   sc: ScResults;
+  purchasing: PurchasingResults;
   finance: FinanceResults;
+}
+
+/** Nguồn của một số Purchasing: sheet (= R0), game (đội nhập), estimate (ước lượng), scaled (R0 × tỷ lệ mô hình). */
+export type PurBasis = 'sheet' | 'game' | 'estimate' | 'scaled';
+
+export interface PurchasingComponentResult {
+  key: ComponentKey;
+  supplier: string;
+  supplierR0: string;
+  isR0Supplier: boolean;
+  transport: string;
+  tradeUnit: string;
+  quality: string;
+  deliveryWindow: string;
+  paymentTermWeeks: number;
+  leadTimeDays: number;
+  basePrice: number;
+  contractIndex: number;
+  ciBasis: PurBasis;
+  /** Điều kiện đã đổi so với mặc định của NCC nhưng chưa nhập CI game → giá đang dùng CI trước đàm phán */
+  ciStale: boolean;
+  reliability: number;
+  reliabilityBasis: PurBasis;
+  rejection: number;
+  rejectionBasis: PurBasis;
+  amountPurchased: number; // cả round (hiển thị: R0 × tỷ lệ mô hình)
+  goodsValue: number; // giá × lượng mua
+  transportCost: number;
+  purchaseValue: number;
+  purchaseValueR0: number;
+  transportCostR0: number;
+  /** Purchase value ÷ lượng mua (gồm phí vận chuyển) — như cột "Giá thực trả" tab 4 */
+  pricePaid: number;
+  deliveriesPerRound: number;
+  /** Phải trả NCC ước lượng = purchase value/tuần × payment term (dùng cho thay đổi Investment) */
+  payables: number;
+}
+
+export interface PurchasingResults {
+  components: PurchasingComponentResult[];
+  purchaseValue: number;
+  transportCost: number;
+  inboundOrderLines: number; // € (P&L)
+  inboundOrders: number; // € (P&L)
+  deliveriesPerRound: number;
+  /** Thay đổi dòng Investment: Payment terms (AR − AP) do payment term NCC — ước lượng */
+  paymentTermsDelta: number;
+  /** KPI dashboard (đã neo R0 + chênh lệch) */
+  kpi: { rejection: number; reliability: number; rawMaterialCosts: number; avgContractIndex: number };
 }
 
 /** Một ô hiển thị: số sheet R0, số kịch bản (= R0 khi không đổi gì), và cách ra số kịch bản. */

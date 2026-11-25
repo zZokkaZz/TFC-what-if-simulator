@@ -55,9 +55,31 @@ service cloud.firestore {
         && d.products is map && d.products.size() <= 6
         && num(d.frozenPeriodWeeks, 0, 26);
     }
+    // Điều kiện hợp đồng một nguyên liệu (giới hạn khớp src/sync/limits.ts PUR_LIMITS).
+    // Viết tối giản vì Firestore chỉ cho 1.000 biểu thức mỗi request (5 nguyên liệu × 9 trường):
+    // so sánh khác kiểu (chuỗi ≥ số, số.size()…) là LỖI → request bị chặn, nên không cần thêm "is number"/"is string".
+    function validTerms(t) {
+      return t.keys().hasOnly(['transport', 'tradeUnit', 'quality', 'deliveryWindow', 'paymentTermWeeks',
+               'agreedReliability', 'ciGame', 'reliabilityActual', 'rejectionActual'])
+        && t.transport.size() <= 20 && t.tradeUnit.size() <= 20 && t.quality.size() <= 20 && t.deliveryWindow.size() <= 20
+        && t.paymentTermWeeks is int && t.paymentTermWeeks >= 0 && t.paymentTermWeeks <= 52
+        && t.agreedReliability >= 0.5 && t.agreedReliability <= 1
+        && (t.ciGame == null || (t.ciGame >= 0.5 && t.ciGame <= 2))
+        && (t.reliabilityActual == null || (t.reliabilityActual >= 0 && t.reliabilityActual <= 1))
+        && (t.rejectionActual == null || (t.rejectionActual >= 0 && t.rejectionActual <= 0.5));
+    }
     function validPurchasing(d) {
-      return d.keys().hasOnly(['suppliers'])
-        && d.suppliers is map && d.suppliers.size() <= 5;
+      return d.keys().hasOnly(['suppliers', 'terms'])
+        && d.suppliers is map && d.suppliers.size() <= 5
+        && (!('terms' in d) || validTermsMap(d.terms));
+    }
+    function validTermsMap(m) {
+      return m.keys().hasOnly(['Pack', 'PET', 'Orange', 'Mango', 'Vitamin C'])
+        && (!('Pack' in m) || validTerms(m['Pack']))
+        && (!('PET' in m) || validTerms(m['PET']))
+        && (!('Orange' in m) || validTerms(m['Orange']))
+        && (!('Mango' in m) || validTerms(m['Mango']))
+        && (!('Vitamin C' in m) || validTerms(m['Vitamin C']));
     }
     function validSales(d) {
       return d.size() <= 50;

@@ -229,6 +229,9 @@ const components: Component[] = tComp.rows.map((r) => {
   };
 });
 for (const c of components) if (!c.liquidUnits && !c.unitsPerPallet) fail(`Thiếu quy cách pallet cho ${c.name}`);
+// Số pallet / 1 xe tải (FTL): ghi chú tab 3, vd "30 pallet = 1 xe tải (FTL)". Không có → null (thiếu dữ liệu).
+const ftlText = prodRows.flat().map((x) => String(x ?? '').normalize('NFC')).find((t) => /pallet\s*=\s*1\s*xe tải/i.test(t));
+const palletsPerFtl = ftlText ? numIn(ftlText, /([\d.,]+)\s*pallet\s*=\s*1\s*xe tải/i) : null;
 
 // ================= 4_Purchasing =================
 const purRows = sheet('4_Purchasing', /^4_/);
@@ -704,6 +707,11 @@ captureRaw('an-line', '10_R0 Analysis', anRows, 'Analysis — Bottling line', [/
 captureRaw('an-mixer', '10_R0 Analysis', anRows, 'Analysis — Mixers', [/^Mixer$/, /Cleaning time/]);
 captureRaw('an-dist', '10_R0 Analysis', anRows, 'Analysis — Distributor', [/^Distributor$/, /Distribution costs/]);
 captureRaw('fin', '2_Finance', finRows, 'P&L Round 0', [/^Nhóm$/, /^Dòng$/, /Round 0/]);
+captureRaw('pur-contracts', '4_Purchasing', purRows, 'Hợp đồng hiện tại', [/^Component$/, /^Nhà cung cấp$/, /^Contract index$/, /^Delivery window$/]);
+captureRaw('pur-results', '4_Purchasing', purRows, 'Kết quả thực tế Round 0 (NCC)', [/^Nhà cung cấp$/, /^Reliability thực tế$/, /^Purchase value/]);
+captureRaw('pur-market', '4_Purchasing', purRows, 'Thị trường nhà cung cấp (trước đàm phán)', [/^Component$/, /^Nhà cung cấp$/, /^Đang dùng$/, /^Contract index$/]);
+captureRaw('pur-specs', '4_Purchasing', purRows, 'Thông số chi tiết 23 NCC', [/^Nhà cung cấp$/, /^Basic contract index$/, /Phí mỗi chuyến/]);
+captureRaw('pur-nego', '4_Purchasing', purRows, 'Lựa chọn khi đàm phán', [/^Component$/, /^Trade unit chọn được$/, /^Delivery window$/]);
 captureRaw('week', '12_R0 Theo tuần', wkRows, 'Nhu cầu theo tuần', [/^Tuần$/, /^Orange 1L$/, /^Mango PET$/]);
 // Thống kê tab 11 (các dòng dưới bảng theo ngày): dùng tiêu đề cột của bảng theo ngày
 {
@@ -740,6 +748,7 @@ const out: Round0Data = {
   meta: { source: 'data/TFC_Round0.xlsx', generatedAt: new Date().toISOString(), sheets: sheetNames },
   issues,
   finance: { lines: finDetail, totals: financeTotals, gamePrinted: financeGamePrinted },
+  palletsPerFtl,
   products,
   productShelfLifeWeeks,
   components,
