@@ -160,7 +160,7 @@ export function roleScores(d: Round0Data, res: Results, base: Results): RoleScor
   return [
     { dept: 'Purchasing', rule, r0: ciR0, scenario: res.purchasing.kpi.avgContractIndex, unit: 'index', good: 'down', note: 'Contract index TB đơn giản của 5 hợp đồng (tab 4) — game có thể tính trọng số khác (ước lượng). NCC mới / đổi điều kiện mà chưa nhập CI game → dùng CI trước đàm phán.' },
     { dept: 'Operations', rule, r0: opsScore(base), scenario: opsScore(res), unit: 'pct', good: 'down', note: 'Production costs + dòng kho (pallet locations, overflow, tank yard, nhân công kho) ÷ realized revenue (tab 2) — game chưa nói rõ dòng nào là "kho" (ước lượng).' },
-    { dept: 'Sales', rule, r0: d.finance.totals.realizedRevenue, scenario: res.finance.realizedRevenue, unit: 'eur', good: 'up', note: 'Realized revenue (tab 2) = contracted (giữ R0) + penalty service level ước lượng theo SL dự kiến. Ô hợp đồng Sales (SL hứa, shelf life…) chưa có.' },
+    { dept: 'Sales', rule, r0: d.finance.totals.realizedRevenue, scenario: res.finance.realizedRevenue, unit: 'eur', good: 'up', note: 'Realized revenue (tab 2) = contracted (R0 × CI ÷ CI R0; CI = số game hoặc ước lượng) + penalty service level ước lượng theo SL dự kiến. Ô SL hứa, shelf life, payment term, promotion chưa có.' },
     { dept: 'Supply Chain', rule, r0: stock(base), scenario: stock(res), unit: 'eur', good: 'down', note: 'Investment: Stock (tab 2) — giá trị tồn NL + TP.' },
   ];
 }

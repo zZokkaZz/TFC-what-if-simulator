@@ -19,16 +19,6 @@ export function merge<T>(base: T, saved: unknown): T {
   return out as T;
 }
 
-/** Sales chưa có quyết định (M3): chỉ nhận số/chuỗi/boolean phẳng. */
-function mergeFlat(saved: unknown): Record<string, number | string | boolean> {
-  const out: Record<string, number | string | boolean> = {};
-  if (saved && typeof saved === 'object') {
-    for (const [k, v] of Object.entries(saved as Record<string, unknown>).slice(0, 50)) {
-      if (typeof v === 'number' || typeof v === 'string' || typeof v === 'boolean') out[k] = v;
-    }
-  }
-  return out;
-}
-
-export const makeSanitizer = (base: Inputs) => (dept: Dept, data: unknown): unknown =>
-  dept === 'sales' && Object.keys(base.sales).length === 0 ? mergeFlat(data) : merge(base[dept], data);
+// Sales (từ mục 1, 25/11) có cấu trúc { customers: { [khách]: { tradeUnit, orderDeadline, ciGame } } } → dùng merge như các phòng khác:
+// chỉ nhận khách và trường có trong baseline; bản lưu cũ dạng phẳng ({} hoặc khóa lạ) bị bỏ, về baseline.
+export const makeSanitizer = (base: Inputs) => (dept: Dept, data: unknown): unknown => merge(base[dept], data);

@@ -39,14 +39,14 @@ export function simulate(inputs: Inputs, data: Round0Data, est: Est = EST): Resu
   const ops = anchorOps(opsRaw, base, data);
   const sc = simulateSupplyChain(inputs, data, opsRaw, base);
   // M3 Sales: service level TP → penalty → realized revenue
-  const sales = simulateSales(data, sc);
+  const sales = simulateSales(data, sc, inputs);
   const rev = sales.realizedRevenue;
   const rev0 = data.finance.totals.realizedRevenue;
   const supOf = (i: Inputs) => Object.fromEntries(COMPONENTS.map((c) => [c, activeSupplier(i, data, c)])) as Record<ComponentKey, ActiveSupplier>;
   const purchasing = simulatePurchasing(data, supOf(inputs), opsRaw.components, supOf(baselineInputs(data)), base.components, rev, rev0);
   const finance = simulateFinance(data, ops, sc, purchasing, sales);
   // V1 "thận trọng": SL = min(phương án B, C) từng SKU → doanh thu thấp hơn hoặc bằng; chỉ doanh thu đổi (Investment giữ nguyên)
-  const salesCons = simulateSales(data, { ...sc, products: sc.products.map((p) => ({ ...p, slPiecesEst: p.slPiecesEstCons })) });
+  const salesCons = simulateSales(data, { ...sc, products: sc.products.map((p) => ({ ...p, slPiecesEst: p.slPiecesEstCons })) }, inputs);
   const opCons = finance.operatingProfit - (sales.realizedRevenue - salesCons.realizedRevenue);
   const conservative = { sales: salesCons, realizedRevenue: salesCons.realizedRevenue, operatingProfit: opCons, roi: opCons / finance.investment };
   return { ops, opsRaw, sc, purchasing, sales, finance, conservative };

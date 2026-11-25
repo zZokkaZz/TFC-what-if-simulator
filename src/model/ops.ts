@@ -182,7 +182,7 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, b
     fgTheory[p.sku] = fgTheoryUnits(inputs, p.sku, p.demandUnits);
     fgBatch[p.sku] = batchUnits;
   }
-  const picking = customerPicking(data);
+  const picking = customerPicking(data, inputs);
   for (const cu of picking) {
     const L = cu.orderLinesPerWeek;
     let h = L * FG_NORMS.pickHoursPerLine;

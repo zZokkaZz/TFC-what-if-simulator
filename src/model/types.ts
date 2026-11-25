@@ -45,8 +45,21 @@ export interface PurchasingInputs {
   terms: Record<ComponentKey, PurchasingTerms>;
 }
 
-/** Sales — M3 sẽ thêm service level, shelf life… (giữ chỗ để đồng bộ theo phòng). */
-export type SalesInputs = Record<string, number | string | boolean>;
+/** Điều khoản hợp đồng một khách (ô Negotiate trong game; lựa chọn đọc từ tab 6 "LỰA CHỌN HỢP ĐỒNG SALES").
+ *  Mục 1 (25/11): trade unit, order deadline, CI game hiển thị. Các ô khác (SL hứa, shelf life, payment term, promotion) làm sau. */
+export interface SalesCustomerTerms {
+  /** Đúng chuỗi lựa chọn của sheet, vd "Box (outer box)" / "Pallet layer" / "Pallet" */
+  tradeUnit: string;
+  /** Đúng chuỗi lựa chọn của sheet, vd "12.00" … "20.00" */
+  orderDeadline: string;
+  /** Contract index game hiển thị sau đàm phán. null = bỏ trống → CI R0 × hệ số ước lượng (COEFFS). */
+  ciGame: number | null;
+}
+
+export interface SalesInputs {
+  /** Theo tên khách (tab 6) */
+  customers: Record<string, SalesCustomerTerms>;
+}
 
 export interface Inputs {
   ops: OpsInputs;
@@ -235,9 +248,23 @@ export interface Results {
   conservative: { sales: SalesResults; realizedRevenue: number; operatingProfit: number; roi: number };
 }
 
+/** Nguồn của contract index khách: sheet (= R0, chưa đổi điều khoản), game (đội nhập), estimate (R0 × hệ số COEFFS). */
+export type SalesCiBasis = 'sheet' | 'game' | 'estimate';
+
 export interface SalesCustomerResult {
   customer: string;
+  /** Contract index đang dùng (kịch bản) */
   contractIndex: number;
+  contractIndexR0: number;
+  ciBasis: SalesCiBasis;
+  /** Đã đổi điều khoản hợp đồng mà chưa nhập CI game → CI là ước lượng */
+  ciStale: boolean;
+  /** Số bậc thay đổi so với R0 (dương = hướng làm CI tăng theo Info Center) */
+  ciSteps: { tradeUnit: number; orderDeadline: number };
+  tradeUnit: string;
+  tradeUnitR0: string;
+  orderDeadline: string;
+  orderDeadlineR0: string;
   serviceLevelType: string;
   promised: number; // SL hứa (tab 6)
   slOrderLinesR0: number;
@@ -246,7 +273,8 @@ export interface SalesCustomerResult {
   slPieces: number;
   shortfallR0: number; // max(0, hứa − SL R0)
   shortfall: number;
-  contracted: number; // Contracted sales (tab 2) — giữ R0 (nhu cầu, giá chưa mô hình)
+  contractedR0: number; // tab 2
+  contracted: number; // = contracted R0 × (CI ÷ CI R0) — ước lượng khi CI đổi; nhu cầu giữ R0
   penaltyR0: number; // âm, tab 2
   penalty: number; // âm
   revenueR0: number;

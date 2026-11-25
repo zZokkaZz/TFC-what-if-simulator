@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-25T14:52:23.782Z",
+  "generatedAt": "2026-11-25T15:03:24.031Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -2466,6 +2466,191 @@
   "notes": [
    "Shortage rule hiện tại: Proportional (thiếu hàng thì chia đều). Có thể đổi sang First-come-first-served hoặc Customer priority.",
    "Cột 'Additional sales next round as a result of webshop service level' trong game = 0 cho cả 15 cặp khách × SKU (Round 0 chưa có webshop)."
+  ],
+  "options": [
+   {
+    "key": "serviceLevelType",
+    "field": "Service level type",
+    "choicesText": "Units | Order lines | Orders",
+    "choices": [
+     "Units",
+     "Order lines",
+     "Orders"
+    ],
+    "range": null,
+    "r0": {
+     "Food & Groceries": "Order lines",
+     "LAND Market": "Order lines",
+     "Dominick's": "Order lines"
+    },
+    "impact": "Đo theo đơn vị (Units) dễ đạt nhất, theo Orders khó nhất: 1 đơn 5 dòng giao đủ 4 dòng = 80% theo order lines nhưng 0% theo orders"
+   },
+   {
+    "key": "serviceLevel",
+    "field": "Service level (%)",
+    "choicesText": "75 – 100",
+    "choices": null,
+    "range": {
+     "min": 75,
+     "max": 100
+    },
+    "r0": {
+     "Food & Groceries": 95,
+     "LAND Market": 95,
+     "Dominick's": 95
+    },
+    "impact": "Hứa cao → contract index cao (giá cao). Không đạt → penalty. Vượt → bonus nhỏ, thấp hơn mức có thể đàm phán trước"
+   },
+   {
+    "key": "shelfLife",
+    "field": "Shelf life (%)",
+    "choicesText": "40 – 85",
+    "choices": null,
+    "range": {
+     "min": 40,
+     "max": 85
+    },
+    "r0": {
+     "Food & Groceries": 75,
+     "LAND Market": 75,
+     "Dominick's": 75
+    },
+    "impact": "Cao → contract index cao. Nhưng số tuần được giữ hàng giảm: hạn 20 tuần × (1 − shelf life). VD 70% → chỉ giao hàng còn ≥ 14 tuần"
+   },
+   {
+    "key": "orderDeadline",
+    "field": "Order deadline",
+    "choicesText": "12.00 | 14.00 | 17.00 | 20.00",
+    "choices": [
+     "12.00",
+     "14.00",
+     "17.00",
+     "20.00"
+    ],
+    "range": null,
+    "r0": {
+     "Food & Groceries": "20.00",
+     "LAND Market": "17.00",
+     "Dominick's": "12.00"
+    },
+    "impact": "Muộn → contract index cao. Quá muộn → nhân viên kho TP không kịp xử lý hết dòng đơn, ảnh hưởng giao hàng"
+   },
+   {
+    "key": "tradeUnit",
+    "field": "Trade unit",
+    "choicesText": "Box (outer box) | Pallet layer | Pallet",
+    "choices": [
+     "Box (outer box)",
+     "Pallet layer",
+     "Pallet"
+    ],
+    "range": null,
+    "r0": {
+     "Food & Groceries": "Pallet layer",
+     "LAND Market": "Pallet layer",
+     "Dominick's": "Pallet"
+    },
+    "impact": "Vừa là mức đặt tối thiểu vừa là bội số. Nhỏ → contract index cao, nhưng soạn hàng lâu hơn (giờ công kho TP)"
+   },
+   {
+    "key": "paymentTermWeeks",
+    "field": "Payment term (tuần)",
+    "choicesText": "1 – 8",
+    "choices": null,
+    "range": {
+     "min": 1,
+     "max": 8
+    },
+    "r0": {
+     "Food & Groceries": 4,
+     "LAND Market": 4,
+     "Dominick's": 4
+    },
+    "impact": "Dài → contract index cao. Ngắn → tốt cho dòng tiền (phải thu thấp → Investment thấp)"
+   },
+   {
+    "key": "promotionalPressure",
+    "field": "Promotional pressure",
+    "choicesText": "None | Light | Middle | Heavy",
+    "choices": [
+     "None",
+     "Light",
+     "Middle",
+     "Heavy"
+    ],
+    "range": null,
+    "r0": {
+     "Food & Groceries": "Middle",
+     "LAND Market": "Middle",
+     "Dominick's": "Middle"
+    },
+    "impact": "Tăng → contract index giảm (TFC gánh 1 phần giảm giá) nhưng nhu cầu tăng. Nhu cầu thêm (lít): None 0%; Light 0,5–1,0%; Middle 1,5–2,0%; Heavy 4,0–5,5%. Khách Value for money: gấp đôi. Cặp khách × SKU slowmover: gấp đôi"
+   },
+   {
+    "key": "promotionHorizon",
+    "field": "Promotion horizon",
+    "choicesText": "Short | Middle | Long",
+    "choices": [
+     "Short",
+     "Middle",
+     "Long"
+    ],
+    "range": null,
+    "r0": {
+     "Food & Groceries": "Short",
+     "LAND Market": "Short",
+     "Dominick's": "Short"
+    },
+    "impact": "Khách thích Short (linh hoạt). Dài hơn → TFC biết trước, dễ lên kế hoạch sản xuất"
+   },
+   {
+    "key": "shortageRule",
+    "field": "Shortage rule (tab ord.mgmt, chung cho 3 khách)",
+    "choicesText": "Proportional | First come, first served | Customer priority",
+    "choices": [
+     "Proportional",
+     "First come, first served",
+     "Customer priority"
+    ],
+    "range": null,
+    "r0": {
+     "Food & Groceries": "Proportional",
+     "LAND Market": null,
+     "Dominick's": null
+    },
+    "impact": "Proportional: chia đều phần thiếu cho mọi đơn trong ngày. FCFS: đơn đặt sớm được trước. Customer priority: xếp hạng khách, khách thấp nhất chịu thiếu nhiều nhất"
+   },
+   {
+    "key": "skus",
+    "field": "SKU bán cho khách (tab cat.mgmt)",
+    "choicesText": "Bật/tắt từng SKU cho từng khách",
+    "choices": null,
+    "range": null,
+    "r0": {
+     "Food & Groceries": "Cả 6 SKU",
+     "LAND Market": "Cả 6 SKU",
+     "Dominick's": "Chỉ 3 SKU PET"
+    },
+    "impact": "Info Center không có mô tả chi tiết"
+   }
+  ],
+  "optionNotes": [
+   {
+    "label": "Kiểm chứng",
+    "text": "Bán thêm nhờ khuyến mãi ở R0 khớp luật: Dominick's (không Value for money) 1,7–1,8% nằm trong 1,5–2,0% của Middle; F&G và LAND (Value for money, gấp đôi) 2,9–3,7% nằm trong 3,0–4,0%; LAND × C-power PET 7,3% ≈ gấp đôi lần nữa, nhiều khả năng là slowmover."
+   },
+   {
+    "label": "Chưa có công thức",
+    "text": "Game không công bố công thức tính contract index theo từng ô; chỉ biết hướng tác động. Nút Calculate trong game tính CI nhưng có thể bị tính là nộp quyết định, không bấm."
+   },
+   {
+    "label": "Tên gọi",
+    "text": "Dropdown game ghi None/Light/Middle/Heavy; Info Center ghi Benchmark/Low/Middle/High (cùng 4 mức). Form còn 2 ô ẩn cho sản phẩm Fresh (SL 97%, shelf life 70%), không áp dụng cho 6 SKU hiện tại. Info Center có nhắc Distribution pattern và Bonus policy nhưng form R0 không có 2 ô này."
+   },
+   {
+    "label": "Nguồn",
+    "text": "Game TFC: Sales > agreements (form Negotiate, chỉ đọc), ord.mgmt, cat.mgmt; Info Center > Sales > Negotiating và Order Management. Không bấm Negotiate/Calculate/Deal."
+   }
   ]
  },
  "supplyChain": {
@@ -10680,6 +10865,183 @@
      false,
      false,
      true,
+     false,
+     false,
+     false,
+     false,
+     false
+    ]
+   ]
+  },
+  {
+   "id": "sales-options",
+   "sheet": "6_Sales",
+   "title": "Lựa chọn hợp đồng Sales (form Negotiate & Info Center)",
+   "headers": [
+    "Ô quyết định",
+    "Lựa chọn / khoảng cho phép",
+    "R0 Food & Groceries",
+    "R0 LAND Market",
+    "R0 Dominick's",
+    "Tác động (Info Center)"
+   ],
+   "rows": [
+    [
+     "Service level type",
+     "Units | Order lines | Orders",
+     "Order lines",
+     "Order lines",
+     "Order lines",
+     "Đo theo đơn vị (Units) dễ đạt nhất, theo Orders khó nhất: 1 đơn 5 dòng giao đủ 4 dòng = 80% theo order lines nhưng 0% theo orders"
+    ],
+    [
+     "Service level (%)",
+     "75 – 100",
+     95,
+     95,
+     95,
+     "Hứa cao → contract index cao (giá cao). Không đạt → penalty. Vượt → bonus nhỏ, thấp hơn mức có thể đàm phán trước"
+    ],
+    [
+     "Shelf life (%)",
+     "40 – 85",
+     75,
+     75,
+     75,
+     "Cao → contract index cao. Nhưng số tuần được giữ hàng giảm: hạn 20 tuần × (1 − shelf life). VD 70% → chỉ giao hàng còn ≥ 14 tuần"
+    ],
+    [
+     "Order deadline",
+     "12.00 | 14.00 | 17.00 | 20.00",
+     "20.00",
+     "17.00",
+     "12.00",
+     "Muộn → contract index cao. Quá muộn → nhân viên kho TP không kịp xử lý hết dòng đơn, ảnh hưởng giao hàng"
+    ],
+    [
+     "Trade unit",
+     "Box (outer box) | Pallet layer | Pallet",
+     "Pallet layer",
+     "Pallet layer",
+     "Pallet",
+     "Vừa là mức đặt tối thiểu vừa là bội số. Nhỏ → contract index cao, nhưng soạn hàng lâu hơn (giờ công kho TP)"
+    ],
+    [
+     "Payment term (tuần)",
+     "1 – 8",
+     4,
+     4,
+     4,
+     "Dài → contract index cao. Ngắn → tốt cho dòng tiền (phải thu thấp → Investment thấp)"
+    ],
+    [
+     "Promotional pressure",
+     "None | Light | Middle | Heavy",
+     "Middle",
+     "Middle",
+     "Middle",
+     "Tăng → contract index giảm (TFC gánh 1 phần giảm giá) nhưng nhu cầu tăng. Nhu cầu thêm (lít): None 0%; Light 0,5–1,0%; Middle 1,5–2,0%; Heavy 4,0–5,5%. Khách Value for money: gấp đôi. Cặp khách × SKU slowmover: gấp đôi"
+    ],
+    [
+     "Promotion horizon",
+     "Short | Middle | Long",
+     "Short",
+     "Short",
+     "Short",
+     "Khách thích Short (linh hoạt). Dài hơn → TFC biết trước, dễ lên kế hoạch sản xuất"
+    ],
+    [
+     "Shortage rule (tab ord.mgmt, chung cho 3 khách)",
+     "Proportional | First come, first served | Customer priority",
+     "Proportional",
+     null,
+     null,
+     "Proportional: chia đều phần thiếu cho mọi đơn trong ngày. FCFS: đơn đặt sớm được trước. Customer priority: xếp hạng khách, khách thấp nhất chịu thiếu nhiều nhất"
+    ],
+    [
+     "SKU bán cho khách (tab cat.mgmt)",
+     "Bật/tắt từng SKU cho từng khách",
+     "Cả 6 SKU",
+     "Cả 6 SKU",
+     "Chỉ 3 SKU PET",
+     "Info Center không có mô tả chi tiết"
+    ]
+   ],
+   "pct": [
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
+     false,
+     false,
+     false,
+     false,
+     false
+    ],
+    [
+     false,
      false,
      false,
      false,

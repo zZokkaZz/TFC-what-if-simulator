@@ -235,3 +235,51 @@ describe('Sửa sau rà soát: tank yard 2 nguồn; tab 6 cột mới; cột ti�
     d.sales.customerProduct.forEach((x, k) => expect(x.demandPerWeek).toBe(cp.rows[k][iU]));
   });
 });
+
+describe('Sales mục 1: khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) = đúng từng ô; baseline = đúng sheet', () => {
+  const rows6 = rowsOf('6_Sales');
+  const h = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Ô quyết định');
+  const H = rows6[h].map((x) => String(x ?? '').normalize('NFC').trim());
+  const iChoice = uniqueCol(H, /^Lựa chọn/);
+  const rowOf = (re: RegExp) => rows6.slice(h + 1).find((x) => re.test(String(x?.[0] ?? '')))!;
+  const r0Col = (customer: string) => uniqueCol(H, new RegExp(`^R0 ${customer.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+  const split = (v: unknown) => String(v).split('|').map((x) => x.trim());
+  it('có đủ 10 ô quyết định; danh sách lựa chọn trade unit / order deadline = đúng ô "Lựa chọn" (tách theo "|")', () => {
+    expect(d.sales.options.length).toBe(10);
+    expect(d.sales.options.find((o) => o.key === 'tradeUnit')!.choices).toEqual(split(rowOf(/^Trade unit/)[iChoice]));
+    expect(d.sales.options.find((o) => o.key === 'orderDeadline')!.choices).toEqual(split(rowOf(/^Order deadline/)[iChoice]));
+    for (const o of d.sales.options) expect(o.choicesText).toBe(String(rowOf(new RegExp(`^${o.field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))[iChoice]).trim());
+  });
+  it('giá trị R0 từng khách trong khối lựa chọn = đúng ô', () => {
+    for (const o of d.sales.options) for (const c of d.sales.contracts) {
+      const raw = rowOf(new RegExp(`^${o.field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))[r0Col(c.customer)];
+      expect(o.r0[c.customer], `${o.field} / ${c.customer}`).toBe(raw === null || raw === undefined || raw === '' ? null : typeof raw === 'number' ? raw : String(raw).trim());
+    }
+  });
+  const base = baselineInputs(d);
+  const r = simulate(base, d);
+  it('ô quyết định baseline = đúng giá trị R0 của khối lựa chọn (trade unit, order deadline); CI game trống', () => {
+    for (const c of d.sales.contracts) {
+      expect(base.sales.customers[c.customer].tradeUnit).toBe(String(rowOf(/^Trade unit/)[r0Col(c.customer)]).trim());
+      expect(base.sales.customers[c.customer].orderDeadline).toBe(String(rowOf(/^Order deadline/)[r0Col(c.customer)]).trim());
+      expect(base.sales.customers[c.customer].ciGame).toBeNull();
+    }
+  });
+  const fin = rowsOf('2_Finance');
+  const v2 = (label: string) => fin.find((x) => String(x?.[1] ?? '').trim().normalize('NFC') === label.normalize('NFC'))![2] as number;
+  const hc = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Khách hàng' && (x ?? []).some((y) => /Service level hứa/.test(String(y ?? ''))));
+  const HC = rows6[hc].map((x) => String(x ?? '').normalize('NFC').trim());
+  it.each(r.sales.customers.map((x) => [x.customer, x] as const))('%s: contract index = tab 6 (bảng hợp đồng); Contracted sales P&L = tab 2; nguồn CI = sheet', (_c, x) => {
+    const row = rows6.slice(hc + 1).find((y) => String(y?.[0] ?? '').trim() === x.customer)!;
+    expect(x.contractIndex).toBe(row[uniqueCol(HC, /^Contract index$/)]);
+    expect(x.contractIndexR0).toBe(row[uniqueCol(HC, /^Contract index$/)]);
+    expect(x.contractedR0).toBe(v2(`Contracted sales – ${x.customer}`));
+    expect(r.finance.rows.find((y) => y.label === `Contracted sales – ${x.customer}`)!.value).toBe(v2(`Contracted sales – ${x.customer}`));
+    expect(x.ciBasis).toBe('sheet');
+    expect(x.ciStale).toBe(false);
+  });
+  it('ROI baseline vẫn = ô ROI tab 2; giờ công kho TP = tab 5', () => {
+    expect(r.finance.roi).toBeCloseTo(d.finance.totals.roi, 9); // ô ROI trong file lưu 11 chữ số
+    expect(r.ops.fg.hoursPerWeek).toBe(d.ops.results.fg.hoursPerWeek);
+  });
+});

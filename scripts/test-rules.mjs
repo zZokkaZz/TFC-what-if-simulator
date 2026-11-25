@@ -54,6 +54,18 @@ await t('purchasing: trường lạ trong điều kiện bị chặn', assertFai
 await t('purchasing: nguyên liệu lạ bị chặn', assertFails(setDoc(purRef, decision('bob', 'purchasing', { suppliers: {}, terms: { Sugar: terms } }))));
 await t('purchasing: trade unit quá dài bị chặn', assertFails(setDoc(purRef, pur({ ...terms, tradeUnit: 'x'.repeat(21) }))));
 await t('ghi decisions/sales hợp lệ (rỗng)', assertSucceeds(setDoc(doc(bob, 'teams', TEAM, 'decisions', 'sales'), decision('bob', 'sales', {}))));
+const salesRef = doc(bob, 'teams', TEAM, 'decisions', 'sales');
+const cust = { tradeUnit: 'Pallet layer', orderDeadline: '20.00', ciGame: null };
+const sal = (customers) => decision('bob', 'sales', { customers });
+await t('sales: điều khoản 1 khách hợp lệ (CI game trống)', assertSucceeds(setDoc(salesRef, sal({ 'LAND Market': cust }))));
+await t('sales: đủ 3 khách, điền CI game (có "Dominick\'s", "Food & Groceries") hợp lệ', assertSucceeds(setDoc(salesRef, sal({ 'Food & Groceries': { ...cust, tradeUnit: 'Box (outer box)', ciGame: 1.02 }, 'LAND Market': { ...cust, ciGame: 0.97 }, "Dominick's": { tradeUnit: 'Pallet', orderDeadline: '12.00', ciGame: 1.0166 } }))));
+await t('sales: CI game 5 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...cust, ciGame: 5 } }))));
+await t('sales: CI game là chuỗi bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...cust, ciGame: '1.0' } }))));
+await t('sales: trade unit quá dài bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...cust, tradeUnit: 'x'.repeat(21) } }))));
+await t('sales: trade unit là số bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...cust, tradeUnit: 3 } }))));
+await t('sales: trường lạ trong điều khoản bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...cust, price: 1 } }))));
+await t('sales: khách lạ bị chặn', assertFails(setDoc(salesRef, sal({ Hacker: cust }))));
+await t('sales: khóa lạ ở gốc (dạng phẳng cũ) bị chặn', assertFails(setDoc(salesRef, decision('bob', 'sales', { shelfLife: 0.7 }))));
 await t('không xóa được decisions', assertFails(deleteDoc(doc(alice, 'teams', TEAM, 'decisions', 'ops'))));
 const log = { uid: 'alice', role: 'ops', dept: 'ops', summary: 'Ops đổi số ca 2 → 3', changes: [{ path: 'ops.shifts', label: 'số ca', from: '2', to: '3' }], at: serverTimestamp() };
 let logRef;

@@ -165,6 +165,26 @@ export interface CustomerContract {
   skus: string;
 }
 
+/** Khóa ô hợp đồng Sales (khối "LỰA CHỌN HỢP ĐỒNG SALES", tab 6). */
+export type SalesOptionKey = 'serviceLevelType' | 'serviceLevel' | 'shelfLife' | 'orderDeadline' | 'tradeUnit' | 'paymentTermWeeks'
+  | 'promotionalPressure' | 'promotionHorizon' | 'shortageRule' | 'skus';
+
+/** Một ô hợp đồng Sales: lựa chọn của game (dropdown) hoặc khoảng cho phép, giá trị R0 từng khách, tác động (Info Center). Chép nguyên văn tab 6. */
+export interface SalesOption {
+  key: SalesOptionKey;
+  /** Tên ô như sheet ghi (cột "Ô quyết định") */
+  field: string;
+  /** Nguyên văn cột "Lựa chọn / khoảng cho phép" */
+  choicesText: string;
+  /** Danh sách lựa chọn (tách theo "|"), null nếu là khoảng số */
+  choices: string[] | null;
+  /** Khoảng số (đơn vị như sheet ghi, vd 75–100 cho %), null nếu là danh sách */
+  range: { min: number; max: number } | null;
+  /** Giá trị R0 từng khách, nguyên văn (null = ô trống) */
+  r0: Record<string, string | number | null>;
+  impact: string;
+}
+
 export interface CustomerResult {
   customer: string;
   attainedContractIndex: number;
@@ -267,7 +287,13 @@ export interface Round0Data {
   components: Component[];
   purchasing: { contracts: SupplierTerms[]; results: SupplierResult[]; market: SupplierTerms[]; specs: SupplierSpec[]; negotiation: NegotiationOption[]; contractTransportChoice: Record<string, string | null> };
   ops: { decisions: OpsDecisionsR0; results: OpsResultsR0; mixers: Mixer[]; lines: BottlingLine[]; norms: { area: string; task: string; norm: string }[] };
-  sales: { contracts: CustomerContract[]; customerResults: CustomerResult[]; productResults: ProductResult[]; customerProduct: CustomerProduct[]; notes: string[] };
+  sales: {
+    contracts: CustomerContract[]; customerResults: CustomerResult[]; productResults: ProductResult[]; customerProduct: CustomerProduct[]; notes: string[];
+    /** Khối "LỰA CHỌN HỢP ĐỒNG SALES" tab 6 (rỗng nếu sheet chưa có) */
+    options: SalesOption[];
+    /** Ghi chú dưới khối lựa chọn (Kiểm chứng, Chưa có công thức, Tên gọi, Nguồn) */
+    optionNotes: { label: string; text: string }[];
+  };
   supplyChain: {
     components: { component: ComponentKey; safetyStockWeeks: number; lotSizeWeeks: number }[];
     products: { sku: SkuKey; productionIntervalDays: number; safetyStockWeeks: number }[];
