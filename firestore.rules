@@ -1,0 +1,133 @@
+rules_version = '2';
+
+// TFC What-if Simulator — Firestore rules (gói Spark, Anonymous Auth).
+// Dữ liệu nằm ở teams/{mãĐội}/decisions|log|snapshots. Biết mã đội = có quyền đọc/ghi đội đó.
+// Dán vào Firebase Console → Firestore Database → Rules → Publish.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    // Mã đội: 8–64 ký tự A–Z a–z 0–9 _ - (khó đoán hơn mã ngắn)
+    function validTeam(team) {
+      return team.size() >= 8 && team.size() <= 64 && team.matches('^[A-Za-z0-9_-]+$');
+    }
+    function member(team) {
+      return signedIn() && validTeam(team);
+    }
+    function isDept(d) {
+      return d in ['ops', 'sc', 'purchasing', 'sales'];
+    }
+    function isRole(r) {
+      return r in ['ops', 'sc', 'purchasing', 'sales', 'viewer'];
+    }
+    function num(x, lo, hi) {
+      return x is number && x >= lo && x <= hi;
+    }
+    function shortStr(x, n) {
+      return x is string && x.size() <= n;
+    }
+
+    // ---- Kiểm tra dữ liệu quyết định từng phòng ----
+    function validOps(d) {
+      return d.keys().hasOnly(['rmInspection', 'rmPalletLocations', 'rmFte', 'intakeDays', 'mixer',
+               'preventiveMaintenance', 'breakdownTraining', 'bottlingLine', 'shifts', 'smed',
+               'increaseSpeed', 'fgPalletLocations', 'fgFte'])
+        && d.rmInspection is map
+        && d.rmInspection.keys().hasOnly(['Pack', 'PET', 'Orange', 'Mango', 'Vitamin C'])
+        && num(d.rmPalletLocations, 0, 100000)
+        && num(d.rmFte, 0, 200)
+        && num(d.intakeDays, 1, 60)
+        && shortStr(d.mixer, 60)
+        && d.preventiveMaintenance in ['None', 'Minimal', 'Extensive']
+        && d.breakdownTraining is bool
+        && shortStr(d.bottlingLine, 60)
+        && d.shifts is int && d.shifts >= 1 && d.shifts <= 5
+        && d.smed is bool
+        && d.increaseSpeed is bool
+        && num(d.fgPalletLocations, 0, 100000)
+        && num(d.fgFte, 0, 200);
+    }
+    function validSc(d) {
+      return d.keys().hasOnly(['components', 'products', 'frozenPeriodWeeks'])
+        && d.components is map && d.components.size() <= 5
+        && d.products is map && d.products.size() <= 6
+        && num(d.frozenPeriodWeeks, 0, 26);
+    }
+    function validPurchasing(d) {
+      return d.keys().hasOnly(['suppliers'])
+        && d.suppliers is map && d.suppliers.size() <= 5;
+    }
+    function validSales(d) {
+      return d.size() <= 50;
+    }
+    function validDeptData(dept, d) {
+      return d is map && (
+        (dept == 'ops' && validOps(d)) ||
+        (dept == 'sc' && validSc(d)) ||
+        (dept == 'purchasing' && validPurchasing(d)) ||
+        (dept == 'sales' && validSales(d)));
+    }
+
+    // Không đọc, không liệt kê, không ghi được document gốc / danh sách teams
+    match /teams/{team} {
+      allow read, write: if false;
+
+      // Bộ quyết định chung: mỗi phòng một document → 2 phòng sửa song song không ghi đè nhau
+      match /decisions/{dept} {
+        allow get: if member(team);
+        allow list: if member(team);
+        allow create, update: if member(team) && isDept(dept)
+          && request.resource.data.keys().hasOnly(['data', 'uid', 'role', 'clientId', 'rev', 'updatedAt'])
+          && request.resource.data.keys().hasAll(['data', 'uid', 'role', 'clientId', 'rev', 'updatedAt'])
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.role == dept
+          && shortStr(request.resource.data.clientId, 40)
+          && request.resource.data.rev is int && request.resource.data.rev >= 0
+          && request.resource.data.updatedAt == request.time
+          && validDeptData(dept, request.resource.data.data);
+        allow delete: if false;
+      }
+
+      // Nhật ký: chỉ thêm, không sửa, không xóa
+      match /log/{entry} {
+        allow get: if member(team);
+        allow list: if member(team) && request.query.limit <= 100;
+        allow create: if member(team)
+          && request.resource.data.keys().hasOnly(['uid', 'role', 'dept', 'summary', 'changes', 'at'])
+          && request.resource.data.keys().hasAll(['uid', 'role', 'dept', 'summary', 'changes', 'at'])
+          && request.resource.data.uid == request.auth.uid
+          && isRole(request.resource.data.role)
+          && isDept(request.resource.data.dept)
+          && shortStr(request.resource.data.summary, 300)
+          && request.resource.data.changes is list && request.resource.data.changes.size() <= 20
+          && request.resource.data.at == request.time;
+        allow update, delete: if false;
+      }
+
+      // Bản chụp có tên: thêm, xem, xóa; không sửa
+      match /snapshots/{snap} {
+        allow get: if member(team);
+        allow list: if member(team) && request.query.limit <= 50;
+        allow create: if member(team)
+          && request.resource.data.keys().hasOnly(['name', 'uid', 'role', 'inputs', 'at'])
+          && request.resource.data.keys().hasAll(['name', 'uid', 'role', 'inputs', 'at'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() >= 1 && request.resource.data.name.size() <= 80
+          && request.resource.data.uid == request.auth.uid
+          && isRole(request.resource.data.role)
+          && request.resource.data.inputs is map
+          && request.resource.data.inputs.keys().hasOnly(['ops', 'sc', 'purchasing', 'sales'])
+          && request.resource.data.at == request.time;
+        allow delete: if member(team);
+        allow update: if false;
+      }
+    }
+
+    // Mọi đường dẫn khác: cấm
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

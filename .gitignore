@@ -1,0 +1,4 @@
+node_modules/
+*.log
+.DS_Store
+# dist/ được COMMIT có chủ đích (dist/index.html để mở trực tiếp)
