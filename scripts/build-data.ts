@@ -54,8 +54,12 @@ function sheet(label: string, ...patterns: RegExp[]): Rows {
 class Table {
   constructor(public title: string, public headers: string[], public rows: Cell[][]) {}
   col(pattern: RegExp | string, required = true): number {
-    const i = this.headers.findIndex((h) => (typeof pattern === 'string' ? norm(h) === norm(pattern) : pattern.test(h)));
+    const hit = (h: string) => (typeof pattern === 'string' ? norm(h) === norm(pattern) : pattern.test(h));
+    const i = this.headers.findIndex(hit);
     if (i < 0 && required) fail(`Bảng "${this.title}": thiếu cột ${pattern}. Cột hiện có: ${this.headers.join(' | ')}`);
+    // Mẫu khớp NHIỀU cột → dừng (trước đây lấy cột đầu tiên, sheet thêm/đổi thứ tự cột là đọc nhầm mà không báo)
+    const all = this.headers.filter((h) => h && hit(h));
+    if (all.length > 1) fail(`Bảng "${this.title}": mẫu ${pattern} khớp ${all.length} cột (${all.join(' | ')}) — sửa mẫu cho chính xác.`);
     return i;
   }
   str(r: Cell[], pattern: RegExp | string): string {
@@ -245,7 +249,7 @@ function supplierTerms(t: Table, r: Cell[], inUse: boolean): SupplierTerms {
     leadTimeDays: t.num(r, /Lead time/),
     certified: yes(t.str(r, /Certification/)),
     country: t.str(r, /Quốc gia/),
-    transport: t.str(r, /Vận chuyển/),
+    transport: t.str(r, /^Vận chuyển$/), // không lẫn cột "Vận chuyển chọn được"
     freeCapacity: t.num(r, /Free capacity/),
     paymentTermWeeks: t.num(r, /Payment term/),
     tradeUnit: t.str(r, /Trade unit/),
@@ -424,6 +428,12 @@ const opsResults: OpsResultsR0 = {
   },
   tankYard: {
     tankDaysPerWeek: rv(/Tank yard/, /Tank-days/),
+    // Ghi chú tab 5 (dòng Tank yard), vd "Game R0: capacity 20 tank, usage TB 5,85 tank…" — khác tab 10 (usage 6, làm tròn)
+    usageNoteTab5: (() => {
+      const iA = tRes.col(/^Khu vực$/), iN = tRes.col(/^Ghi chú$/, false);
+      const row = tRes.rows.find((x) => /Tank yard/.test(String(x[iA] ?? '')));
+      return iN >= 0 && row ? numIn(String(row[iN] ?? '').normalize('NFC'), /usage TB\s*([\d.,]+)\s*tank/i) : null;
+    })(),
     capacity: parseVN(tankRow[tWh.col(/^Capacity$/)]),
     usage: parseVN(tankRow[tWh.col(/^Usage$/)]),
     tanksPerWeek: parseVN(tankRow[tWh.col(/Pallets hoặc tanks/)]),
@@ -476,7 +486,9 @@ const customerContracts = tCC.rows.map((r) => ({
   promotionHorizon: tCC.str(r, /Promotion horizon/),
   skus: tCC.str(r, /SKU mua/),
 }));
-const tCR = table(salesRows, 'Kết quả theo KH', [/^Khách hàng$/, /Attained contract index/, /^Revenue/]);
+// Revenue cả round: "Revenue (€)" (bản cũ) hoặc "Revenue (€, 26 tuần)"; KHÔNG lấy "Revenue/tuần (€)"
+const REV_ROUND = /^Revenue \(€/;
+const tCR = table(salesRows, 'Kết quả theo KH', [/^Khách hàng$/, /Attained contract index/, REV_ROUND]);
 const customerResults = tCR.rows.map((r) => ({
   customer: tCR.str(r, /^Khách hàng$/),
   attainedContractIndex: tCR.num(r, /Attained contract index/),
@@ -484,7 +496,7 @@ const customerResults = tCR.rows.map((r) => ({
   slOrderLines: tCR.num(r, /SL order lines/),
   slOrders: tCR.num(r, /SL orders/),
   osa: tCR.num(r, /On-shelf/),
-  revenue: tCR.num(r, /^Revenue/),
+  revenue: tCR.num(r, REV_ROUND),
   grossMarginPerWeek: tCR.num(r, /Gross margin/),
   shipmentsPerWeek: tCR.num(r, /Shipments/),
   orderLinesPerWeek: tCR.num(r, /Order lines/),
@@ -511,7 +523,7 @@ const tCP = table(salesRows, 'KH × SP', [/^Khách hàng$/, /^SKU$/, /Giá bán/
 const customerProduct = tCP.rows.map((r) => ({
   customer: tCP.str(r, /^Khách hàng$/),
   sku: skuKey(tCP.str(r, /^SKU$/)),
-  demandPerWeek: tCP.num(r, /Nhu cầu\/tuần/),
+  demandPerWeek: tCP.num(r, /^Nhu cầu\/tuần(?!\s*\(€\))/), // đơn vị, không lấy cột "Nhu cầu/tuần (€)"
   price: tCP.num(r, /Giá bán/),
   attainedShelfLife: tCP.num(r, /Attained shelf life/),
   slPieces: tCP.num(r, /SL pieces/),
@@ -520,7 +532,7 @@ const customerProduct = tCP.rows.map((r) => ({
   promoUplift: tCP.num(r, /khuyến mãi/),
 }));
 const salesNotes = salesRows
-  .filter((r) => r && /order management/i.test(String(r[0] ?? '')))
+  .filter((r) => r && /order management|webshop/i.test(String(r[0] ?? '')))
   .map((r) => String(r[1] ?? ''));
 
 // ================= 7_Supply Chain =================
@@ -707,6 +719,11 @@ captureRaw('an-line', '10_R0 Analysis', anRows, 'Analysis — Bottling line', [/
 captureRaw('an-mixer', '10_R0 Analysis', anRows, 'Analysis — Mixers', [/^Mixer$/, /Cleaning time/]);
 captureRaw('an-dist', '10_R0 Analysis', anRows, 'Analysis — Distributor', [/^Distributor$/, /Distribution costs/]);
 captureRaw('fin', '2_Finance', finRows, 'P&L Round 0', [/^Nhóm$/, /^Dòng$/, /Round 0/]);
+captureRaw('sales-contracts', '6_Sales', salesRows, 'Hợp đồng khách hàng hiện tại', [/^Khách hàng$/, /Số cửa hàng/, /Service level hứa/]);
+captureRaw('sales-cust', '6_Sales', salesRows, 'Kết quả theo khách hàng Round 0', [/^Khách hàng$/, /Attained contract index/, /^SL pieces$/]);
+captureRaw('sales-prod', '6_Sales', salesRows, 'Kết quả theo sản phẩm Round 0', [/^SKU$/, /Giá bán TB/, /Gross margin\/đv/]);
+captureRaw('sales-cp', '6_Sales', salesRows, 'Khách hàng × sản phẩm Round 0', [/^Khách hàng$/, /^SKU$/, /khuyến mãi/]);
+captureRaw('sales-dist', '6_Sales', salesRows, 'Nhà phân phối (Distributor) Round 0', [/^Distributor$/, /^Distribution costs/]);
 captureRaw('pur-contracts', '4_Purchasing', purRows, 'Hợp đồng hiện tại', [/^Component$/, /^Nhà cung cấp$/, /^Contract index$/, /^Delivery window$/]);
 captureRaw('pur-results', '4_Purchasing', purRows, 'Kết quả thực tế Round 0 (NCC)', [/^Nhà cung cấp$/, /^Reliability thực tế$/, /^Purchase value/]);
 captureRaw('pur-market', '4_Purchasing', purRows, 'Thị trường nhà cung cấp (trước đàm phán)', [/^Component$/, /^Nhà cung cấp$/, /^Đang dùng$/, /^Contract index$/]);

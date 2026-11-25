@@ -23,9 +23,10 @@
 | Sửa sau tự kiểm tra | Câu Investment→ROI theo dấu OP; cảnh báo lot size ↓ → phí vận chuyển/đơn hàng (chưa tính, M3); giải thích interval ngắn ↔ mẻ tối thiểu máy trộn; hiện cả số game in & tổng dòng sheet (OP, Indirect); ±0,00; lockfile | `src/model/warnings.ts`, `src/ui/r0Sources.ts`, `ASSUMPTIONS.md` mục 14 |
 | M3 Purchasing | Ô quyết định NCC + ô đàm phán + 3 ô số game (CI, reliability, rejection) cho 5 NL; purchase value (công thức đã kiểm chứng), phí vận chuyển & phí đơn hàng (ước lượng), payment term → Investment, reliability/lead time → availability, quality bao bì → hỏng máy; KPI Purchasing; cảnh báo; rules Firestore | `src/model/purchasing.ts`, `src/ui/PurchasingTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 15 |
 | M3 Sales (SL) | Service level TP ← safety stock TP, interval, plan adherence (gồm availability NL, capacity); SL khách → penalty service level (neo từng khách, ước lượng) → realized revenue; KPI SL outbound; frozen period = chưa mô hình | `src/model/sales.ts`, `src/model/supplyChain.ts`, `src/ui/SalesTab.tsx`, `ASSUMPTIONS.md` mục 16 |
+| Sửa sau rà soát | Dữ liệu mới (tab 5 D29, tab 6 cột mới); tiêu đề mơ hồ → lỗi; penalty có trần + cờ "ngoài vùng dữ liệu R0"; màu Investment theo ROI; tank yard 2 nguồn; bảng nguyên văn tab 6 | `scripts/build-data.ts`, `src/model/sales.ts`, `ASSUMPTIONS.md` mục 17 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 217 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 240 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
@@ -50,7 +51,7 @@ Test: 217 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 
 ## 4. Quyết định đã chốt (không tự đổi)
 
-- Chỉ đọc dữ liệu từ `data/TFC_Round0.xlsx` (bản upload GitHub). File gốc tên "TFC Round Trial.xlsx" — khi người dùng upload bản mới lên `main` với tên đó, phải `git merge origin/main` (git tự áp vào `data/TFC_Round0.xlsx`) hoặc copy đè, rồi `npm run verify`.
+- Chỉ đọc dữ liệu từ `data/TFC_Round0.xlsx` (bản upload GitHub). Người dùng upload bản mới lên `main` ở thư mục gốc với tên "TFC Round Trial.xlsx" → copy đè vào `data/TFC_Round0.xlsx`, `git rm` file ở thư mục gốc, rồi `npm run verify`. Code KHÔNG đọc file ở thư mục gốc.
 - Tab luật trong file tên `Luật for ops and others phòng b` (= `8_Luật game`).
 - Firebase: project `tfc-group`, Firestore + Anonymous Auth, gói Spark. **Mã đội KHÔNG bao giờ ghi vào code/repo/commit/log.** Rules ở `firestore.rules`; đổi rules → nhắc người dùng Publish lại trong Console (Firestore → Rules) và chạy `scripts/test-rules.mjs` trên emulator.
 - Giới hạn ô nhập (`src/sync/limits.ts`) phải khớp `firestore.rules` (có test).
@@ -69,6 +70,9 @@ Test: 217 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 - Giữ và gửi mã đội cho đồng đội qua kênh riêng.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
+
+- 25/11/2026 — Gom hệ số ước lượng chưa xác minh vào `COEFFS` (`src/model/assumptions.ts`): mốc ngoài vùng R0, mũ penalty, độ dốc capacity V1 phương án B/C. Có dữ liệu trial → sửa ở đó, chạy `npm run verify`.
+- 25/11/2026 — Rà soát 4 phòng (chỉ đọc) + PR sửa lỗi C1, V3, T1–T4 (nhánh `claude/fix-audit`). Còn chờ người dùng chọn phương án: **C2** (obsolete/scrap theo tuổi tồn — đã duyệt hướng) và **V1** (tách adherence thiếu NL / capacity — đang chọn phương án).
 
 - 25/11/2026 — M3 Sales phần service level (nhánh `claude/m3-sales`): SL dự kiến → penalty → realized revenue (ước lượng, neo từng khách), kiểm chứng revenue = contracted + penalty (khớp tuyệt đối), frozen period chưa mô hình, 217/217. Cần người dùng xem độ lớn (vd thêm ca → penalty = 0).
 

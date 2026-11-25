@@ -7,6 +7,7 @@ import type { Inputs } from '../src/model/types';
 import { baselineInputs, simulate } from '../src/model/simulate';
 import { adherenceSlSlope } from '../src/model/supplyChain';
 import { crossWarnings } from '../src/model/warnings';
+import { COEFFS } from '../src/model/assumptions';
 
 const XLSX: typeof import('xlsx') = createRequire(import.meta.url)('xlsx');
 const d = data as unknown as Round0Data;
@@ -77,7 +78,7 @@ describe('Service level ← availability NL + plan adherence + safety stock TP',
   });
   it('penalty tỷ lệ với mức thiếu SL của từng khách (neo R0)', () => {
     const { r } = run((x) => allProd(x, { safetyStockWeeks: 2 }));
-    for (const c of r.sales.customers) expect(c.penalty).toBeCloseTo(c.penaltyR0 * (c.shortfall / c.shortfallR0), 6);
+    for (const c of r.sales.customers) expect(c.penalty).toBeCloseTo(c.penaltyR0 * Math.pow(c.shortfall / c.shortfallR0, COEFFS.penaltyShortfallExponent.value), 6);
   });
   it('Contracted sales giữ R0 (nhu cầu, giá chưa mô hình)', () => {
     const { r } = run((x) => allProd(x, { safetyStockWeeks: 1 }));
@@ -97,5 +98,40 @@ describe('Frozen period: CHƯA MÔ HÌNH — đổi không đổi số nào', ()
       });
       expect(crossWarnings(d, base, i, r, b).find((w) => w.id === 'sc-frozen')!.detail).toMatch(/CHƯA mô hình/);
     }
+  });
+});
+
+describe('C1: penalty bị chặn — doanh thu từng khách không âm; cờ "ngoài vùng dữ liệu R0"', () => {
+  it('baseline: không khách nào ngoài vùng, không bị chặn', () => {
+    for (const c of b.sales.customers) { expect(c.outOfRange).toBe(false); expect(c.capped).toBe(false); }
+  });
+  it('2 → 1 ca (SL rơi ~30 điểm): doanh thu mỗi khách ≥ 0, attained CI ≥ 0, khách vượt trần bị chặn đúng ở −contracted', () => {
+    const { r } = run((x) => { x.ops.shifts = 1; });
+    expect(r.sales.realizedRevenue).toBeGreaterThanOrEqual(0);
+    for (const c of r.sales.customers) {
+      expect(c.revenue).toBeGreaterThanOrEqual(0);
+      expect(c.attainedCi).toBeGreaterThanOrEqual(0);
+      expect(c.penalty).toBeGreaterThanOrEqual(-c.contracted);
+      expect(c.outOfRange).toBe(true);
+      if (c.capped) expect(c.revenue).toBe(0);
+    }
+    expect(r.sales.customers.some((c) => c.capped)).toBe(true); // F&G: ngoại suy tuyến tính vượt contracted
+    expect(r.finance.realizedRevenue).toBeCloseTo(r.sales.realizedRevenue, 6);
+  });
+  it('cờ ngoài vùng theo mốc COEFFS.outOfRangeFactor (giá trị hiện tại: SS TP 3 → 2 trong vùng, 3 → 1 ngoài vùng ở F&G)', () => {
+    const k = COEFFS.outOfRangeFactor.value;
+    for (const ss of [2, 1]) {
+      const r = run((x) => allProd(x, { safetyStockWeeks: ss })).r;
+      for (const c of r.sales.customers) expect(c.outOfRange).toBe(c.capped || c.shortfall > k * c.shortfallR0);
+    }
+    // Ảnh chụp với giá trị hiện tại (k = 2) — đổi k thì kiểm tra lại 2 dòng dưới
+    if (k === 2) {
+      expect(run((x) => allProd(x, { safetyStockWeeks: 2 })).r.sales.customers.every((c) => !c.outOfRange)).toBe(true);
+      expect(run((x) => allProd(x, { safetyStockWeeks: 1 })).r.sales.customers.find((c) => c.customer === 'Food & Groceries')!.outOfRange).toBe(true);
+    }
+  });
+  it('cảnh báo service level ghi "NGOÀI VÙNG DỮ LIỆU R0" khi có khách ngoài vùng', () => {
+    const { i, r } = run((x) => { x.ops.shifts = 1; });
+    expect(crossWarnings(d, base, i, r, b).find((w) => w.id === 'sc-sl')!.detail).toMatch(/NGOÀI VÙNG DỮ LIỆU R0/);
   });
 });

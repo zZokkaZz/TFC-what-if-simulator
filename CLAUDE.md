@@ -21,7 +21,7 @@
 
 **Trước khi làm gì:**
 1. Đọc lần lượt: `CLAUDE.md` → `PROGRESS.md` (đang ở đâu, quyết định đã chốt) → `ROADMAP_M3_M4_M5.md` (cách làm mốc tiếp theo, cái gì CHƯA biết) → `ASSUMPTIONS.md`.
-2. `git fetch` và kiểm tra `main` có file .xlsx mới không (người dùng upload tên "TFC Round Trial.xlsx"). Có → merge/copy vào `data/TFC_Round0.xlsx`.
+2. `git fetch` và kiểm tra `main` có file .xlsx mới không (người dùng upload tên "TFC Round Trial.xlsx" ở thư mục gốc). Có → copy đè vào `data/TFC_Round0.xlsx`, **xóa file ở thư mục gốc** (`git rm`), chạy `npm run verify`, so khác biệt từng ô với bản cũ và báo người dùng.
 3. `npm install` rồi `npm run verify` (đọc Excel → toàn bộ test → build). **Phải xanh hết** trước khi sửa.
 4. Báo người dùng ngắn gọn: đang ở mốc nào, test bao nhiêu/bao nhiêu, việc tiếp theo — rồi **chờ lệnh**. Người dùng làm **từng mốc một**, không tự nhảy sang M3/M4/M5.
 

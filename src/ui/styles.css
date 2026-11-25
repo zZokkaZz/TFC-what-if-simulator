@@ -334,3 +334,4 @@ table.raw-t td { font-variant-numeric: tabular-nums; }
 .pur-game { border-top: 1px dashed var(--grid); margin-top: 4px; padding-top: 2px; }
 .badge-game { background: var(--surface-2); color: var(--accent); border: 1px solid var(--accent); }
 @media (max-width: 520px) { .pur-grid { grid-template-columns: 1fr; } }
+.badge-oor { background: var(--alert-bg); color: var(--bad); border: 1px solid var(--bad); }
