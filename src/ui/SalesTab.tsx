@@ -9,6 +9,7 @@ import { eur, num, pct } from './format';
 import { causesFor } from './trace';
 import { WarningsPanel } from './WarningsPanel';
 import { RawTable } from './RawTable';
+import { CONSERVATIVE_NOTE, capacityChanged } from './conservative';
 import { COEFFS } from '../model/assumptions';
 
 interface Props { data: Round0Data; res: Results; baseRes: Results; changed: string[]; warnings: Warning[] }
@@ -32,6 +33,7 @@ export function SalesTab({ data, res, baseRes, changed, warnings }: Props) {
 
       <Card title="Tổng quan Sales">
         <Grid>
+          {capacityChanged(res, baseRes) && <Metric label="Realized revenue — thận trọng" value={eur(res.conservative.realizedRevenue)} raw={res.conservative.realizedRevenue} base={SB.realizedRevenue} deltaKind="eur" good="up" basis="estimate" hint={CONSERVATIVE_NOTE} />}
           <Metric label="Realized revenue" value={eur(S.realizedRevenue)} raw={S.realizedRevenue} base={SB.realizedRevenue} deltaKind="eur" good="up" r0={eur(data.finance.totals.realizedRevenue)} causes={c} hint="Contracted sales (giữ R0) + penalty service level" />
           <Metric label="Penalty service level (3 khách)" value={eur(S.penaltyTotal)} raw={S.penaltyTotal} base={SB.penaltyTotal} deltaKind="eur" good="up" r0={eur(SB.penaltyTotal)} basis="estimate" causes={c} hint="Penalty R0 từng khách × (mức thiếu SL mới ÷ mức thiếu R0)" />
           <Metric label="Service level outbound order lines" value={S.slOutbound === null ? 'thiếu dữ liệu' : pct(S.slOutbound)} raw={S.slOutbound ?? undefined} base={SB.slOutbound ?? undefined} deltaKind="pt" good="up" r0={sl === null ? 'thiếu dữ liệu' : pct(sl)} basis="estimate" causes={c} hint="Dashboard Sales (tab 1) + thay đổi TB gia quyền order lines/tuần của 3 khách" />

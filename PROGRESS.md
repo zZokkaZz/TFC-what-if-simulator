@@ -24,9 +24,10 @@
 | M3 Purchasing | Ô quyết định NCC + ô đàm phán + 3 ô số game (CI, reliability, rejection) cho 5 NL; purchase value (công thức đã kiểm chứng), phí vận chuyển & phí đơn hàng (ước lượng), payment term → Investment, reliability/lead time → availability, quality bao bì → hỏng máy; KPI Purchasing; cảnh báo; rules Firestore | `src/model/purchasing.ts`, `src/ui/PurchasingTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 15 |
 | M3 Sales (SL) | Service level TP ← safety stock TP, interval, plan adherence (gồm availability NL, capacity); SL khách → penalty service level (neo từng khách, ước lượng) → realized revenue; KPI SL outbound; frozen period = chưa mô hình | `src/model/sales.ts`, `src/model/supplyChain.ts`, `src/ui/SalesTab.tsx`, `ASSUMPTIONS.md` mục 16 |
 | Sửa sau rà soát | Dữ liệu mới (tab 5 D29, tab 6 cột mới); tiêu đề mơ hồ → lỗi; penalty có trần + cờ "ngoài vùng dữ liệu R0"; màu Investment theo ROI; tank yard 2 nguồn; bảng nguyên văn tab 6 | `scripts/build-data.ts`, `src/model/sales.ts`, `ASSUMPTIONS.md` mục 17 |
+| C2 + V1 | Obsolete & Costs of scrap theo tuổi tồn (hiệu chỉnh R0, cảnh báo đỏ); plan adherence tách phần thiếu NL / capacity, số chính B (0,5) + thận trọng min(B, C) | `src/model/supplyChain.ts`, `finance.ts`, `ui/conservative.ts`, `ASSUMPTIONS.md` mục 18 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 240 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 278 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
@@ -70,6 +71,9 @@ Test: 240 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 - Giữ và gửi mã đội cho đồng đội qua kênh riêng.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
+
+- 25/11/2026 — PR #6 bổ sung: `obsoleteAgeSpreadScale` = 2 (người dùng chọn); kiểm tra PM → hệ số `maintenanceDisruptionWeight` = 0 (người dùng chọn: bảo trì có lịch trước, không làm trễ kế hoạch như hỏng đột xuất); bảng kịch bản thêm tổ hợp Training; ghi "chưa mô hình: sản xuất bù hàng hủy" trên web.
+- 25/11/2026 — C2 + V1 (nhánh `claude/c2-v1`): obsolete/scrap theo tuổi tồn, V1 B chính + thận trọng; 270/270. Cần người dùng xem độ dốc obsolete (SS TP 5 → ~92%) và hệ số `obsoleteAgeSpreadScale`.
 
 - 25/11/2026 — Gom hệ số ước lượng chưa xác minh vào `COEFFS` (`src/model/assumptions.ts`): mốc ngoài vùng R0, mũ penalty, độ dốc capacity V1 phương án B/C. Có dữ liệu trial → sửa ở đó, chạy `npm run verify`.
 - 25/11/2026 — Rà soát 4 phòng (chỉ đọc) + PR sửa lỗi C1, V3, T1–T4 (nhánh `claude/fix-audit`). Còn chờ người dùng chọn phương án: **C2** (obsolete/scrap theo tuổi tồn — đã duyệt hướng) và **V1** (tách adherence thiếu NL / capacity — đang chọn phương án).

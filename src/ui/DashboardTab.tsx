@@ -5,6 +5,7 @@ import type { Round0Data } from '../data/types';
 import type { Results } from '../model/types';
 import { buildKpis, roleScores, type Kpi, type KpiDept } from '../model/kpi';
 import { eur, num, pct, signed } from './format';
+import { CONSERVATIVE_NOTE, conservativeRoiText } from './conservative';
 
 const fmt = (u: Kpi['unit'], v: number, big = false) => (u === 'pct' ? pct(v, 1) : u === 'eur' ? eur(v) : u === 'weeks' ? `${num(v, 2)}${big ? '' : ' tuần'}` : num(v, 4));
 
@@ -99,7 +100,7 @@ export function DashboardTab({ data, res, baseRes }: { data: Round0Data; res: Re
       <section class="card dash-hero">
         <div class="dh-left">
           <div class="kt-label">ROI công ty (chỉ số xếp hạng chung)</div>
-          <div class="dh-roi"><AnimatedNumber value={roi.scenario ?? 0} format={(x) => pct(x, 2)} /></div>
+          <div class="dh-roi"><AnimatedNumber value={roi.scenario ?? 0} format={(x) => pct(x, 2)} />{conservativeRoiText(res, baseRes) && <span class="kpi-extra" title={CONSERVATIVE_NOTE}> {conservativeRoiText(res, baseRes)}</span>}</div>
           <div class="kt-delta">
             {Math.abs((roi.scenario ?? 0) - (roi.r0.value ?? 0)) > 1e-7
               ? <span class={`arrow ${(roi.scenario ?? 0) > (roi.r0.value ?? 0) ? 'better' : 'worse'}`}>{(roi.scenario ?? 0) > (roi.r0.value ?? 0) ? '▲' : '▼'} {signed((roi.scenario ?? 0) - (roi.r0.value ?? 0), 'pt', 2)} so với R0 ({pct(roi.r0.value ?? 0, 2)})</span>

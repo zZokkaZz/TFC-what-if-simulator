@@ -290,3 +290,57 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 | `capacitySlopeC` — V1 phương án C | 0,25 | chưa xác minh | chưa dùng (chờ chọn) |
 
 **Khi có dữ liệu vòng trial:** sửa `value` (và `status`, `source`) trong `COEFFS` → `npm run verify`. Test đọc giá trị từ `COEFFS`, không gõ lại số; baseline R0 không phụ thuộc các hệ số này (đã thử đổi mốc 2 → 3 và mũ 1 → 1,3: 240/240 vẫn xanh). `tests/coeffs.test.ts` còn kiểm tra mục `usedIn` khớp thực tế: hệ số ghi "chưa dùng" mà có file đọc (hoặc ngược lại) thì test đỏ.
+
+## 18. C2 — obsolete & Costs of scrap theo tuổi tồn; V1 — tách plan adherence (25/11/2026)
+
+### C2 (ước lượng, hiệu chỉnh R0)
+
+- **Tuổi cho phép** A = hạn dùng SP (tab 3: 20 tuần) × (1 − shelf life khách đòi cao nhất, tab 6: 75%) = **5 tuần**.
+- **Tuổi lúc xuất kho** của SKU ≈ Đều[S, S + P] + Chuẩn(0, σ): S = safety stock TP (tuần), P = production interval ÷ 5 (tuần). Tỷ lệ quá tuổi
+  `f(S, P, A, σ) = σ/P × [L((A − S − P)/σ) − L((A − S)/σ)]`, với L(z) = E[(Z − z)+], Z ~ N(0,1).
+- **σ từng SKU hiệu chỉnh** sao cho f(R0: S = 3, P = 2, A = 5) = obsolete R0 tab 7: σ = 0,42 / 0,36 / 0,44 / 0,41 / 0,28 / 0,40 tuần (Orange 1L … Mango PET). Giả định: toàn bộ obsolete R0 do tuổi tồn (không tách được phần do sai dự báo).
+- **Obsolete kịch bản** = obsolete R0 × f(mới, σ × `obsoleteAgeSpreadScale`) ÷ f(R0, σ × `obsoleteAgeSpreadScale`) (≤ 100%); không đổi SS/interval → đúng số tab 7.
+- **Obsolete value/tuần** = số tab 7 × (obsolete mới ÷ R0).
+- **Costs of scrap** = €40.203 (tab 2) × (Σ obsolete value/tuần mới ÷ R0)^`scrapObsoleteElasticity`. R0: obsolete 4.421 €/tuần × 26 = 114.946 € ≠ scrap 40.203 € → quan hệ chính xác chưa rõ.
+- **KPI Obsolete products** = 8,1% (tab 1) + (TB gia quyền nhu cầu của obsolete mới − R0).
+- **Cảnh báo ĐỎ** khi tuổi tồn lớn nhất (S + P) > A, kèm số Costs of scrap.
+- **Chưa mô hình:** hàng hủy làm giảm hàng bán / phải sản xuất bù (giờ dây chuyền, NL); giờ hủy hàng kho TP vẫn theo obsolete R0.
+- **`obsoleteAgeSpreadScale` = 2 (người dùng chọn 25/11, vẫn "chưa xác minh").** Lý do: R0 nằm sát mép (SS 3 + chu kỳ 2 = 5 tuần = tuổi cho phép) nên hiệu chỉnh từ 1 điểm cho σ quá nhỏ (~0,4 tuần) → obsolete đổi rất dốc; MAPE dự báo 47–61% (tab 7) cho thấy tuổi hàng phải phân tán rộng hơn. Độ nhạy (obsolete Orange 1L, R0 8,4%):
+
+| Hệ số phân tán | σ (tuần) | Interval 15 | Interval 20 | SS TP 4 | SS TP 5 | Interval 5 |
+|---|---|---|---|---|---|---|
+| 1 | 0,42 | 33,4% | 50,0% | 50,0% | 91,6% | 0,1% |
+| **2 (đang dùng)** | 0,84 | 17,6% | 25,2% | 25,2% | 42,0% | 2,3% |
+| 3 | 1,26 | 13,3% | 17,7% | 17,7% | 27,1% | 4,4% |
+
+### V1 (ước lượng) — người dùng chọn phương án B làm số chính, C làm cận dưới
+
+- Δ plan adherence của SKU = **phần thiếu NL** (capacity R0 × Δ availability) + **phần capacity** (availability mới × Δ capacity adherence).
+- **Phần thiếu NL**: tuyến tính 0,974 điểm SL / điểm adherence (hồi quy 6 SKU R0, R² 0,95 — chênh lệch giữa SKU trong R0 chỉ do thiếu Vitamin C).
+- **Phần capacity** (R0 không có điểm dữ liệu): bão hòa mũ trên tỷ lệ thiếu hàng: `thiếu mới = thiếu × e^(−(độ dốc ÷ 0,0778) × Δ capacity)`; 0,0778 = tỷ lệ thiếu TB R0 (1 − SL pieces, 6 SKU) → độ dốc tại R0 = `capacitySlopeB` (0,5, **số chính**) hoặc `capacitySlopeC` (0,25).
+- **"Thận trọng"** = SL thấp hơn giữa B và C từng SKU → doanh thu & ROI thận trọng **luôn ≤ số chính**. Khi capacity giảm (vd 1 ca), C cho SL cao hơn B nên thận trọng = B (C không phải cận dưới khi capacity giảm). Hiện "(thận trọng: x%)" cạnh ROI (thanh trên, Dashboard) và doanh thu thận trọng ở tab Sales khi phần capacity thay đổi.
+
+### PM — giờ bảo trì và plan adherence (kiểm tra 25/11)
+
+- Giờ bảo trì **có** trừ vào công suất: giờ tải = run + changeover + breakdown + giờ bảo trì → overtime, chi phí thời vụ. Lời giờ ròng gần bằng nhau: Minimal 2,25 giờ/tuần (giảm hỏng 3,24 − bảo trì 1), Extensive 2,41 giờ/tuần (5,41 − 3); overtime 7,90 so với 7,79 giờ/tuần.
+- Plan adherence = 1 − k × (breakdown + `maintenanceDisruptionWeight` × giờ bảo trì + overtime + thuê ngoài) ÷ (giờ ca + overtime), k hiệu chỉnh R0 (R0 không có PM). Mặc định hệ số = **0**: giờ bảo trì là việc có kế hoạch, không tính như hỏng đột xuất → Extensive có adherence cao hơn Minimal 1,7 điểm (89,4% so với 87,6% phần capacity) → penalty ít hơn ~€39k → ROI hơn ~1 điểm. Đặt hệ số = 1 nếu coi mọi giờ mất như nhau: hai mức gần bằng nhau (có test).
+- **Người dùng chọn giữ hệ số = 0 (25/11):** bảo trì có lịch trước nên không làm trễ kế hoạch sản xuất như hỏng đột xuất; giờ bảo trì chỉ làm giảm công suất (đã tính qua giờ tải → overtime). Vẫn "chưa xác minh" — xem lại khi có plan adherence của vòng trial có bật PM.
+
+### Bảng kịch bản trước / sau (ROI; trước = main b59c6a4; sau = phân tán tuổi tồn × 2, PM hệ số 0)
+
+| Kịch bản | Trước | Sau (số chính B) | Thận trọng | Plan adherence | Penalty | Costs of scrap |
+|---|---|---|---|---|---|---|
+| R0 | −7,68% | −7,68% | −7,68% | 78,7% | −€322.708 | €40.203 |
+| 2 → 1 ca | −58,88% | −55,55% | −55,55% | 50,1% | −€2.077.153 | €40.203 |
+| 2 → 3 ca | −0,44% | −3,38% | −5,59% | 87,6% | −€117.239 | €40.203 |
+| SMED | −4,09% | −6,49% | −6,99% | 80,1% | −€282.015 | €40.203 |
+| PM Minimal | −1,06% | −5,14% | −6,22% | 82,0% | −€232.183 | €40.203 |
+| PM Extensive | +0,13% | −4,14% | −5,64% | 83,7% | −€193.090 | €40.203 |
+| Training | +0,22% | −4,05% | −5,54% | 83,7% | −€194.025 | €40.203 |
+| Training + PM Minimal | +0,91% | −2,99% | −4,85% | 85,5% | −€155.639 | €40.203 |
+| Training + PM Minimal + SMED | +1,00% | −2,29% | −4,38% | 86,8% | −€131.191 | €40.203 |
+| Training + PM Extensive | +0,84% | −2,72% | −4,71% | 86,2% | −€142.087 | €40.203 |
+| Interval 10 → 5 | −26,47% | −16,21% | −16,21% | 72,7% | −€540.084 | €10.599 |
+| Interval 10 → 15 | −3,93% | −7,81% | −8,37% | 80,3% | −€280.370 | €86.071 |
+| Interval 10 → 20 | −3,68% | −9,37% | −10,17% | 81,0% | −€264.369 | €123.807 |
+| SS TP 3 → 5 | −8,60% | −12,70% | −12,70% | 78,7% | −€306.284 | €207.410 |

@@ -231,6 +231,8 @@ export interface Results {
   purchasing: PurchasingResults;
   sales: SalesResults;
   finance: FinanceResults;
+  /** V1: ROI "thận trọng" — SL dự kiến dùng min(phương án B, C) (COEFFS.capacitySlopeB/C); luôn ≤ ROI chính */
+  conservative: { sales: SalesResults; realizedRevenue: number; operatingProfit: number; roi: number };
 }
 
 export interface SalesCustomerResult {
@@ -365,6 +367,12 @@ export interface ScProductResult {
   stockValueR0: number;
   slPiecesR0: number;
   slPiecesEst: number;
+  /** V1: SL thận trọng = min(phương án B, phương án C) — luôn ≤ slPiecesEst */
+  slPiecesEstCons: number;
+  /** C2: obsolete kịch bản theo tuổi tồn (= R0 khi không đổi SS/interval) */
+  obsoleteEst: number;
+  obsoleteValuePerWeek: number;
+  obsoleteValuePerWeekR0: number;
   targetServiceLevel: number;
   recommendedSsWeeks: number;
   maxAgeWeeks: number;
@@ -378,4 +386,7 @@ export interface ScResults {
   components: ScComponentResult[];
   products: ScProductResult[];
   stockValue: { components: number; products: number; total: number; componentsR0: number; productsR0: number };
+  /** C2: tổng giá trị obsolete/tuần (6 SKU) kịch bản và R0 (tab 7) */
+  obsoleteValuePerWeek: number;
+  obsoleteValuePerWeekR0: number;
 }
