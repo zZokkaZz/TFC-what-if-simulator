@@ -331,7 +331,7 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
         id: `sales-promo-${name}`, severity: 'warn', from: 'Sales', to: ['Ops', 'SC', 'Purchasing', 'Finance'],
         title: `Promotional pressure ${name}: ${t0.promotionalPressure} → ${t.promotionalPressure}`,
         detail: `Nhu cầu khách ${n0(cu.demandR0)} → ${n0(cu.demand)} đv/tuần (${cu.demand >= cu.demandR0 ? '+' : '−'}${pct(Math.abs(cu.demand / cu.demandR0 - 1))}; ước lượng: điểm giữa khoảng % của sheet, neo % bán thêm R0 từng cặp khách × SKU — đã gồm ×2 Value for money / slowmover). Kéo theo sản xuất, mua NL, tồn kho, giờ kho; plan adherence ${pct(ob.line.planAdherence)} → ${pct(o.line.planAdherence)}. Chưa mô hình: nhu cầu biến động hơn khi khuyến mãi (σ giữ CV R0). ${ciNote(cu)} Info Center: ${impact('promotionalPressure')}`,
-        roi: [imp(`Contracted sales – ${name}`, reContr), imp('Penalty service level (3 khách)', PEN), imp('Flexible manpower (bottling)', /^Flexible manpower \(bottling\)/), imp('Investment: Stock', /^Stock$/)],
+        roi: [imp(`Contracted sales – ${name}`, reContr), imp('Penalty service level (3 khách)', PEN), imp('Flexible manpower (bottling)', /^Flexible manpower \(bottling\)/), imp('Distribution costs (ước lượng)', /^Distribution costs$/), imp('Investment: Stock', /^Stock$/)],
       });
     }
     if (t.promotionHorizon !== t0.promotionHorizon) {

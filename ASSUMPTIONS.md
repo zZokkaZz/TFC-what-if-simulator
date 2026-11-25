@@ -1,6 +1,6 @@
 # ASSUMPTIONS — Giả định & hiệu chỉnh của TFC Simulator
 
-Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu + M3 Sales đủ ô hợp đồng (trade unit, order deadline, SL type, SL hứa, shelf life, payment term, promotion, horizon, CI game)** (chưa có ô: shortage rule, SKU bán cho khách). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
+Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu + M3 Sales đủ ô hợp đồng (trade unit, order deadline, SL type, SL hứa, shelf life, payment term, promotion, horizon, CI game)** (chưa có ô: shortage rule, SKU bán cho khách) + **M4 Finance** (mọi dòng P&L có nguồn; Distribution costs theo pallet). M5 người dùng bỏ (25/11). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
 
 Nhãn trên giao diện:
 - **ước lượng**: giả định không có trong luật game.
@@ -427,3 +427,30 @@ Lựa chọn / khoảng của mọi ô đọc từ tab 6 "LỰA CHỌN HỢP Đ�
 Đọc bảng: SL type / SL hứa đổi penalty rất mạnh vì penalty F&G R0 lớn (−252.766) và neo tuyến tính từ 1 điểm R0 — SL type đã gắn "ngoài vùng dữ liệu R0". Payment term dài hơn làm ROI "tốt lên" chỉ vì đang lỗ (Investment lớn hơn chia khoản lỗ). Promotion Heavy: doanh thu +, nhưng tải dây chuyền ↑ → plan adherence ↓ → penalty ↑ (CI giảm do khuyến mãi chưa tính → thực tế còn xấu hơn).
 
 **Firestore rules:** `validCust` thêm 6 trường (khoảng như trên; bản 3 trường cũ vẫn hợp lệ). `scripts/test-rules.mjs` 59/59 (gồm ca 9 trường × 3 khách, điền CI game). **Người dùng cần Publish lại rules.**
+
+## 21. M4 — Finance đầy đủ (25/11/2026)
+
+**Mọi dòng P&L tab 2 có nhãn nguồn** (`LINE_BASIS` trong `src/model/finance.ts`, rê chuột trên tab Finance để xem cách tính): *luật* (định mức × quyết định), *mô hình* (neo R0), *ước lượng* (game không công bố), *số R0*. Test `tests/finance-m4.test.ts` kiểm: không dòng nào thiếu nhãn, không mẫu nào thừa; đẳng thức Revenue / COGS / Gross margin / Indirect / Operating profit / Investment / ROI đúng ở 6 kịch bản (gồm đổi cả 4 phòng cùng lúc); dòng giữ R0 không đổi ở mọi kịch bản. Không đổi gì → mọi dòng = đúng ô tab 2 (test đọc thẳng Excel).
+
+**Giữ số R0 (người dùng chốt 25/11 — sheet/luật không cho cách tính hoặc không có ô quyết định):**
+
+| Dòng | R0 | Lý do |
+|---|---|---|
+| Energy, Water, Other | 150.904 / 26.779 / 146.619 | Không có luật hay dữ liệu nào trong sheet. Hệ quả: đổi sản lượng (promotion, số ca) KHÔNG đổi các dòng này — có thể lạc quan khi tăng sản lượng |
+| Interest | 27.419 | Sheet không ghi tính trên khoản nào |
+| Contracted suppliers | 100.000 | Luôn 5 NCC |
+| Outbound order lines / orders | 927 / 7.167 | Số dòng đơn khách giữ R0 trong mô hình |
+| Fixed (Investment) | 2.500.000 | Không có ô quyết định |
+
+**Distribution costs (ước lượng, người dùng chốt "theo pallet, neo R0"):** P&L kịch bản = 192.114 (tab 2) × Σ(phí khách tab 6 × pallet giao/tuần mới ÷ baseline) ÷ Σ phí khách tab 6. Hai nguồn lệch (luật 4): tab 2 = 192.114, Σ tab 6 = 192.114,41 (làm tròn) → app neo tab 2. Luật Info Center €31/pallet **không dùng** vì R0 suy ra chỉ ≈ €22,09/pallet (tab 2 ÷ (334,5 pallet/tuần × 26)) — có thể do giá theo cỡ chuyến (bảng Distributor tab 6); tab Finance hiện cả 4 số. Chỉ promotion làm đổi lượng giao; trade unit (cỡ chuyến) chưa mô hình.
+
+| Kịch bản | Distribution costs | Δ | ROI |
+|---|---|---|---|
+| R0 | 192.114 | 0 | −7,68% |
+| Promotion F&G Middle → Heavy | 197.429 | +5.315 | −8,30% |
+| Promotion F&G Middle → None | 189.014 | −3.100 | −7,40% |
+| Promotion cả 3 khách → Heavy | 201.608 | +9.494 | −9,89% |
+
+(Promotion F&G Heavy trước M4: −8,16% → nay −8,30% vì thêm phí phân phối.)
+
+**Payment terms (Investment)** đã làm ở M3 (Δ AP Purchasing + Δ AR Sales, mục 15, 20) — M4 không đổi. AR / AP tách riêng: **thiếu dữ liệu** (tab 2 chỉ có số ròng 365.589).

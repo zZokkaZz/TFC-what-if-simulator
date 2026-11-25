@@ -212,9 +212,15 @@ export interface FinanceRow {
   r0: number | null;
   value: number;
   modeled: boolean; // true: tính từ model; false: giữ số R0
+  /** M4: nguồn của dòng — rule (luật/định mức), model (mô hình hiệu chỉnh R0), estimate (ước lượng), r0 (giữ số R0) */
+  basis?: FinanceBasis;
+  /** Vì sao dòng có nguồn này (hiện trên tab Finance) */
+  why?: string;
   isTotal?: boolean;
   isNew?: boolean;
 }
+
+export type FinanceBasis = 'rule' | 'model' | 'estimate' | 'r0';
 
 export interface FinanceResults {
   rows: FinanceRow[];
@@ -301,6 +307,9 @@ export interface SalesCustomerResult {
   /** Phải thu (AR) ước lượng = revenue/tuần × payment term */
   arR0: number;
   ar: number;
+  /** M4: phí phân phối theo khách — tab 6 R0 × (pallet giao/tuần mới ÷ baseline) */
+  distributionR0: number;
+  distribution: number;
   serviceLevelType: string;
   promised: number; // SL hứa (tab 6)
   slOrderLinesR0: number;
@@ -333,6 +342,9 @@ export interface SalesResults {
   adherenceSlope: { slope: number; r2: number };
   /** Thay đổi phải thu (AR) so với baseline → dòng Investment "Payment terms" (ước lượng, neo R0) */
   arDelta: number;
+  /** M4: Σ phí phân phối theo khách (tab 6) — R0 và kịch bản; P&L dùng 192.114 (tab 2) × tỷ lệ */
+  distributionR0: number;
+  distribution: number;
 }
 
 /** Nguồn của một số Purchasing: sheet (= R0), game (đội nhập), estimate (ước lượng), scaled (R0 × tỷ lệ mô hình). */

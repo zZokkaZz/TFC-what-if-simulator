@@ -209,7 +209,7 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
         <RawTable data={data} id="sales-cust" />
         <RawTable data={data} id="sales-prod" />
         <RawTable data={data} id="sales-cp" />
-        <RawTable data={data} id="sales-dist" note="Distribution costs = tổng 3 khách (N13); app giữ số R0 trong P&L" />
+        <RawTable data={data} id="sales-dist" note="Distribution costs = tổng 3 khách (N13). P&L kịch bản: 192.114 (tab 2) × (phí khách × pallet giao mới ÷ baseline) — ước lượng, xem tab Finance" />
         <RawTable data={data} id="sales-options" note="Danh sách dropdown của tab Sales đọc từ bảng này" />
         {data.sales.optionNotes.length > 0 && <ul class="muted small-text">{data.sales.optionNotes.map((n) => <li><b>{n.label}:</b> {n.text}</li>)}</ul>}
         {checks.length > 0 && <>
