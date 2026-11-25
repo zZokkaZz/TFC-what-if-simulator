@@ -7,6 +7,7 @@ import { baselineInputs as baselineInputsSc } from './baseline';
 import type { Calibration } from './calibration';
 import { activeSupplier, COMPONENTS } from './purchasing';
 import type { Est } from './assumptions';
+import { COEFFS } from './assumptions';
 import { ROUND } from './rules';
 import { expectedAbove, Phi } from './stats';
 import type { ActiveSupplier } from './purchasing';
@@ -160,6 +161,48 @@ export function productRisk(inputs: Inputs, data: Round0Data, production: SkuPro
   return out;
 }
 
+// ======================= C2: tuổi tồn → obsolete (ước lượng, hiệu chỉnh R0) =======================
+/**
+ * Tỷ lệ hàng quá tuổi cho phép khi xuất kho. Giả định: tuổi lúc xuất ~ Đều[S, S+P] + Chuẩn(0, σ)
+ * (S = safety stock TP, P = chu kỳ sản xuất, đều tính bằng tuần; A = tuổi cho phép = hạn dùng × (1 − shelf life khách đòi)).
+ * = σ/P × [L((A−S−P)/σ) − L((A−S)/σ)], L(z) = E[(Z − z)+] với Z ~ N(0,1).
+ */
+export function overAgeShare(S: number, P: number, A: number, sigma: number): number {
+  const clip = (x: number) => Math.min(1, Math.max(0, x));
+  if (sigma <= 1e-9) return P <= 1e-9 ? (S > A ? 1 : 0) : clip((S + P - A) / P);
+  if (P <= 1e-9) return 1 - Phi((A - S) / sigma);
+  return clip((sigma / P) * (expectedAbove(0, 1, (A - S - P) / sigma) - expectedAbove(0, 1, (A - S) / sigma)));
+}
+
+/** σ tuổi tồn (tuần) của từng SKU, hiệu chỉnh để overAgeShare(quyết định R0) = obsolete R0 (tab 7). */
+const sigmaCache = new WeakMap<Round0Data, Record<string, number | null>>();
+export function obsoleteAgeSigma(data: Round0Data): Record<string, number | null> {
+  const hit = sigmaCache.get(data);
+  if (hit) return hit;
+  const out: Record<string, number | null> = {};
+  const A = allowedAge(data);
+  for (const st of data.supplyChain.productStock) {
+    const dec = data.supplyChain.products.find((p) => p.sku === st.sku);
+    if (A === null || !dec || st.obsolete === null || st.obsolete === undefined) { out[st.sku] = null; continue; }
+    const S = dec.safetyStockWeeks, P = dec.productionIntervalDays / ROUND.daysPerWeek;
+    const f = (sg: number) => overAgeShare(S, P, A, sg) - st.obsolete;
+    if (f(1e-6) >= 0) { out[st.sku] = 0; continue; }
+    let lo = 1e-6, hi = 50;
+    if (f(hi) <= 0) { out[st.sku] = hi; continue; }
+    for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (f(m) < 0) lo = m; else hi = m; }
+    out[st.sku] = (lo + hi) / 2;
+  }
+  sigmaCache.set(data, out);
+  return out;
+}
+
+/** Tuổi cho phép (tuần) = hạn dùng SP (tab 3) × (1 − shelf life khách đòi cao nhất, tab 6). null = thiếu dữ liệu. */
+function allowedAge(data: Round0Data): number | null {
+  const shelf = data.productShelfLifeWeeks;
+  const req = data.sales.contracts.length ? Math.max(...data.sales.contracts.map((c) => c.shelfLife)) : null;
+  return shelf !== null && req !== null ? shelf * (1 - req) : null;
+}
+
 // ======================= Kết quả Supply Chain (M2) =======================
 
 /**
@@ -236,6 +279,10 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
     };
   });
   const slSlope = adherenceSlSlope(data).slope;
+  // Tỷ lệ thiếu hàng TB R0 (1 − SL pieces, 6 SKU tab 7) — quy độ dốc capacity "tại R0" ra hệ số bão hòa
+  const shortageR0 = data.supplyChain.productStock.reduce((s, p) => s + (1 - p.slPieces), 0) / Math.max(1, data.supplyChain.productStock.length);
+  const ageSigma = obsoleteAgeSigma(data);
+  const ageA = allowedAge(data);
   const products = ops.production.map((p) => {
     const st = data.supplyChain.productStock.find((x) => x.sku === p.sku)!;
     const r = prisk[p.sku], b = pbase[p.sku];
@@ -244,9 +291,31 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
     const kFg = ops.scLink.fgStockRatio[p.sku];
     // SL TP dự kiến (ước lượng) = SL R0 − Δ thiếu hàng (safety stock TP, interval) + độ dốc R0 × Δ plan adherence
     // (plan adherence đã gồm availability NL & capacity dây chuyền). Baseline = đúng số sheet.
-    const dAdh = pb ? p.adherence - pb.adherence : 0;
-    const slEst = Math.min(1, Math.max(0, st.slPieces - (r.shortRate - b.shortRate) + slSlope * dAdh));
+    // V1: tách Δ plan adherence = phần do availability NL (dMat) + phần do capacity dây chuyền (dCap)
+    //  - phần NL: tuyến tính, độ dốc hồi quy 6 SKU R0 (chênh lệch giữa SKU trong R0 chỉ do thiếu Vitamin C);
+    //  - phần capacity: bão hòa mũ trên tỷ lệ thiếu hàng, độ dốc tại R0 = COEFFS.capacitySlopeB (số chính) /
+    //    COEFFS.capacitySlopeC; "thận trọng" = SL thấp hơn của 2 phương án (luôn ≤ số chính).
+    const capB = baseOps ? baseOps.line.capacityAdherence : ops.line.capacityAdherence;
+    const dMat = pb ? capB * (p.availability - pb.availability) : 0;
+    const dCap = pb ? p.availability * (ops.line.capacityAdherence - capB) : 0;
+    const clip01 = (x: number) => Math.min(1, Math.max(0, x));
+    const sl0 = st.slPieces - (r.shortRate - b.shortRate) + slSlope * dMat;
+    const withCap = (slopeAtR0: number) => (Math.abs(dCap) < 1e-12 ? clip01(sl0) : clip01(1 - clip01(1 - sl0) * Math.exp(-(slopeAtR0 / shortageR0) * dCap)));
+    const slEst = withCap(COEFFS.capacitySlopeB.value);
+    const slCons = Math.min(slEst, withCap(COEFFS.capacitySlopeC.value));
     const slOlEst = Math.min(1, Math.max(0, st.slOrderLines + (slEst - st.slPieces)));
+    // C2: obsolete theo tuổi tồn = obsolete R0 × (tỷ lệ quá tuổi kịch bản ÷ tỷ lệ quá tuổi R0), σ hiệu chỉnh R0 × hệ số COEFFS
+    const sg0 = ageSigma[p.sku];
+    const P = p.intervalDays / ROUND.daysPerWeek, Sss = inputs.sc.products[p.sku].safetyStockWeeks;
+    const dec0 = data.supplyChain.products.find((x) => x.sku === p.sku);
+    let obsEst: number | null = st.obsolete ?? null;
+    if (obsEst !== null && sg0 !== null && sg0 !== undefined && ageA !== null && dec0) {
+      const sg = sg0 * COEFFS.obsoleteAgeSpreadScale.value;
+      const fNew = overAgeShare(Sss, P, ageA, sg), fR0 = overAgeShare(dec0.safetyStockWeeks, dec0.productionIntervalDays / ROUND.daysPerWeek, ageA, sg);
+      obsEst = fR0 > 1e-12 ? Math.min(1, st.obsolete * (fNew / fR0)) : st.obsolete + fNew;
+      if (Math.abs(Sss - dec0.safetyStockWeeks) < 1e-12 && Math.abs(P - dec0.productionIntervalDays / ROUND.daysPerWeek) < 1e-12) obsEst = st.obsolete;
+    }
+    const kObs = st.obsolete ? (obsEst ?? st.obsolete) / st.obsolete : 1;
     const batches = ROUND.days / p.intervalDays;
     return {
       sku: p.sku,
@@ -258,8 +327,8 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
         stockValue: cell(st.stockValue, kFg),
         economicWeeks: keep(st.economicWeeks),
         floatingStock: keep(st.floatingStockValue),
-        obsoletes: keep(st.obsolete),
-        obsoleteValuePerWeek: keep(st.obsoleteValuePerWeek),
+        obsoletes: obsEst === null ? keep(st.obsolete) : { r0: st.obsolete, value: obsEst, basis: Math.abs(obsEst - st.obsolete) < 1e-12 ? 'sheet' : 'model' } as SheetCell,
+        obsoleteValuePerWeek: cell(st.obsoleteValuePerWeek, kObs, 'model'),
         mape: keep(st.mape),
         bias: keep(st.bias),
         batches: { r0: st.batches, value: batches, basis: Math.abs(batches - st.batches) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
@@ -276,6 +345,10 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
       stockValueR0: st.stockValue,
       slPiecesR0: st.slPieces,
       slPiecesEst: slEst,
+      slPiecesEstCons: slCons,
+      obsoleteEst: obsEst ?? st.obsolete,
+      obsoleteValuePerWeek: (st.obsoleteValuePerWeek ?? 0) * kObs,
+      obsoleteValuePerWeekR0: st.obsoleteValuePerWeek ?? 0,
       targetServiceLevel: r.targetServiceLevel,
       recommendedSsWeeks: r.recommendedSsWeeks,
       maxAgeWeeks: r.maxAgeWeeks,
@@ -289,7 +362,11 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
   const fgValue = products.reduce((s, p) => s + p.stockValue, 0);
   const rmR0 = components.reduce((s, c) => s + c.stockValueR0, 0);
   const fgR0 = products.reduce((s, p) => s + p.stockValueR0, 0);
-  return { components, products, stockValue: { components: rmValue, products: fgValue, total: rmValue + fgValue, componentsR0: rmR0, productsR0: fgR0 } };
+  return {
+    components, products, stockValue: { components: rmValue, products: fgValue, total: rmValue + fgValue, componentsR0: rmR0, productsR0: fgR0 },
+    obsoleteValuePerWeek: products.reduce((s, p) => s + p.obsoleteValuePerWeek, 0),
+    obsoleteValuePerWeekR0: products.reduce((s, p) => s + p.obsoleteValuePerWeekR0, 0),
+  };
 }
 
 /** Quyết định SC/Ops/Purchasing của R0 (để tính rủi ro baseline cùng cách). */

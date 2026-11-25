@@ -290,3 +290,42 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 | `capacitySlopeC` — V1 phương án C | 0,25 | chưa xác minh | chưa dùng (chờ chọn) |
 
 **Khi có dữ liệu vòng trial:** sửa `value` (và `status`, `source`) trong `COEFFS` → `npm run verify`. Test đọc giá trị từ `COEFFS`, không gõ lại số; baseline R0 không phụ thuộc các hệ số này (đã thử đổi mốc 2 → 3 và mũ 1 → 1,3: 240/240 vẫn xanh). `tests/coeffs.test.ts` còn kiểm tra mục `usedIn` khớp thực tế: hệ số ghi "chưa dùng" mà có file đọc (hoặc ngược lại) thì test đỏ.
+
+## 18. C2 — obsolete & Costs of scrap theo tuổi tồn; V1 — tách plan adherence (25/11/2026)
+
+### C2 (ước lượng, hiệu chỉnh R0)
+
+- **Tuổi cho phép** A = hạn dùng SP (tab 3: 20 tuần) × (1 − shelf life khách đòi cao nhất, tab 6: 75%) = **5 tuần**.
+- **Tuổi lúc xuất kho** của SKU ≈ Đều[S, S + P] + Chuẩn(0, σ): S = safety stock TP (tuần), P = production interval ÷ 5 (tuần). Tỷ lệ quá tuổi
+  `f(S, P, A, σ) = σ/P × [L((A − S − P)/σ) − L((A − S)/σ)]`, với L(z) = E[(Z − z)+], Z ~ N(0,1).
+- **σ từng SKU hiệu chỉnh** sao cho f(R0: S = 3, P = 2, A = 5) = obsolete R0 tab 7: σ = 0,42 / 0,36 / 0,44 / 0,41 / 0,28 / 0,40 tuần (Orange 1L … Mango PET). Giả định: toàn bộ obsolete R0 do tuổi tồn (không tách được phần do sai dự báo).
+- **Obsolete kịch bản** = obsolete R0 × f(mới, σ × `obsoleteAgeSpreadScale`) ÷ f(R0, σ × `obsoleteAgeSpreadScale`) (≤ 100%); không đổi SS/interval → đúng số tab 7.
+- **Obsolete value/tuần** = số tab 7 × (obsolete mới ÷ R0).
+- **Costs of scrap** = €40.203 (tab 2) × (Σ obsolete value/tuần mới ÷ R0)^`scrapObsoleteElasticity`. R0: obsolete 4.421 €/tuần × 26 = 114.946 € ≠ scrap 40.203 € → quan hệ chính xác chưa rõ.
+- **KPI Obsolete products** = 8,1% (tab 1) + (TB gia quyền nhu cầu của obsolete mới − R0).
+- **Cảnh báo ĐỎ** khi tuổi tồn lớn nhất (S + P) > A, kèm số Costs of scrap.
+- **Chưa mô hình:** hàng hủy làm giảm hàng bán / phải sản xuất bù (giờ dây chuyền, NL); giờ hủy hàng kho TP vẫn theo obsolete R0.
+- **Hệ quả cần biết:** σ hiệu chỉnh nhỏ (~0,4 tuần) vì R0 nằm đúng mép (S + P = A = 5 tuần) → obsolete đổi rất dốc khi tuổi tồn vượt 5 tuần: interval 15 → 33%, interval 20 → 50%, SS TP 5 → ~92%; interval 5 hoặc SS TP 1 → ~0%. Với `obsoleteAgeSpreadScale` = 2: 18% / 25% / 42%; = 3: 13% / 18% / 27%. Hệ số này chờ dữ liệu trial.
+
+### V1 (ước lượng) — người dùng chọn phương án B làm số chính, C làm cận dưới
+
+- Δ plan adherence của SKU = **phần thiếu NL** (capacity R0 × Δ availability) + **phần capacity** (availability mới × Δ capacity adherence).
+- **Phần thiếu NL**: tuyến tính 0,974 điểm SL / điểm adherence (hồi quy 6 SKU R0, R² 0,95 — chênh lệch giữa SKU trong R0 chỉ do thiếu Vitamin C).
+- **Phần capacity** (R0 không có điểm dữ liệu): bão hòa mũ trên tỷ lệ thiếu hàng: `thiếu mới = thiếu × e^(−(độ dốc ÷ 0,0778) × Δ capacity)`; 0,0778 = tỷ lệ thiếu TB R0 (1 − SL pieces, 6 SKU) → độ dốc tại R0 = `capacitySlopeB` (0,5, **số chính**) hoặc `capacitySlopeC` (0,25).
+- **"Thận trọng"** = SL thấp hơn giữa B và C từng SKU → doanh thu & ROI thận trọng **luôn ≤ số chính**. Khi capacity giảm (vd 1 ca), C cho SL cao hơn B nên thận trọng = B (C không phải cận dưới khi capacity giảm). Hiện "(thận trọng: x%)" cạnh ROI (thanh trên, Dashboard) và doanh thu thận trọng ở tab Sales khi phần capacity thay đổi.
+
+### Bảng kịch bản trước / sau (ROI; trước = main b59c6a4)
+
+| Kịch bản | Trước | Sau (số chính B) | Thận trọng |
+|---|---|---|---|
+| R0 | −7,68% | −7,68% | −7,68% |
+| 2 → 1 ca | −58,88% | −55,55% | −55,55% |
+| 2 → 3 ca | −0,44% | −3,38% | −5,59% |
+| SMED | −4,09% | −6,49% | −6,99% |
+| PM Minimal | −1,06% | −5,14% | −6,22% |
+| PM Extensive | +0,13% | −4,14% | −5,64% |
+| Interval 10 → 5 | −26,47% | −15,96% | −15,96% |
+| Interval 10 → 15 | −3,93% | −9,75% | −10,32% |
+| Interval 10 → 20 | −3,68% | −12,40% | −13,20% |
+| SS TP 3 → 1 | −23,33% | −22,30% | −22,30% |
+| SS TP 3 → 5 | −8,60% | −18,70% | −18,70% |

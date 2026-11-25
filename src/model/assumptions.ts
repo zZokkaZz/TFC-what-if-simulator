@@ -47,7 +47,7 @@ export const COEFFS = {
     unit: 'điểm SL / điểm adherence',
     source: 'Đề xuất (rà soát 25/11): R0 KHÔNG có điểm dữ liệu cho phần capacity (mọi SKU cùng capacity); chọn ≈ ½ độ dốc phần thiếu NL (0,974, hồi quy 6 SKU R0). Dạng bão hòa mũ: tỷ lệ thiếu × e^(−dốc/thiếu TB R0 × Δadherence).',
     status: 'chưa xác minh',
-    usedIn: 'chưa dùng — chờ người dùng chọn phương án V1 (B hoặc C)',
+    usedIn: 'src/model/supplyChain.ts (SL dự kiến — SỐ CHÍNH, người dùng chọn 25/11)',
     verifyWith: 'Vòng trial có đổi số ca / SMED / PM: so plan adherence và SL pieces trước–sau.',
   },
   capacitySlopeC: {
@@ -56,8 +56,25 @@ export const COEFFS = {
     unit: 'điểm SL / điểm adherence',
     source: 'Như phương án B nhưng giảm một nửa (≈ ¼ độ dốc phần thiếu NL), cùng dạng bão hòa mũ.',
     status: 'chưa xác minh',
-    usedIn: 'chưa dùng — chờ người dùng chọn phương án V1 (B hoặc C)',
+    usedIn: 'src/model/supplyChain.ts (SL thận trọng = min(B, C) — hiện kèm "thận trọng")',
     verifyWith: 'Như phương án B.',
+  },
+  scrapObsoleteElasticity: {
+    value: 1,
+    label: 'C2 — Costs of scrap theo giá trị obsolete (mũ co giãn)',
+    source: 'Giả định (C2, 25/11): Costs of scrap = số R0 tab 2 (€40.203) × (giá trị obsolete/tuần mới ÷ R0)^mũ. R0: obsolete 4.421 €/tuần × 26 = 114.946 € ≠ scrap 40.203 € → quan hệ chính xác chưa rõ (có thể tính theo giá vốn hoặc gồm rejects).',
+    status: 'chưa xác minh',
+    usedIn: 'src/model/finance.ts (Costs of scrap)',
+    verifyWith: 'Costs of scrap và obsolete value các vòng trial có đổi safety stock TP / production interval.',
+  },
+  obsoleteAgeSpreadScale: {
+    value: 1,
+    label: 'C2 — độ phân tán tuổi tồn kịch bản so với σ hiệu chỉnh R0',
+    unit: 'lần',
+    source: 'Giả định (C2, 25/11): tuổi lúc xuất ~ Đều[SS, SS + chu kỳ] + Chuẩn(0, σ); σ từng SKU hiệu chỉnh để khớp obsolete R0 tab 7 (8,4/7,1/8,8/8,2/5,5/8,0%). Hệ số = 1 nghĩa là σ không đổi khi đổi SS/interval. Baseline không phụ thuộc hệ số này.',
+    status: 'chưa xác minh',
+    usedIn: 'src/model/supplyChain.ts (obsolete theo tuổi tồn)',
+    verifyWith: 'Obsolete từng SKU ở vòng trial có production interval hoặc safety stock TP khác R0.',
   },
 } satisfies Record<string, Coeff>;
 

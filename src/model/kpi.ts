@@ -97,12 +97,17 @@ export function buildKpis(d: Round0Data, res: Results, base: Results): Kpi[] {
     scenario: res.finance.grossMargin, scenarioBasis: 'model', good: 'up', target: null, comment: null,
   });
   const obs = quick(/^Obsolete products/);
+  const obsW = (r: Results) => {
+    const w = r.sc.products.reduce((t, p) => t + (p.sheet.demandPerWeek.value ?? 0), 0);
+    return w > 0 ? r.sc.products.reduce((t, p) => t + (p.sheet.demandPerWeek.value ?? 0) * p.obsoleteEst, 0) / w : 0;
+  };
   out.push({
     id: 'sal-obs', dept: 'Sales', label: 'Obsolete products (%)', unit: 'pct',
     rMinus2: MISSING('Obsolete products Round -2'),
     rMinus1: obs?.value != null ? { value: obs.value, source: R1_EQ } : MISSING('Obsolete R-1'),
     r0: obs?.value != null ? { value: obs.value, source: `tab 1 (${obs.source})` } : MISSING('Obsolete products R0'),
-    scenario: obs?.value ?? null, scenarioBasis: 'notModeled', good: 'down', target: null, comment: null,
+    // C2: R0 dashboard + (obsolete TB gia quyền nhu cầu mới − R0), ước lượng theo tuổi tồn
+    scenario: obs?.value != null ? (Math.abs(obsW(res) - obsW(base)) < 1e-12 ? obs.value : Math.min(1, Math.max(0, obs.value + obsW(res) - obsW(base)))) : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: null,
   });
   const sl = quick(/^Service level outbound/);
   const slTarget = d.sales.contracts.length ? Math.min(...d.sales.contracts.map((c) => c.serviceLevel)) : null;

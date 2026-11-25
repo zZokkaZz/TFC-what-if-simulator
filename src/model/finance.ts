@@ -1,6 +1,7 @@
 // Finance: P&L R0; thay các dòng Ops (M1), Stock / Interest on components & products (M2), mua NL / Inbound orders /
 // Inbound order lines / Payment terms (M3 Purchasing), Penalty service level (M3 Sales) bằng số model; các dòng khác GIỮ SỐ R0. ROI = Operating profit / Investment.
 import type { Round0Data } from '../data/types';
+import { COEFFS } from './assumptions';
 import type { FinanceResults, FinanceRow, OpsResults, PurchasingResults, RoiNode, SalesResults, ScResults } from './types';
 
 /** Dòng P&L trong tab 2_Finance ↔ id chi phí trong model Ops */
@@ -51,6 +52,12 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
     if (pur && /^Inbound order lines$/i.test(l.label)) { value = pur.inboundOrderLines; modeled = true; }
     if (pur && /^Inbound orders$/i.test(l.label)) { value = pur.inboundOrders; modeled = true; }
     if (pur && /^Payment terms$/i.test(l.label)) { value = l.value + pur.paymentTermsDelta; modeled = true; }
+    // C2: Costs of scrap = R0 × (giá trị obsolete/tuần mới ÷ R0)^mũ (COEFFS) — ước lượng
+    if (sc && /^Costs of scrap$/i.test(l.label) && sc.obsoleteValuePerWeekR0 > 0) {
+      const k = sc.obsoleteValuePerWeek / sc.obsoleteValuePerWeekR0;
+      value = Math.abs(k - 1) < 1e-12 ? l.value : l.value * Math.pow(k, COEFFS.scrapObsoleteElasticity.value);
+      modeled = true;
+    }
     // M3 Sales: penalty service level từng khách (ước lượng theo mức thiếu SL); contracted sales giữ R0
     if (sales && /^Penalty service level/i.test(l.label)) {
       const cu = sales.customers.find((x) => l.label.normalize('NFC').endsWith(x.customer.normalize('NFC')));

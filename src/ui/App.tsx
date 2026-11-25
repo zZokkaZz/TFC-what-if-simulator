@@ -13,6 +13,7 @@ import { useSync } from './useSync';
 import { changedPaths } from './trace';
 import { eur, pct, signed } from './format';
 import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
+import { CONSERVATIVE_NOTE, conservativeRoiText } from './conservative';
 import { OpsTab } from './OpsTab';
 import { AssumptionsTab, FinanceTab } from './OtherTabs';
 import { SalesTab } from './SalesTab';
@@ -37,11 +38,11 @@ const TABS = [
   { id: 'info', label: 'Giả định & R0' },
 ] as const;
 
-function Kpi({ label, value, delta, cls, sub, subTitle, title }: { label: string; value: string; delta?: string; cls?: string; sub?: string; subTitle?: string; title?: string }) {
+function Kpi({ label, value, delta, cls, sub, subTitle, title, extra, extraTitle }: { label: string; value: string; delta?: string; cls?: string; sub?: string; subTitle?: string; title?: string; extra?: string; extraTitle?: string }) {
   return (
     <div class="kpi">
       <div class="kpi-l">{label}</div>
-      <div class="kpi-v">{value}{delta && <span class={`delta ${cls}`} title={title}>{delta}</span>}</div>
+      <div class="kpi-v">{value}{extra && <span class="kpi-extra" title={extraTitle}> {extra}</span>}{delta && <span class={`delta ${cls}`} title={title}>{delta}</span>}</div>
       {sub && <div class="kpi-s" title={subTitle}>{sub}</div>}
     </div>
   );
@@ -115,7 +116,7 @@ export function App() {
           <b>TFC What-if</b>
           <span>Ops + SC + Purchasing + Sales (SL) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
-        <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}${res.sales.customers.some((c) => c.outOfRange) ? ' · ⚠ ngoài vùng dữ liệu R0' : ''}`} subTitle={res.sales.customers.some((c) => c.outOfRange) ? `Service level của ít nhất 1 khách rơi xa R0 (mức thiếu > ${COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × R0, hệ số chưa xác minh): penalty/doanh thu là ngoại suy — xem tab Sales` : undefined} />
+        <Kpi label="ROI" value={pct(f.roi, 2)} extra={conservativeRoiText(res, baseRes) || undefined} extraTitle={CONSERVATIVE_NOTE} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}${res.sales.customers.some((c) => c.outOfRange) ? ' · ⚠ ngoài vùng dữ liệu R0' : ''}`} subTitle={res.sales.customers.some((c) => c.outOfRange) ? `Service level của ít nhất 1 khách rơi xa R0 (mức thiếu > ${COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × R0, hệ số chưa xác minh): penalty/doanh thu là ngoại suy — xem tab Sales` : undefined} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} sub={r0TwoSources(data, 'operatingProfit')} subTitle={R0_SOURCE_NOTE} />
         <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={Math.abs(dInv) < 0.5 ? 'neutral' : cls(invRoiEffect)} title={f.operatingProfit < 0 ? 'Đang lỗ: Investment tăng làm ROI tốt lên, giảm làm ROI xấu đi (màu theo tác động lên ROI)' : 'Màu theo tác động lên ROI'} />
         <div class="top-actions">

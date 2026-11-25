@@ -249,14 +249,27 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
       roi: [imp('Penalty service level (3 khách)', PEN)],
     });
   }
+  // C2: tuổi tồn vượt tuổi cho phép (shelf life khách yêu cầu) → CẢNH BÁO ĐỎ; obsolete & Costs of scrap theo tuổi tồn (ước lượng)
+  const obsLine = (list: typeof res.sc.products) => list.map((p) => `${p.sku} ${pct(p.obsoleteR0)} → ${pct(p.obsoleteEst)}`).join('; ');
+  const scrapNote = `Obsolete = obsolete R0 × (tỷ lệ quá tuổi mới ÷ R0); tuổi lúc xuất ≈ Đều[SS, SS + chu kỳ] + phân tán σ hiệu chỉnh R0. Costs of scrap = €${n0(data.finance.lines.find((l) => /^Costs of scrap$/i.test(l.label))?.value ?? 0)} (tab 2) × tỷ lệ giá trị obsolete — ước lượng. Hàng hủy KHÔNG làm giảm hàng bán / không sản xuất bù (chưa mô hình).`;
   const old = res.sc.products.filter((p) => p.allowedAgeWeeks !== null && p.maxAgeWeeks > p.allowedAgeWeeks + 1e-9);
   if (old.length) {
     out.push({
-      id: 'sc-age', severity: 'warn', from: 'SC', to: ['Sales', 'Ops'],
-      title: `Hàng có thể quá hạn giao (${old.length} SKU)`,
-      detail: `Tuổi tồn lớn nhất ≈ safety stock + chu kỳ sản xuất = ${n1(old[0].maxAgeWeeks)} tuần > ${n1(old[0].allowedAgeWeeks!)} tuần cho phép (hạn dùng ${data.productShelfLifeWeeks ?? '?'} tuần, khách đòi còn ≥ ${pct(Math.max(...data.sales.contracts.map((c) => c.shelfLife)), 0)}). Nguy cơ obsolete tăng (R0 đã 8,1%), kho TP tốn giờ hủy hàng.`,
-      roi: [notModeled('Costs of scrap', 'chưa mô hình theo tuổi tồn'), notModeled('Penalty do shelf life', 'chưa mô hình')],
+      id: 'sc-age', severity: 'critical', from: 'SC', to: ['Sales', 'Ops', 'Finance'],
+      title: `Tuổi tồn vượt shelf life khách yêu cầu (${old.length} SKU) → Costs of scrap ${row(/^Costs of scrap$/) >= 0 ? '+' : '−'}€${n0(Math.abs(row(/^Costs of scrap$/)))}`,
+      detail: `Tuổi tồn lớn nhất ≈ safety stock + chu kỳ sản xuất = ${n1(old[0].maxAgeWeeks)} tuần > ${n1(old[0].allowedAgeWeeks!)} tuần cho phép (hạn dùng ${data.productShelfLifeWeeks ?? '?'} tuần × (1 − shelf life khách đòi ${pct(Math.max(...data.sales.contracts.map((c) => c.shelfLife)), 0)})). Obsolete: ${obsLine(old)}. ${scrapNote}`,
+      roi: [imp('Costs of scrap (ước lượng)', /^Costs of scrap$/), notModeled('Doanh thu mất do hàng hủy / sản xuất bù', 'chưa mô hình')],
     });
+  } else {
+    const obsMoved = res.sc.products.filter((p) => Math.abs(p.obsoleteEst - p.obsoleteR0) > 0.0005);
+    if (obsMoved.length) {
+      out.push({
+        id: 'sc-obs', severity: 'info', from: 'SC', to: ['Sales', 'Finance'],
+        title: `Obsolete thay đổi theo tuổi tồn → Costs of scrap ${row(/^Costs of scrap$/) >= 0 ? '+' : '−'}€${n0(Math.abs(row(/^Costs of scrap$/)))}`,
+        detail: `${obsLine(obsMoved)}. ${scrapNote}`,
+        roi: [imp('Costs of scrap (ước lượng)', /^Costs of scrap$/)],
+      });
+    }
   }
   if (scFrozen) {
     out.push({
