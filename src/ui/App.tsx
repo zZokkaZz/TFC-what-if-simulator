@@ -114,7 +114,7 @@ export function App() {
       <header class="topbar">
         <div class="brand">
           <b>TFC What-if</b>
-          <span>Ops + SC + Purchasing + Sales (SL) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
+          <span>Ops + SC + Purchasing + Sales · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
         <Kpi label="ROI" value={pct(f.roi, 2)} extra={conservativeRoiText(res, baseRes) || undefined} extraTitle={CONSERVATIVE_NOTE} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}${res.sales.customers.some((c) => c.outOfRange) ? ' · ⚠ ngoài vùng dữ liệu R0' : ''}`} subTitle={res.sales.customers.some((c) => c.outOfRange) ? `Service level của ít nhất 1 khách rơi xa R0 (mức thiếu > ${COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × R0, hệ số chưa xác minh): penalty/doanh thu là ngoại suy — xem tab Sales` : undefined} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} sub={r0TwoSources(data, 'operatingProfit')} subTitle={R0_SOURCE_NOTE} />

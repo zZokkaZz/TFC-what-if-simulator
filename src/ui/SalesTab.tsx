@@ -5,9 +5,9 @@ import type { ComponentChildren } from 'preact';
 import type { Round0Data } from '../data/types';
 import type { Inputs, Results, SalesCustomerTerms, SalesInputs } from '../model/types';
 import type { Warning } from '../model/warnings';
-import { salesOption, salesOptionChecks } from '../model/sales';
+import { CI_STEP_KEYS, salesOption, salesOptionChecks } from '../model/sales';
 import { SALES_LIMITS } from '../sync/limits';
-import { Badge, Card, Grid, Metric, OptNumberField, SelectField, Table } from './components';
+import { Badge, Card, Grid, Metric, NumberField, OptNumberField, SelectField, Table } from './components';
 import { eur, num, pct } from './format';
 import { causesFor } from './trace';
 import { WarningsPanel } from './WarningsPanel';
@@ -17,6 +17,8 @@ import { COEFFS } from '../model/assumptions';
 
 /** Ghi chú cạnh ô trade unit / order deadline khi chưa nhập CI game (người dùng chốt: hệ số CI trong COEFFS giữ = 0). */
 export const CI_MISSING_NOTE = 'Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng.';
+/** Đổi điều khoản theo hướng làm CI GIẢM (vd promotion cao hơn, SL hứa thấp hơn, trade unit lớn hơn) — hệ số CI = 0 nên lựa chọn trông tốt hơn thực tế. */
+export const CI_DOWN_NOTE = 'Chưa tính phần giá giảm (CI) — lựa chọn này đang trông tốt hơn thực tế. Nhập CI game hiển thị để tính đúng.';
 
 interface Props {
   data: Round0Data;
@@ -45,6 +47,9 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
   const anyChanged = changed.some((p) => p.startsWith('sales.'));
   const setCust = (name: string, patch: Partial<SalesCustomerTerms>) => setSales({ ...sa, customers: { ...sa.customers, [name]: { ...sa.customers[name], ...patch } } });
   const optTU = salesOption(data, 'tradeUnit'), optDL = salesOption(data, 'orderDeadline');
+  const optSLT = salesOption(data, 'serviceLevelType'), optPromo = salesOption(data, 'promotionalPressure'), optHz = salesOption(data, 'promotionHorizon');
+  const promoLabel = (x: string) => { const lv = optPromo?.levels?.[x]; return !lv ? x : lv.min === lv.max ? `${x} (+${num(lv.min * 100, 1)}%)` : `${x} (+${num(lv.min * 100, 1)}–${num(lv.max * 100, 1)}%)`; };
+  const pctLimit = (l: typeof SALES_LIMITS.serviceLevel) => ({ ...l, min: Math.round(l.min * 100), max: Math.round(l.max * 100) });
   const opts = (xs: string[] | null | undefined, cur: string, r0: string) => [...new Set([...(xs ?? []), cur])].map((x) => ({ value: x, label: `${x}${x === r0 ? ' (R0)' : ''}` }));
   const checks = salesOptionChecks(data);
   const badChecks = checks.filter((x) => !x.same || !x.inChoices);
@@ -71,24 +76,35 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
               <div class="pur-grid">
                 <SelectField label="Trade unit" value={t.tradeUnit} disabled={dis} changed={t.tradeUnit !== tb.tradeUnit} options={opts(optTU?.choices, t.tradeUnit, tb.tradeUnit)} onChange={(v) => setCust(k.customer, { tradeUnit: v })} hint="→ giờ soạn hàng kho TP (Ops)" />
                 <SelectField label="Order deadline" value={t.orderDeadline} disabled={dis} changed={t.orderDeadline !== tb.orderDeadline} options={opts(optDL?.choices, t.orderDeadline, tb.orderDeadline)} onChange={(v) => setCust(k.customer, { orderDeadline: v })} hint="Chưa mô hình vào số — chỉ cảnh báo" />
+                <SelectField label="Service level type" value={t.serviceLevelType} disabled={dis} changed={t.serviceLevelType !== tb.serviceLevelType} options={opts(optSLT?.choices, t.serviceLevelType, tb.serviceLevelType)} onChange={(v) => setCust(k.customer, { serviceLevelType: v })} hint="→ loại đo của mốc penalty" />
+                <NumberField label="Service level" unit="%" value={Math.round(t.serviceLevel * 1e6) / 1e4} limit={pctLimit(SALES_LIMITS.serviceLevel)} step={1} disabled={dis} changed={Math.abs(t.serviceLevel - tb.serviceLevel) > 1e-9} onChange={(v) => setCust(k.customer, { serviceLevel: v / 100 })} hint="→ mốc penalty (ước lượng)" />
+                <NumberField label="Shelf life" unit="%" value={Math.round(t.shelfLife * 1e6) / 1e4} limit={pctLimit(SALES_LIMITS.shelfLife)} step={1} disabled={dis} changed={Math.abs(t.shelfLife - tb.shelfLife) > 1e-9} onChange={(v) => setCust(k.customer, { shelfLife: v / 100 })} hint={`→ tuổi tồn cho phép ${data.productShelfLifeWeeks ?? '?'} tuần × (1 − shelf life) → obsolete`} />
+                <NumberField label="Payment term" unit="tuần" value={t.paymentTermWeeks} limit={SALES_LIMITS.paymentTermWeeks} step={1} disabled={dis} changed={t.paymentTermWeeks !== tb.paymentTermWeeks} onChange={(v) => setCust(k.customer, { paymentTermWeeks: v })} hint="→ phải thu (AR) → Investment" />
+                <SelectField label="Promotional pressure" value={t.promotionalPressure} disabled={dis} changed={t.promotionalPressure !== tb.promotionalPressure} options={opts(optPromo?.choices, t.promotionalPressure, tb.promotionalPressure).map((o) => ({ ...o, label: o.label.replace(o.value, promoLabel(o.value)) }))} onChange={(v) => setCust(k.customer, { promotionalPressure: v })} hint="→ nhu cầu (ước lượng)" />
+                <SelectField label="Promotion horizon" value={t.promotionHorizon} disabled={dis} changed={t.promotionHorizon !== tb.promotionHorizon} options={opts(optHz?.choices, t.promotionHorizon, tb.promotionHorizon)} onChange={(v) => setCust(k.customer, { promotionHorizon: v })} hint="Chưa mô hình vào số — chỉ cảnh báo" />
               </div>
-              {t.ciGame === null && <p class={`${t.tradeUnit !== tb.tradeUnit || t.orderDeadline !== tb.orderDeadline ? 'warn-text' : 'muted'} small-text`}>{CI_MISSING_NOTE}</p>}
+              {(() => {
+                const up = CI_STEP_KEYS.some((x) => cu.ciSteps[x] > 0), down = CI_STEP_KEYS.some((x) => cu.ciSteps[x] < 0);
+                return <>
+                  {t.ciGame === null && (up || !down) && <p class={`${up ? 'warn-text' : 'muted'} small-text`}>{CI_MISSING_NOTE}</p>}
+                  {t.ciGame === null && down && <p class="warn-text small-text">{CI_DOWN_NOTE}</p>}
+                </>;
+              })()}
               <div class="pur-grid pur-game">
                 <OptNumberField label="CI game hiển thị" value={t.ciGame} limit={SALES_LIMITS.ciGame} disabled={dis} changed={t.ciGame !== tb.ciGame}
                   placeholder={`trống = ${num(cu.ciBasis === 'game' ? k.contractIndex : cu.contractIndex, 4)}`} hint={`Trống: CI R0 ${num(k.contractIndex, 4)}${cu.ciStale ? ' × hệ số ước lượng' : ''}`}
                   onChange={(v) => setCust(k.customer, { ciGame: v })} />
               </div>
-              {cu.ciStale && <p class="warn-text small-text">⚠ Chưa nhập CI game: CI ước lượng {num(cu.contractIndex, 4)} (hệ số COEFFS: trade unit {num(COEFFS.salesCiPerStepTradeUnit.value, 3)}/bậc, deadline {num(COEFFS.salesCiPerStepOrderDeadline.value, 3)}/bậc — chưa xác minh) <Badge basis="estimate" /></p>}
-              <p class="muted small-text">Điều khoản khác (R0, chưa có ô): SL {pct(k.serviceLevel, 0)} {k.serviceLevelType} · shelf life {pct(k.shelfLife, 0)} · payment term {k.paymentTermWeeks} tuần · promotion {k.promotionalPressure}/{k.promotionHorizon}</p>
+              {cu.ciStale && <p class="warn-text small-text">⚠ Chưa nhập CI game: CI ước lượng {num(cu.contractIndex, 4)} (hệ số CI của mọi ô hợp đồng Sales trong COEFFS = 0 theo người dùng chốt — chưa xác minh) <Badge basis="estimate" /></p>}
             </fieldset>
           );
         })}
-        {optTU && <p class="muted small-text"><b>Trade unit</b> (Info Center): {optTU.impact}</p>}
-        {optDL && <p class="muted small-text"><b>Order deadline</b> (Info Center): {optDL.impact}</p>}
+        {data.sales.options.filter((o) => o.key !== 'shortageRule' && o.key !== 'skus').map((o) => <p class="muted small-text"><b>{o.field}</b> (Info Center): {o.impact}</p>)}
+        <p class="muted small-text">Chưa có ô: shortage rule, SKU bán cho khách (giữ R0).</p>
       </aside>
 
       <section class="results">
-      <p class="pending">Đã nối: <b>service level → penalty → doanh thu</b> (ước lượng), <b>trade unit → giờ soạn hàng kho TP</b>, <b>CI game → contracted sales</b>. Order deadline: chỉ cảnh báo. SL hứa, shelf life, payment term, promotion: <b>chưa có ô</b> (giữ R0).</p>
+      <p class="pending">Đã nối (ước lượng, neo R0): <b>SL hứa / SL type → mốc penalty</b>, <b>shelf life → tuổi tồn → obsolete/scrap</b>, <b>promotion → nhu cầu → sản xuất, tồn kho, SL</b>, <b>payment term → phải thu → Investment</b>, <b>trade unit → giờ soạn hàng</b>, <b>CI game → contracted sales</b>. Order deadline, promotion horizon: chỉ cảnh báo. Phần giá (CI) khi đổi điều khoản: <b>chưa tính</b> (hệ số = 0) — nhập CI game.</p>
       {S.customers.some((x) => x.outOfRange) && <p class="lock">⚠ <b>Ngoài vùng dữ liệu R0:</b> {S.customers.filter((x) => x.outOfRange).map((x) => x.customer).join(', ')} — service level rơi xa R0 (mức thiếu &gt; {COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × R0, hệ số chưa xác minh), penalty là ngoại suy tuyến tính từ 1 điểm R0{S.customers.some((x) => x.capped) ? '; có khách bị chặn ở doanh thu 0' : ''}. Chỉ nên đọc chiều hướng, không đọc độ lớn.</p>}
       <WarningsPanel warnings={warnings} filterTo="Sales" title="Cảnh báo liên quan Sales" />
 
@@ -114,7 +130,7 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
                   <td>{x.tradeUnit === x.tradeUnitR0 ? x.tradeUnit : <><b>{x.tradeUnit}</b><div class="m-r0">R0 {x.tradeUnitR0}</div></>}</td>
                   <td>{x.orderDeadline === x.orderDeadlineR0 ? x.orderDeadline : <><b>{x.orderDeadline}</b><div class="m-r0">R0 {x.orderDeadlineR0}</div></>}</td>
                   <td>{x.serviceLevelType}</td>
-                  <td>{pct(x.promised, 0)}</td>
+                  <td>{Math.abs(x.promised - x.termsR0.serviceLevel) < 1e-9 && x.serviceLevelType === x.termsR0.serviceLevelType ? pct(x.promised, 0) : <><b>{pct(x.promised, 0)} {x.serviceLevelType}</b><div class="m-r0">R0 {pct(x.termsR0.serviceLevel, 0)} {x.termsR0.serviceLevelType}</div></>}</td>
                   <td><Cell v={x.slOrderLines} r0={x.slOrderLinesR0} f={(v) => pct(v)} /></td>
                   <td><Cell v={x.slPieces} r0={x.slPiecesR0} f={(v) => pct(v)} /></td>
                   <td><Cell v={x.shortfall} r0={x.shortfallR0} f={(v) => `${num(v * 100, 1)} điểm`} /></td>
@@ -132,6 +148,28 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
           (độ dốc hồi quy 6 SKU R0, R² = {num(S.adherenceSlope.r2, 2)}; plan adherence đã gồm availability NL và capacity dây chuyền). Frozen period: chưa mô hình.
           Penalty = penalty R0 của khách × (contracted ÷ contracted R0) × (mức thiếu mới ÷ mức thiếu R0); đạt/vượt SL hứa → 0, <b>thưởng khi vượt chưa tính</b>. Attained CI kịch bản = attained CI R0 × (revenue mới ÷ revenue R0).
           Contracted sales = R0 (tab 2) × CI ÷ CI R0 (ước lượng: nhu cầu giữ R0); CI = số game đội nhập, bỏ trống thì CI R0 × (1 + hệ số × bậc) theo COEFFS.
+        </p>
+      </Card>
+
+      <Card title="Promotion, shelf life, payment term theo khách (ước lượng)">
+        <Table head={['Khách hàng', 'Promotion', 'Nhu cầu (đv/tuần)', 'Shelf life → tuổi tồn cho phép', 'Payment term', 'Phải thu AR (€)']}
+          rows={S.customers.map((x) => {
+            const A = (s: number) => (data.productShelfLifeWeeks === null ? 'thiếu dữ liệu' : `${num(data.productShelfLifeWeeks * (1 - s), 1)} tuần`);
+            const ch = (a: string, b: string) => (a === b ? a : <><b>{a}</b><div class="m-r0">R0 {b}</div></>);
+            return [x.customer, ch(x.terms.promotionalPressure, x.termsR0.promotionalPressure),
+              Math.abs(x.demand - x.demandR0) < 1e-9 ? num(x.demandR0) : <><b>{num(x.demand)}</b> <Badge basis="estimate" /><div class="m-r0">R0 {num(x.demandR0)}</div></>,
+              ch(`${pct(x.terms.shelfLife, 0)} → ${A(x.terms.shelfLife)}`, `${pct(x.termsR0.shelfLife, 0)} → ${A(x.termsR0.shelfLife)}`),
+              ch(`${x.terms.paymentTermWeeks} tuần`, `${x.termsR0.paymentTermWeeks} tuần`),
+              Math.abs(x.ar - x.arR0) < 1e-6 ? <>{num(x.arR0)} <Badge basis="estimate" /></> : <><b>{num(x.ar)}</b> <Badge basis="estimate" /><div class="m-r0">R0 {num(x.arR0)}</div></>];
+          })} />
+        <Grid>
+          <Metric label="Investment: Payment terms" value={eur(res.finance.rows.find((r) => r.label === 'Payment terms')?.value ?? 0)} raw={res.finance.rows.find((r) => r.label === 'Payment terms')?.value} base={baseRes.finance.rows.find((r) => r.label === 'Payment terms')?.value} deltaKind="eur" r0={eur(fin('Payment terms') ?? 0)} basis="estimate" causes={causesFor('payterm', changed)} hint="R0 (tab 2) + Δ phải thu khách − Δ phải trả NCC" />
+          <Metric label="Costs of scrap" value={eur(res.finance.rows.find((r) => r.label === 'Costs of scrap')?.value ?? 0)} raw={res.finance.rows.find((r) => r.label === 'Costs of scrap')?.value} base={baseRes.finance.rows.find((r) => r.label === 'Costs of scrap')?.value} deltaKind="eur" good="down" r0={eur(fin('Costs of scrap') ?? 0)} basis="estimate" causes={causesFor('fgStock', changed)} hint="C2: obsolete theo tuổi tồn (shelf life, safety stock TP, interval)" />
+        </Grid>
+        <p class="muted small-text">
+          Promotion: nhu cầu thêm = % bán thêm R0 của từng cặp khách × SKU (tab 6, đã gồm ×2 Value for money / slowmover) × (điểm giữa khoảng mức mới ÷ điểm giữa mức R0); khoảng % đọc từ câu Info Center tab 6. Biến động nhu cầu thêm do khuyến mãi: chưa mô hình.
+          Shelf life: tuổi cho phép của SKU dùng shelf life <b>cao nhất</b> của các khách mua SKU đó (hạ một khách không đổi số nếu khách khác vẫn đòi cao hơn).
+          AR = revenue khách ÷ 26 × payment term (ước lượng; R0 chỉ có số ròng AR − AP = 365.589 ở tab 2, AR đứng riêng: thiếu dữ liệu) — nên đổi revenue (penalty, promotion) cũng đổi AR.
         </p>
       </Card>
 

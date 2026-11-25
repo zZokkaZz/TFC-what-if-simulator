@@ -161,7 +161,8 @@ describe('Đồng bộ: sanitize, giới hạn, firestore.rules', () => {
   it('sanitize: nhận điều khoản hợp lệ; bỏ khách lạ, trường lạ, sai kiểu; bản lưu cũ ({} phẳng) → baseline', () => {
     const ok = { customers: { 'LAND Market': { tradeUnit: boxOf(), orderDeadline: DL[0], ciGame: 1.01 } } };
     const out = sanitize('sales', ok) as Inputs['sales'];
-    expect(out.customers['LAND Market']).toEqual(ok.customers['LAND Market']);
+    // bản ghi thiếu trường (vd bản mục 1 chỉ có 3 trường) → các trường còn thiếu lấy từ baseline
+    expect(out.customers['LAND Market']).toEqual({ ...base.sales.customers['LAND Market'], ...ok.customers['LAND Market'] });
     expect(out.customers['Food & Groceries']).toEqual(base.sales.customers['Food & Groceries']);
     const bad = sanitize('sales', { customers: { Hacker: { tradeUnit: 'x' }, 'LAND Market': { tradeUnit: 5, hack: 1, ciGame: 'cao' } }, junk: 1 }) as Record<string, unknown>;
     expect(bad).toEqual(base.sales);
@@ -208,7 +209,9 @@ describe('Ghi chú "chưa tính phần giá tăng (CI)" cạnh ô trade unit / o
   it('đúng câu người dùng chốt; hiện khi CI game trống; 2 hệ số CI giữ = 0', () => {
     const src = readFileSync(new URL('../src/ui/SalesTab.tsx', import.meta.url), 'utf8');
     expect(src).toContain("'Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng.'");
-    expect(src).toMatch(/t\.ciGame === null && <p[^>]*>\{CI_MISSING_NOTE\}/);
+    expect(src).toMatch(/t\.ciGame === null && \(up \|\| !down\) && <p[^>]*>\{CI_MISSING_NOTE\}/);
+    expect(src).toContain("'Chưa tính phần giá giảm (CI) — lựa chọn này đang trông tốt hơn thực tế. Nhập CI game hiển thị để tính đúng.'");
+    expect(src).toMatch(/t\.ciGame === null && down && <p[^>]*>\{CI_DOWN_NOTE\}/);
     expect(COEFFS.salesCiPerStepTradeUnit.value).toBe(0);
     expect(COEFFS.salesCiPerStepOrderDeadline.value).toBe(0);
   });

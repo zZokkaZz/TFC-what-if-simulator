@@ -66,6 +66,17 @@ await t('sales: trade unit là số bị chặn', assertFails(setDoc(salesRef, s
 await t('sales: trường lạ trong điều khoản bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...cust, price: 1 } }))));
 await t('sales: khách lạ bị chặn', assertFails(setDoc(salesRef, sal({ Hacker: cust }))));
 await t('sales: khóa lạ ở gốc (dạng phẳng cũ) bị chặn', assertFails(setDoc(salesRef, decision('bob', 'sales', { shelfLife: 0.7 }))));
+const full9 = { tradeUnit: 'Pallet layer', orderDeadline: '20.00', ciGame: null, serviceLevelType: 'Order lines', serviceLevel: 0.95, shelfLife: 0.75, paymentTermWeeks: 4, promotionalPressure: 'Middle', promotionHorizon: 'Short' };
+await t('sales: đủ 9 trường × 3 khách, điền CI game (ca tốn biểu thức nhất) hợp lệ', assertSucceeds(setDoc(salesRef, sal({ 'Food & Groceries': { ...full9, ciGame: 1.01, serviceLevelType: 'Orders' }, 'LAND Market': { ...full9, ciGame: 0.97 }, "Dominick's": { ...full9, ciGame: 1.0166, tradeUnit: 'Pallet', orderDeadline: '12.00' } }))));
+await t('sales: SL hứa 0,7 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, serviceLevel: 0.7 } }))));
+await t('sales: SL hứa 1,2 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, serviceLevel: 1.2 } }))));
+await t('sales: shelf life 0,9 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, shelfLife: 0.9 } }))));
+await t('sales: shelf life 0,3 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, shelfLife: 0.3 } }))));
+await t('sales: payment term 9 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, paymentTermWeeks: 9 } }))));
+await t('sales: payment term 0 bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, paymentTermWeeks: 0 } }))));
+await t('sales: payment term lẻ (4,5) bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, paymentTermWeeks: 4.5 } }))));
+await t('sales: promotion quá dài bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, promotionalPressure: 'x'.repeat(21) } }))));
+await t('sales: SL hứa là chuỗi bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, serviceLevel: '95' } }))));
 await t('không xóa được decisions', assertFails(deleteDoc(doc(alice, 'teams', TEAM, 'decisions', 'ops'))));
 const log = { uid: 'alice', role: 'ops', dept: 'ops', summary: 'Ops đổi số ca 2 → 3', changes: [{ path: 'ops.shifts', label: 'số ca', from: '2', to: '3' }], at: serverTimestamp() };
 let logRef;

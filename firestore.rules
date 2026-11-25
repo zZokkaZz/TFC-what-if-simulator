@@ -83,10 +83,18 @@ service cloud.firestore {
     }
     // Sales: điều khoản hợp đồng từng khách (giới hạn khớp src/sync/limits.ts SALES_LIMITS, SALES_TEXT_MAX).
     // Viết tối giản như validTerms (giới hạn 1.000 biểu thức/request). Lựa chọn hợp lệ đọc từ sheet → rules chỉ chặn độ dài.
+    // SL hứa / shelf life / payment term: khoảng game cho phép (tab 6), tỷ lệ lưu 0–1. Bản cũ chỉ có 3 trường vẫn hợp lệ.
     function validCust(c) {
-      return c.keys().hasOnly(['tradeUnit', 'orderDeadline', 'ciGame'])
+      return c.keys().hasOnly(['tradeUnit', 'orderDeadline', 'ciGame', 'serviceLevelType', 'serviceLevel', 'shelfLife',
+               'paymentTermWeeks', 'promotionalPressure', 'promotionHorizon'])
         && c.tradeUnit.size() <= 20 && c.orderDeadline.size() <= 20
-        && (c.ciGame == null || (c.ciGame >= 0.5 && c.ciGame <= 2));
+        && (c.ciGame == null || (c.ciGame >= 0.5 && c.ciGame <= 2))
+        && (!('serviceLevelType' in c) || c.serviceLevelType.size() <= 20)
+        && (!('promotionalPressure' in c) || c.promotionalPressure.size() <= 20)
+        && (!('promotionHorizon' in c) || c.promotionHorizon.size() <= 20)
+        && (!('serviceLevel' in c) || (c.serviceLevel >= 0.75 && c.serviceLevel <= 1))
+        && (!('shelfLife' in c) || (c.shelfLife >= 0.4 && c.shelfLife <= 0.85))
+        && (!('paymentTermWeeks' in c) || (c.paymentTermWeeks is int && c.paymentTermWeeks >= 1 && c.paymentTermWeeks <= 8));
     }
     function validCustMap(m) {
       return m.keys().hasOnly(['Food & Groceries', 'LAND Market', "Dominick's"])

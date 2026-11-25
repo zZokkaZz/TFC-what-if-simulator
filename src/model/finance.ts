@@ -51,7 +51,8 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
     }
     if (pur && /^Inbound order lines$/i.test(l.label)) { value = pur.inboundOrderLines; modeled = true; }
     if (pur && /^Inbound orders$/i.test(l.label)) { value = pur.inboundOrders; modeled = true; }
-    if (pur && /^Payment terms$/i.test(l.label)) { value = l.value + pur.paymentTermsDelta; modeled = true; }
+    // Payment terms = AR − AP (R0 365.589): Δ AP theo NCC (Purchasing), Δ AR = revenue khách/tuần × payment term khách (Sales) — ước lượng
+    if ((pur || sales) && /^Payment terms$/i.test(l.label)) { value = l.value + (pur?.paymentTermsDelta ?? 0) + (sales?.arDelta ?? 0); modeled = true; }
     // C2: Costs of scrap = R0 × (giá trị obsolete/tuần mới ÷ R0)^mũ (COEFFS) — ước lượng
     if (sc && /^Costs of scrap$/i.test(l.label) && sc.obsoleteValuePerWeekR0 > 0) {
       const k = sc.obsoleteValuePerWeek / sc.obsoleteValuePerWeekR0;

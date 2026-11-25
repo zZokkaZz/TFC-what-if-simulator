@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-25T15:09:07.670Z",
+  "generatedAt": "2026-11-25T15:30:29.196Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -2584,7 +2584,25 @@
      "LAND Market": "Middle",
      "Dominick's": "Middle"
     },
-    "impact": "Tăng → contract index giảm (TFC gánh 1 phần giảm giá) nhưng nhu cầu tăng. Nhu cầu thêm (lít): None 0%; Light 0,5–1,0%; Middle 1,5–2,0%; Heavy 4,0–5,5%. Khách Value for money: gấp đôi. Cặp khách × SKU slowmover: gấp đôi"
+    "impact": "Tăng → contract index giảm (TFC gánh 1 phần giảm giá) nhưng nhu cầu tăng. Nhu cầu thêm (lít): None 0%; Light 0,5–1,0%; Middle 1,5–2,0%; Heavy 4,0–5,5%. Khách Value for money: gấp đôi. Cặp khách × SKU slowmover: gấp đôi",
+    "levels": {
+     "None": {
+      "min": 0,
+      "max": 0
+     },
+     "Light": {
+      "min": 0.005,
+      "max": 0.01
+     },
+     "Middle": {
+      "min": 0.015,
+      "max": 0.02
+     },
+     "Heavy": {
+      "min": 0.04,
+      "max": 0.055
+     }
+    }
    },
    {
     "key": "promotionHorizon",

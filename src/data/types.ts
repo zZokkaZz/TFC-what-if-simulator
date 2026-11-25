@@ -183,6 +183,8 @@ export interface SalesOption {
   /** Giá trị R0 từng khách, nguyên văn (null = ô trống) */
   r0: Record<string, string | number | null>;
   impact: string;
+  /** Chỉ Promotional pressure: % nhu cầu thêm theo từng lựa chọn, đọc từ câu tác động (vd "Light 0,5–1,0%"), dạng 0–1 */
+  levels?: Record<string, { min: number; max: number }>;
 }
 
 export interface CustomerResult {

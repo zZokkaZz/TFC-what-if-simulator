@@ -303,6 +303,53 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
         roi: [imp(`Contracted sales – ${name}`, new RegExp(`^Contracted sales – ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)), notModeled('Outbound flexible manpower / service level', 'order deadline chưa mô hình')],
       });
     }
+    const t = cu.terms, t0 = cu.termsR0;
+    const reContr = new RegExp(`^Contracted sales – ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+    const rePen = new RegExp(`^Penalty service level – ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+    const impact = (key: 'serviceLevel' | 'serviceLevelType' | 'shelfLife' | 'paymentTermWeeks' | 'promotionalPressure' | 'promotionHorizon') => data.sales.options.find((x) => x.key === key)?.impact ?? '';
+    if (Math.abs(t.serviceLevel - t0.serviceLevel) > 1e-9 || t.serviceLevelType !== t0.serviceLevelType) {
+      const up = t.serviceLevel > t0.serviceLevel;
+      out.push({
+        id: `sales-sl-${name}`, severity: cu.shortfall > cu.shortfallR0 || cu.outOfRange ? 'warn' : 'info', from: 'Sales', to: ['SC', 'Ops', 'Finance'],
+        title: `Service level hứa ${name}: ${pct(t0.serviceLevel, 0)} ${t0.serviceLevelType} → ${pct(t.serviceLevel, 0)} ${t.serviceLevelType}`,
+        detail: `SL theo loại đo đang hứa ${pct(cu.slMeasured)} (R0 ${pct(cu.slMeasuredR0)} ${t0.serviceLevelType}) → mức thiếu ${n1(cu.shortfall * 100)} điểm (R0 ${n1(cu.shortfallR0 * 100)}). Penalty = penalty R0 × (mức thiếu mới ÷ R0) — ước lượng, neo từng khách.${t.serviceLevelType !== t0.serviceLevelType ? ' Đổi SL type: R0 chỉ có penalty cho loại đo R0 → ngoài vùng dữ liệu R0 nếu còn thiếu.' : ''}${up ? ' SC xem gợi ý safety stock TP (tab Supply Chain) — app KHÔNG tự tăng safety stock.' : ''} ${ciNote(cu)} Info Center: ${impact('serviceLevel')} ${t.serviceLevelType !== t0.serviceLevelType ? impact('serviceLevelType') : ''}`,
+        roi: [imp(`Penalty service level – ${name}`, rePen), imp(`Contracted sales – ${name}`, reContr), notModeled('Thưởng khi vượt SL hứa', 'luật: thưởng nhỏ, không có độ lớn')],
+      });
+    }
+    if (Math.abs(t.shelfLife - t0.shelfLife) > 1e-9) {
+      const skus = res.sc.products.filter((p) => data.sales.customerProduct.some((r) => r.customer === name && r.sku === p.sku));
+      const worst = skus.reduce((m, p) => (p.allowedAgeWeeks !== null && (m === null || p.allowedAgeWeeks < m) ? p.allowedAgeWeeks : m), null as number | null);
+      out.push({
+        id: `sales-shelf-${name}`, severity: t.shelfLife > t0.shelfLife ? 'warn' : 'info', from: 'Sales', to: ['SC', 'Ops', 'Finance'],
+        title: `Shelf life yêu cầu ${name}: ${pct(t0.shelfLife, 0)} → ${pct(t.shelfLife, 0)}`,
+        detail: `Tuổi tồn cho phép = ${data.productShelfLifeWeeks ?? 'thiếu dữ liệu'} tuần × (1 − shelf life CAO NHẤT của các khách mua SKU) → ${worst === null ? 'thiếu dữ liệu' : n1(worst) + ' tuần'} cho SKU khách này mua (R0 ${data.productShelfLifeWeeks !== null ? n1(data.productShelfLifeWeeks * (1 - t0.shelfLife)) : 'thiếu dữ liệu'} tuần). Obsolete theo tuổi tồn (C2): ${skus.map((p) => `${p.sku} ${pct(p.obsoleteR0 ?? 0)} → ${pct(p.obsoleteEst)}`).join(', ')}. ${t.shelfLife < t0.shelfLife ? 'Hạ shelf life một khách không đổi số nếu khách khác mua cùng SKU vẫn đòi cao hơn. ' : ''}Chưa mô hình: sản xuất bù hàng hủy. ${ciNote(cu)} Info Center: ${impact('shelfLife')}`,
+        roi: [imp('Costs of scrap (ước lượng)', /^Costs of scrap$/), imp(`Contracted sales – ${name}`, reContr)],
+      });
+    }
+    if (t.promotionalPressure !== t0.promotionalPressure) {
+      out.push({
+        id: `sales-promo-${name}`, severity: 'warn', from: 'Sales', to: ['Ops', 'SC', 'Purchasing', 'Finance'],
+        title: `Promotional pressure ${name}: ${t0.promotionalPressure} → ${t.promotionalPressure}`,
+        detail: `Nhu cầu khách ${n0(cu.demandR0)} → ${n0(cu.demand)} đv/tuần (${cu.demand >= cu.demandR0 ? '+' : '−'}${pct(Math.abs(cu.demand / cu.demandR0 - 1))}; ước lượng: điểm giữa khoảng % của sheet, neo % bán thêm R0 từng cặp khách × SKU — đã gồm ×2 Value for money / slowmover). Kéo theo sản xuất, mua NL, tồn kho, giờ kho; plan adherence ${pct(ob.line.planAdherence)} → ${pct(o.line.planAdherence)}. Chưa mô hình: nhu cầu biến động hơn khi khuyến mãi (σ giữ CV R0). ${ciNote(cu)} Info Center: ${impact('promotionalPressure')}`,
+        roi: [imp(`Contracted sales – ${name}`, reContr), imp('Penalty service level (3 khách)', PEN), imp('Flexible manpower (bottling)', /^Flexible manpower \(bottling\)/), imp('Investment: Stock', /^Stock$/)],
+      });
+    }
+    if (t.promotionHorizon !== t0.promotionHorizon) {
+      out.push({
+        id: `sales-horizon-${name}`, severity: 'info', from: 'Sales', to: ['SC', 'Ops'],
+        title: `Promotion horizon ${name}: ${t0.promotionHorizon} → ${t.promotionHorizon}`,
+        detail: `CHƯA MÔ HÌNH vào số (ước lượng chiều hướng): horizon dài hơn → biết trước đợt khuyến mãi, dễ lên kế hoạch (có thể cần ít safety stock TP hơn); ngắn hơn → ngược lại. ${ciNote(cu)} Info Center: ${impact('promotionHorizon')}`,
+        roi: [notModeled('Service level / safety stock TP', 'promotion horizon chưa mô hình')],
+      });
+    }
+    if (t.paymentTermWeeks !== t0.paymentTermWeeks) {
+      out.push({
+        id: `sales-pay-${name}`, severity: 'info', from: 'Sales', to: ['Finance'],
+        title: `Payment term ${name}: ${t0.paymentTermWeeks} → ${t.paymentTermWeeks} tuần`,
+        detail: `Phải thu (AR) ước lượng = revenue khách/tuần × payment term: €${n0(cu.arR0)} → €${n0(cu.ar)}; Investment "Payment terms" = R0 365.589 + Δ AR − Δ AP (ước lượng, game không công bố cách tính). ${investmentRoiNote(res.finance.operatingProfit, res.finance.investment, baseRes.finance.investment)} ${ciNote(cu)} Info Center: ${impact('paymentTermWeeks')}`,
+        roi: [imp('Investment: Payment terms', /^Payment terms$/), imp(`Contracted sales – ${name}`, reContr)],
+      });
+    }
     if (cu.ciBasis === 'game' && cu.tradeUnit === cu.tradeUnitR0 && cu.orderDeadline === cu.orderDeadlineR0 && Math.abs(cu.contractIndex - cu.contractIndexR0) > 1e-9) {
       out.push({
         id: `sales-ci-${name}`, severity: 'info', from: 'Sales', to: ['Finance'],
