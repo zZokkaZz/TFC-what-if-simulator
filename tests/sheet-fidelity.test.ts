@@ -80,3 +80,13 @@ describe('Số HIỂN THỊ ở baseline = đúng số đề bài', () => {
     }
   });
 });
+
+describe('Tab 2: số game in (cột Ghi chú) = đúng file; app hiện cả hai nguồn', () => {
+  it('Operating profit & Indirect cost: "Game: …" trong ô Ghi chú = gamePrinted', () => {
+    const rows = rowsOf('2_Finance');
+    const note = (label: string) => String(rows.find((r) => String(r?.[1] ?? '').trim() === label)?.[3] ?? '');
+    const game = (label: string) => Number(note(label).match(/Game:\s*(-?[\d.]+)/)![1].replace(/\./g, ''));
+    expect(d.finance.gamePrinted.operatingProfit).toBe(game('Operating profit'));
+    expect(d.finance.gamePrinted.indirectCost).toBe(game('Indirect cost'));
+  });
+});

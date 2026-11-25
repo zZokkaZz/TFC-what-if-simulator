@@ -8,8 +8,11 @@ export const hrs = (x: number, d = 1) => `${num(x, d)} giờ`;
 
 export function signed(x: number, kind: 'eur' | 'pct' | 'pt' | 'num', d = 1): string {
   if (!Number.isFinite(x)) return '—';
-  const s = x > 0 ? '+' : x < 0 ? '−' : '±';
   const a = Math.abs(x);
+  // Dấu theo số ĐÃ làm tròn hiển thị: −0,00004 với 2 chữ số → "±0,00", không phải "−0,00"
+  const dp = kind === 'eur' ? 0 : d;
+  const shown = Number(((kind === 'pct' || kind === 'pt' ? a * 100 : a)).toFixed(dp));
+  const s = shown === 0 ? '±' : x > 0 ? '+' : '−';
   if (kind === 'eur') return `${s}€${nf(0).format(a)}`;
   if (kind === 'pct') return `${s}${nf(d).format(a * 100)}%`;
   if (kind === 'pt') return `${s}${nf(d).format(a * 100)} điểm %`;
