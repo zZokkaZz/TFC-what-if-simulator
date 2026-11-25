@@ -1,5 +1,5 @@
-// Finance — M1 (tạm thời): P&L R0, thay các dòng Ops bằng số model; các dòng khác GIỮ SỐ R0
-// (đánh dấu modeled=false) cho tới M2–M4. ROI = Operating profit / Investment.
+// Finance: P&L R0; thay các dòng Ops (M1) và Stock / Interest on components & products (M2) bằng số model;
+// các dòng khác GIỮ SỐ R0 (modeled=false) cho tới M3–M4. ROI = Operating profit / Investment.
 import type { Round0Data } from '../data/types';
 import type { FinanceResults, FinanceRow, OpsResults, RoiNode, ScResults } from './types';
 

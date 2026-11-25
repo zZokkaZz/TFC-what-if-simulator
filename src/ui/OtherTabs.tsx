@@ -6,6 +6,7 @@ import { ASSUMPTIONS, EDITABLE_EST, EST } from '../model/assumptions';
 import { getCalibration } from '../model/simulate';
 import { Badge, Card, Table } from './components';
 import { eur, num, pct, signed } from './format';
+import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
 
 const Pending = ({ m }: { m: string }) => <p class="pending">Quyết định của phòng này sẽ sửa được ở <b>{m}</b>. Hiện hiển thị dữ liệu Round 0 thô từ file Excel.</p>;
 
@@ -95,19 +96,28 @@ export function RoiBreakdownCard({ res, baseRes, roiR0 }: { res: Results; baseRe
           </tbody>
         </table>
       </div>
-      <p class="muted">Chi phí ghi dấu âm trong cây (COGS, operating expense) để cộng thẳng ra Operating profit. Nhãn <b>số R0</b> = chưa phụ thuộc quyết định nào trong app (Sales/Purchasing/SC/tồn kho/payment terms sẽ mô hình ở M2–M4); <b>thiếu dữ liệu</b> = file không có số tách riêng.</p>
+      <p class="muted">Chi phí ghi dấu âm trong cây (COGS, operating expense) để cộng thẳng ra Operating profit. Nhãn <b>số R0</b> = chưa phụ thuộc quyết định nào trong app (Sales/Purchasing/payment terms/overhead sẽ mô hình ở M3–M4; tồn kho đã nối SC ở M2); <b>thiếu dữ liệu</b> = file không có số tách riêng.</p>
     </Card>
   );
 }
 
-export function FinanceTab({ res, baseRes, roiR0 }: { res: Results; baseRes: Results; roiR0: number }) {
+export function FinanceTab({ data, res, baseRes, roiR0 }: { data: Round0Data; res: Results; baseRes: Results; roiR0: number }) {
   const f = res.finance;
   const baseById = new Map(baseRes.finance.rows.map((r) => [r.id, r.value]));
+  const gameOf = (label: string): number | null | undefined =>
+    label === 'Operating profit' ? data.finance.gamePrinted?.operatingProfit ?? null : label === 'Indirect cost' ? data.finance.gamePrinted?.indirectCost ?? null : undefined;
   return (
     <div class="single">
       <RoiBreakdownCard res={res} baseRes={baseRes} roiR0={roiR0} />
-      <Card title="P&L Round (mô hình M1)">
-        <p class="muted">Dòng có nhãn <b>mô hình</b> tính từ quyết định Ops; dòng <Badge basis="r0" /> giữ nguyên số Round 0 (Sales, Purchasing, SC, tồn kho, payment terms sẽ mô hình ở M2–M4). Dòng đổi so với baseline được tô vàng.</p>
+      <Card title="Nguồn số R0: Operating profit & Indirect cost">
+        <ul class="r0-sources">
+          <li>Operating profit — {r0TwoSources(data, 'operatingProfit')}</li>
+          <li>Indirect cost — {r0TwoSources(data, 'indirectCost')}</li>
+        </ul>
+        <p class="muted">{R0_SOURCE_NOTE}</p>
+      </Card>
+      <Card title="P&L Round 0 → kịch bản">
+        <p class="muted">Dòng có nhãn <b>mô hình</b> tính từ quyết định Ops (M1) và Supply Chain (M2: Stock, Interest on components / products); dòng <Badge basis="r0" /> giữ nguyên số Round 0 (Sales, Purchasing, payment terms, overhead… sẽ mô hình ở M3–M4). Cột "R0 thật" của dòng TỔNG là tổng dòng sheet; dòng nhỏ bên dưới là số game in. Dòng đổi so với baseline được tô vàng.</p>
         <div class="tbl-wrap">
           <table class="pnl">
             <thead><tr><th>Nhóm</th><th>Dòng</th><th>R0 thật</th><th>Baseline mô hình</th><th>Kịch bản</th><th>Δ vs baseline</th></tr></thead>
@@ -120,7 +130,7 @@ export function FinanceTab({ res, baseRes, roiR0 }: { res: Results; baseRes: Res
                   <tr class={`${r.isTotal ? 'total' : ''} ${changed ? 'changed' : ''}`}>
                     <td>{r.group}</td>
                     <td>{r.label} {!r.isTotal && (r.modeled ? <span class="badge badge-model">mô hình</span> : <Badge basis="r0" />)}</td>
-                    <td>{r.r0 === null ? '' : eur(r.r0)}</td>
+                    <td>{r.r0 === null ? '' : eur(r.r0)}{r.isTotal && gameOf(r.label) !== undefined && <div class="m-r0" title={R0_SOURCE_NOTE}>game in: {gameOf(r.label) === null ? 'thiếu dữ liệu' : eur(gameOf(r.label)!)}</div>}</td>
                     <td>{eur(bv)}</td>
                     <td>{eur(r.value)}</td>
                     <td>{changed ? <span class={(d < 0) === /revenue|margin|profit/i.test(r.label) ? 'bad' : 'good'}>{signed(d, 'eur')}</span> : ''}</td>

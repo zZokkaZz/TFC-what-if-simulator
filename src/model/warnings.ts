@@ -19,6 +19,28 @@ export interface Warning {
 const pct = (x: number, d = 1) => `${(x * 100).toLocaleString('vi-VN', { maximumFractionDigits: d, minimumFractionDigits: d })}%`;
 const n0 = (x: number) => Math.round(x).toLocaleString('vi-VN');
 const n1 = (x: number) => x.toLocaleString('vi-VN', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+/** Chênh lệch điểm % có dấu, dấu theo số đã làm tròn (không ra "−0,00"). */
+const pt2 = (x: number) => {
+  const a = Math.abs(x * 100);
+  const s = Number(a.toFixed(2)) === 0 ? '±' : x > 0 ? '+' : '−';
+  return `${s}${a.toLocaleString('vi-VN', { maximumFractionDigits: 2, minimumFractionDigits: 2 })} điểm %`;
+};
+
+/**
+ * Câu mô tả tác động của Investment lên ROI, ĐÚNG THEO DẤU của Operating profit.
+ * ROI = OP ÷ Investment: OP > 0 thì Investment giảm → ROI tăng; OP < 0 (đang lỗ) thì Investment giảm → ROI XẤU ĐI
+ * (cùng một khoản lỗ chia cho mẫu nhỏ hơn). "Phần do Investment" = OP kịch bản ÷ Inv kịch bản − OP kịch bản ÷ Inv baseline.
+ */
+export function investmentRoiNote(operatingProfit: number, investment: number, baseInvestment: number): string {
+  const dInv = investment - baseInvestment;
+  if (Math.abs(dInv) < 0.5 || investment <= 0 || baseInvestment <= 0) return '';
+  const effect = operatingProfit / investment - operatingProfit / baseInvestment;
+  const verb = dInv < 0 ? 'giảm' : 'tăng';
+  if (Math.abs(operatingProfit) < 0.5) return `Investment ${verb} €${n0(Math.abs(dInv))}; Operating profit ≈ 0 nên phần này không đổi ROI.`;
+  const opState = operatingProfit < 0 ? `đang âm (−€${n0(-operatingProfit)}, lỗ)` : `đang dương (€${n0(operatingProfit)})`;
+  const dir = effect > 0 ? 'làm ROI tốt lên' : 'làm ROI xấu đi';
+  return `Investment ${verb} €${n0(Math.abs(dInv))}. Operating profit ${opState} nên riêng phần Investment ${verb} ${dir} (${pt2(effect)}); ROI tổng xem ở thanh trên.`;
+}
 
 function changed(base: Inputs, cur: Inputs, pick: (i: Inputs) => unknown) {
   return JSON.stringify(pick(base)) !== JSON.stringify(pick(cur));
@@ -52,6 +74,21 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
       roi: [imp('Overflow raw materials warehouse', /^Overflow raw/), imp('Inbound flexible manpower', /^Inbound flexible/), imp('Interest on components', /^Interest on components/), imp('Investment: Stock', /^Stock$/)],
     });
   }
+  // --- SC → Purchasing/Finance: lot size NL giảm → nhiều chuyến giao hơn (phí vận chuyển/đơn hàng CHƯA mô hình) ---
+  const lotDown = res.sc.components.filter((c) => cur.sc.components[c.key].lotSizeWeeks < base.sc.components[c.key].lotSizeWeeks);
+  if (lotDown.length) {
+    const trips = (c: (typeof res.sc.components)[number]) => {
+      const b = baseRes.sc.components.find((x) => x.key === c.key)!;
+      const v = c.deliveries.value, bv = b.deliveries.value;
+      return `${c.key} ${n1(base.sc.components[c.key].lotSizeWeeks)} → ${n1(cur.sc.components[c.key].lotSizeWeeks)} tuần${v !== null && bv !== null ? ` (${n1(bv)} → ${n1(v)} lần giao/round)` : ''}`;
+    };
+    out.push({
+      id: 'sc-lot-trips', severity: 'warn', from: 'SC', to: ['Purchasing', 'Finance'],
+      title: 'Giảm lot size làm tăng số chuyến giao → phí vận chuyển & phí đơn hàng tăng (chưa tính, M3)',
+      detail: `${lotDown.map(trips).join('; ')}. Phí mỗi chuyến của NCC (Purchase value / transport) và phí đơn hàng nhập (Inbound orders, Inbound order lines) CHƯA mô hình — đang giữ số R0, nên ROI hiện trông tốt hơn thực tế.`,
+      roi: [notModeled('Phí vận chuyển NCC (trong Purchase value)', 'M3 — chưa tính'), notModeled('Inbound orders / Inbound order lines', 'M3 — chưa tính')],
+    });
+  }
   // --- SC/Purchasing/Ops(intake) → availability NL → plan adherence ---
   for (const c of res.sc.components) {
     const b = baseRes.sc.components.find((x) => x.key === c.key)!;
@@ -71,7 +108,10 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
         id: `avail-low-${c.key}`, severity: 'critical', from: 'Purchasing', to: ['SC', 'Ops', 'Sales'],
         title: `${c.key}: availability chỉ ${pct(c.availability)}${c.stockoutDaysR0 ? ` (R0 hết hàng ${c.stockoutDaysR0}/130 ngày)` : ''}`,
         detail: `NCC ${c.supplier}: lead time ${n1(c.leadTimeWeeks)} tuần, reliability ${pct(c.reliability)}. Safety stock đang ${n1(c.safetyStockWeeks)} tuần, gợi ý ≥ ${n1(c.recommendedSsWeeks)} tuần (ước lượng) — hoặc Purchasing đổi NCC nhanh/tin cậy hơn (M3).`,
-        roi: [notModeled('Penalty service level', 'Sales — M3'), imp('Interest on components (nếu tăng SS)', /^Interest on components/)],
+        roi: [
+          notModeled('Penalty service level', 'Sales — M3'),
+          ...(cur.sc.components[c.key].safetyStockWeeks > base.sc.components[c.key].safetyStockWeeks ? [imp('Interest on components (do tăng SS)', /^Interest on components/)] : []),
+        ],
       });
     }
   }
@@ -85,11 +125,24 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
     });
   }
   if (o.mixer.excessLitersPerWeek > 0) {
+    // Lít dư vẫn phải trộn & đóng chai → tiêu thụ NL tăng → cỡ đơn (lot size tuần × lượng dùng) và tồn NL tăng.
+    const rmUp = res.opsRaw.components
+      .map((f) => { const fb = baseRes.opsRaw.components.find((x) => x.key === f.key)!; return { key: f.key, k: fb.usagePerWeek > 0 ? f.usagePerWeek / fb.usagePerWeek - 1 : 0 }; })
+      .filter((x) => x.k > 0.005);
+    const availUp = res.sc.components
+      .map((c) => ({ key: c.key, a: c.availability, b: baseRes.sc.components.find((x) => x.key === c.key)!.availability }))
+      .filter((x) => x.a > x.b + 0.0005);
+    const rmText = rmUp.length
+      ? ` Lít dư vẫn tiêu thụ nguyên liệu: lượng dùng ${rmUp.map((x) => `${x.key} +${pct(x.k, 0)}`).join(', ')} → cỡ đơn và tồn NL tăng (NL €${n0(baseRes.sc.stockValue.components)} → €${n0(res.sc.stockValue.components)}).`
+      : '';
+    const availText = availUp.length
+      ? ` Availability NL mô hình tăng (${availUp.map((x) => `${x.key} ${pct(x.b)} → ${pct(x.a)}`).join(', ')}) CHỈ vì safety stock tính bằng tuần × lượng dùng (đã gồm phần thừa) nên nhiều đơn vị hơn — ước lượng, chưa chắc game tính như vậy; không phải cải thiện từ NCC.`
+      : '';
     out.push({
-      id: 'mixer-min', severity: 'warn', from: 'SC', to: ['Ops'],
+      id: 'mixer-min', severity: 'warn', from: scInterval ? 'SC' : 'Ops', to: scInterval ? ['Ops', 'Finance'] : ['SC', 'Finance'],
       title: `Mẻ nhỏ hơn mẻ tối thiểu máy trộn → dư ${n0(o.mixer.excessLitersPerWeek)} L/tuần`,
-      detail: `Production interval ngắn với máy ${o.mixer.name} (mẻ tối thiểu) làm lô bị làm tròn lên: sản xuất thừa, thêm giờ dây chuyền và tồn kho.`,
-      roi: [imp('Mixer variable costs', /^Mixer variable/), imp('Flexible manpower (bottling)', /^Flexible manpower \(bottling\)/)],
+      detail: `Production interval ngắn với máy ${o.mixer.name} (mẻ tối thiểu) làm lô bị làm tròn lên: sản xuất thừa, thêm giờ dây chuyền và tồn kho.${rmText}${availText}`,
+      roi: [imp('Mixer variable costs', /^Mixer variable/), imp('Flexible manpower (bottling)', /^Flexible manpower \(bottling\)/), imp('Interest on components', /^Interest on components/)],
     });
   }
   // --- SC → Ops: kho TP ---
@@ -134,7 +187,7 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
     out.push({
       id: 'stock-fin', severity: 'info', from: 'SC', to: ['Finance'],
       title: `Giá trị tồn kho ${dStock > 0 ? 'tăng' : 'giảm'} €${n0(Math.abs(dStock))}`,
-      detail: `NL €${n0(baseRes.sc.stockValue.components)} → €${n0(res.sc.stockValue.components)}; TP €${n0(baseRes.sc.stockValue.products)} → €${n0(res.sc.stockValue.products)}. Investment ${dStock > 0 ? 'tăng' : 'giảm'} → ROI ${dStock > 0 ? 'giảm' : 'tăng'} (chưa tính rủi ro service level).`,
+      detail: `NL €${n0(baseRes.sc.stockValue.components)} → €${n0(res.sc.stockValue.components)}; TP €${n0(baseRes.sc.stockValue.products)} → €${n0(res.sc.stockValue.products)}. ${investmentRoiNote(res.finance.operatingProfit, res.finance.investment, baseRes.finance.investment)} (Chưa tính rủi ro service level.)`,
       roi: [imp('Investment: Stock', /^Stock$/), imp('Interest on components', /^Interest on components/), imp('Interest on products', /^Interest on products/)],
     });
   }

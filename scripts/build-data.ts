@@ -163,6 +163,18 @@ const financeTotals = {
   operatingProfit: finAll(/^Operating profit$/i),
   investment: finAll(/^Investment$/i),
 };
+// Số game in ra (cột Ghi chú dòng TỔNG, vd "Game: -306.503"). Game làm tròn từng dòng nên có thể lệch
+// 1–2 € so với tổng các dòng trong sheet. Không có ghi chú → null (thiếu dữ liệu), không suy ra.
+const finGame = (label: RegExp): number | null => {
+  const iL = tFin.col(/^Dòng$/), iN = tFin.col(/Ghi chú/);
+  const r = finRows.find((row) => label.test(String(row?.[iL] ?? '').normalize('NFC')));
+  const note = r ? String(r[iN] ?? '').normalize('NFC') : '';
+  return numIn(note, /Game:\s*(-?[\d.,]+)/i);
+};
+const financeGamePrinted = {
+  operatingProfit: finGame(/^Operating profit$/i),
+  indirectCost: finGame(/^Indirect cost$/i),
+};
 const finDetail = finLines.filter((l) => !/^(TỔNG|Tổng|Tổng phụ)$/i.test(l.group));
 
 // ================= 3_Sản phẩm =================
@@ -727,7 +739,7 @@ if (daily.length < 100) fail(`Tab theo ngày chỉ có ${daily.length} dòng`);
 const out: Round0Data = {
   meta: { source: 'data/TFC_Round0.xlsx', generatedAt: new Date().toISOString(), sheets: sheetNames },
   issues,
-  finance: { lines: finDetail, totals: financeTotals },
+  finance: { lines: finDetail, totals: financeTotals, gamePrinted: financeGamePrinted },
   products,
   productShelfLifeWeeks,
   components,

@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-24T20:15:00.163Z",
+  "generatedAt": "2026-11-25T07:27:56.550Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -363,6 +363,10 @@
    "indirectCost": 1209653,
    "operatingProfit": -306505,
    "investment": 3989513
+  },
+  "gamePrinted": {
+   "operatingProfit": -306503,
+   "indirectCost": 1209651
   }
  },
  "products": [

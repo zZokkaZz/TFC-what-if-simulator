@@ -52,10 +52,10 @@ Bản trước mô phỏng lịch đều, không ngẫu nhiên, nên đỉnh t�
 - **Giờ công theo ngày** = 4 giờ cố định + giờ biến đổi TB mô hình + dao động R0 × a.
   - a = Σ (phần giờ mô hình × hệ số hình dạng) ÷ Σ phần giờ baseline.
   - Hệ số hình dạng: nhận hàng ∝ cỡ lô NL (pallet) × (intake R0 ÷ intake)^0,5 <sup>ước lượng</sup>; nhập TP / cấp NL ∝ cỡ mẻ; các phần khác = 1.
-- **Thời vụ** = Σ ngày max(0, giờ cần − FTE × 8) × €42 × **hệ số năng suất thời vụ 1,30**:
+- **Thời vụ** = Σ ngày max(0, giờ cần − FTE × 8) × €42 × **hệ số năng suất thời vụ 1,299** (≈ 1,30; app dùng số chưa làm tròn):
   - Hệ số lấy từ dây chuyền: 66.670 ÷ (9,4 giờ × 26 × 5 × €42).
-  - Kho TP xác nhận độc lập: 68,1 giờ vượt (tab 11) × €42 × 1,30 = €3.718 so với P&L €3.725.
-  - Kho NL ra €5.848 so với €6.753 (−13%).
+  - Kho TP xác nhận độc lập: 68,1 giờ vượt (tab 11) × €42 × 1,299 = €3.714 so với P&L €3.725 (đúng số app hiện ở tab "Giả định & R0").
+  - Kho NL: 107,1 giờ vượt (tab 11) → €5.843 so với €6.753 (−13%). Đây là phép kiểm chứng dùng giờ vượt **thật** của tab 11; khác với số **mô hình** €5.697 ở bảng mục 7 (giờ vượt do mô hình dựng lại).
 - Giới hạn: khi đổi production interval hay lot size, **biên độ** dao động co giãn nhưng **nhịp** vẫn theo lịch R0 (ví dụ chu kỳ 10 ngày).
 
 Vì vậy đỉnh pallet, số ngày vượt sức chứa, đỉnh giờ và số ngày vượt giờ cố định ở baseline **khớp R0 gần như do cấu tạo**, và được gắn nhãn hiệu chỉnh. Kiểm chứng độc lập là phí overflow và chi phí thời vụ (so với P&L, không dùng để hiệu chỉnh).
@@ -186,3 +186,13 @@ KPI giống dashboard game: Purchasing (rejection, raw material costs, delivery 
 - **Thiếu trong sheet (app ghi "thiếu", không tự điền):** R-2 của rejection, raw material costs, delivery reliability (Purchasing); R-2 của gross margin tổng, obsolete, SL outbound (Sales); nhận xét game của Purchasing/Operations/Sales.
 - Điểm phòng theo tab luật: Purchasing = contract index TB (TB đơn giản — ước lượng trọng số); Ops = (production costs + dòng kho) ÷ doanh thu (ước lượng dòng nào là "kho"); Sales = realized revenue; SC = Investment: Stock.
 - Thay đổi KPI theo kịch bản: Ops & ROI & GM theo mô hình; SC (availability, stock weeks) ước lượng; Purchasing/Sales chưa mô hình (M3) nên đứng yên.
+
+## 14. Sửa sau phiên tự kiểm tra app (25/11/2026)
+
+- **Investment → ROI theo dấu Operating profit.** ROI = OP ÷ Investment. R0 đang lỗ (OP âm) nên **giảm Investment làm ROI xấu đi** (cùng khoản lỗ chia mẫu nhỏ hơn). Cảnh báo "Giá trị tồn kho tăng/giảm" giờ ghi đúng chiều theo dấu OP và in "phần do Investment" = OP ÷ Inv kịch bản − OP ÷ Inv baseline (chỉ là số học của công thức ROI, không phải luật mới). Ví dụ safety stock TP 3 → 2: OP +€3.925, Investment −€43.087, riêng phần Investment −0,08 điểm % → ROI tổng chỉ +0,02 điểm %.
+- **Giảm lot size NL → nhiều chuyến giao hơn.** Phí mỗi chuyến của NCC (nằm trong Purchase value / transport) và phí đơn hàng nhập (Inbound orders, Inbound order lines) **chưa mô hình** (giữ R0). App thêm cảnh báo "Giảm lot size làm tăng số chuyến giao → phí vận chuyển & phí đơn hàng tăng (chưa tính, M3)" kèm số lần giao/round (tab 10 × tỷ lệ mô hình). Không có công thức tự chế; các dòng ROI ghi "chưa tính".
+- **Production interval ngắn → tồn NL và availability NL tăng: do mẻ tối thiểu máy trộn (đã kiểm chứng).** Với Fruitmix MQ (mẻ tối thiểu 8.000 L), interval 5 ngày làm mẻ của các SKU nhỏ bị làm tròn lên (dư 5.757 L/tuần). Lít dư vẫn trộn và đóng chai nên tiêu thụ thêm NL (Vitamin C +32%, Pack +3%, PET +4%, Orange +3%) → cỡ đơn (lot size tuần × lượng dùng) và tồn NL tăng (€149.076 → €153.505). Đổi sang FMM 4000 (mẻ tối thiểu 3.000 L) thì interval 5 **không** còn đổi lượng dùng, tồn hay availability NL (có test).
+  - Availability Vitamin C 84,3% → 85,4% là **hệ quả của cách mô hình** (ước lượng): safety stock = tuần × lượng dùng (đã gồm phần thừa) nên nhiều đơn vị hơn trong khi σ nhu cầu giữ nguyên. **Chưa chắc game tính safety stock theo lượng dùng có phần sản xuất thừa** — không sửa mô hình, chỉ ghi rõ trong cảnh báo. Cần người dùng xác nhận nếu có thông tin từ game.
+  - Dòng "Interest on components" trong cảnh báo Vitamin C chỉ hiện khi **tăng safety stock** của NL đó (trước đây luôn hiện, gây hiểu nhầm khi đổi interval).
+- **Hai nguồn số R0 của dòng TỔNG tab 2.** `build-data.ts` đọc thêm số game in từ cột Ghi chú ("Game: …") → `finance.gamePrinted`: Operating profit −306.503, Indirect cost 1.209.651. App dùng **tổng dòng sheet** (−306.505 / 1.209.653, = ô TỔNG tab 2) để tính ROI; thanh trên cùng và tab Finance hiện cả hai và ghi rõ nguồn. Có test đọc thẳng file Excel.
+- Định dạng chênh lệch: dấu theo số đã làm tròn (không còn "−0,00 điểm %", hiện "±0,00").

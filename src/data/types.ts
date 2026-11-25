@@ -256,6 +256,8 @@ export interface Round0Data {
   finance: {
     lines: FinanceLine[];
     totals: { roi: number; realizedRevenue: number; purchaseValue: number; productionCosts: number; cogs: number; grossMargin: number; indirectCost: number; operatingProfit: number; investment: number };
+    /** Số game in ra (cột Ghi chú tab 2, "Game: …"); khác tổng dòng sheet 1–2 € do game làm tròn từng dòng. null = thiếu dữ liệu */
+    gamePrinted: { operatingProfit: number | null; indirectCost: number | null };
   };
   products: Product[];
   /** Hạn dùng sản phẩm (tuần), đọc từ tiêu đề bảng tab 3; null = thiếu dữ liệu */

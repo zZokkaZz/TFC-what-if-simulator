@@ -11,6 +11,7 @@ import { loadEst, loadSession, saveEst, saveSession, useMockBackend, type Sessio
 import { useSync } from './useSync';
 import { changedPaths } from './trace';
 import { eur, pct, signed } from './format';
+import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
 import { OpsTab } from './OpsTab';
 import { AssumptionsTab, FinanceTab, PurchasingTab, SalesTab } from './OtherTabs';
 import { SupplyChainTab } from './SupplyChainTab';
@@ -33,12 +34,12 @@ const TABS = [
   { id: 'info', label: 'Giả định & R0' },
 ] as const;
 
-function Kpi({ label, value, delta, cls, sub }: { label: string; value: string; delta?: string; cls?: string; sub?: string }) {
+function Kpi({ label, value, delta, cls, sub, subTitle }: { label: string; value: string; delta?: string; cls?: string; sub?: string; subTitle?: string }) {
   return (
     <div class="kpi">
       <div class="kpi-l">{label}</div>
       <div class="kpi-v">{value}{delta && <span class={`delta ${cls}`}>{delta}</span>}</div>
-      {sub && <div class="kpi-s">{sub}</div>}
+      {sub && <div class="kpi-s" title={subTitle}>{sub}</div>}
     </div>
   );
 }
@@ -110,7 +111,7 @@ export function App() {
           <span>Ops + SC · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
         <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}`} />
-        <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} />
+        <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} sub={r0TwoSources(data, 'operatingProfit')} subTitle={R0_SOURCE_NOTE} />
         <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={cls(dInv, false)} />
         <div class="top-actions">
           {team && (
@@ -185,7 +186,7 @@ export function App() {
         {tab === 'sc' && <SupplyChainTab data={data} inputs={inputs} base={BASE} res={res} baseRes={baseRes} changed={changed} setSc={(v) => setDept('sc', v)} editable={editable('sc')} lockReason={team && !editable('sc') ? `Bạn đang ở vai trò ${ROLE_LABEL[team.state.role]}: ô của Supply Chain chỉ xem. Bấm "Tách kịch bản riêng" để thử số trên máy mình.` : undefined} warnings={warnings} />}
         {tab === 'pur' && <PurchasingTab data={data} />}
         {tab === 'sales' && <SalesTab data={data} />}
-        {tab === 'fin' && <FinanceTab res={res} baseRes={baseRes} roiR0={data.finance.totals.roi} />}
+        {tab === 'fin' && <FinanceTab data={data} res={res} baseRes={baseRes} roiR0={data.finance.totals.roi} />}
         {tab === 'team' && team && <TeamTab data={data} est={est} ctl={team.ctl} state={team.state} res={res} />}
         {tab === 'info' && <AssumptionsTab data={data} estOver={estOver} setEstOver={setEstOver} />}
       </main>
