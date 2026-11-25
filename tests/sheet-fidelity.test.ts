@@ -90,3 +90,70 @@ describe('Tab 2: số game in (cột Ghi chú) = đúng file; app hiện cả ha
     expect(d.finance.gamePrinted.indirectCost).toBe(game('Indirect cost'));
   });
 });
+
+describe('M3 Purchasing: baseline (không đổi gì) = đúng từng ô tab 4 / tab 2 / dashboard', () => {
+  const rows4 = rowsOf('4_Purchasing');
+  const hdr = rows4.findIndex((r) => String(r?.[0] ?? '').trim() === 'Nhà cung cấp' && String(r?.[1] ?? '').trim() === 'Reliability thực tế');
+  const H = rows4[hdr].map((x) => String(x ?? '').trim());
+  const col = (re: RegExp) => H.findIndex((h) => re.test(h));
+  const sheetRow = (supplier: string) => rows4.slice(hdr + 1).find((r) => String(r?.[0] ?? '').trim() === supplier)!;
+  const r = simulate(baselineInputs(d), d);
+  it.each(r.purchasing.components.map((x) => [x.supplier, x] as const))('%s: reliability, rejection, purchase value, transport, giá thực trả = tab 4', (_s, x) => {
+    const row = sheetRow(x.supplier);
+    expect(x.reliability).toBe(row[col(/^Reliability thực tế$/)]);
+    expect(x.rejection).toBe(row[col(/^Rejection$/)]);
+    expect(x.purchaseValue).toBeCloseTo(row[col(/^Purchase value/)] as number, 6);
+    expect(x.transportCost).toBeCloseTo(row[col(/^Transport cost/)] as number, 6);
+    expect(x.pricePaid).toBeCloseTo(row[col(/^Giá thực trả/)] as number, 9);
+    expect(x.ciBasis).toBe('sheet');
+    expect(x.reliabilityBasis).toBe('sheet');
+    expect(x.rejectionBasis).toBe('sheet');
+  });
+  it('NCC, contract index, lead time, trade unit, payment term, reliability cam kết = hợp đồng tab 4', () => {
+    const h = rows4.findIndex((x) => String(x?.[0] ?? '').trim() === 'Component' && String(x?.[1] ?? '').trim() === 'Nhà cung cấp');
+    const HC = rows4[h].map((x) => String(x ?? '').trim());
+    const cc = (re: RegExp) => HC.findIndex((x) => re.test(x));
+    for (const x of r.purchasing.components) {
+      const row = rows4.slice(h + 1, h + 6).find((y) => String(y?.[1] ?? '').trim() === x.supplier)!;
+      expect(x.contractIndex).toBe(row[cc(/^Contract index$/)]);
+      expect(x.leadTimeDays).toBe(row[cc(/^Lead time/)]);
+      expect(x.tradeUnit).toBe(row[cc(/^Trade unit$/)]);
+      expect(x.paymentTermWeeks).toBe(row[cc(/^Payment term/)]);
+      expect(x.quality).toBe(row[cc(/^Quality$/)]);
+      expect(x.deliveryWindow).toBe(row[cc(/^Delivery window$/)]);
+    }
+  });
+  it('P&L: dòng mua NL, Inbound order lines, Inbound orders, Payment terms, Purchase value = đúng tab 2; ROI = ô tab 2', () => {
+    const fin = rowsOf('2_Finance');
+    const v = (label: string) => fin.find((x) => String(x?.[1] ?? '').trim() === label)![2] as number;
+    for (const row of r.finance.rows.filter((x) => /mua NL/i.test(x.group))) expect(row.value).toBeCloseTo(v(row.label), 6);
+    for (const label of ['Inbound order lines', 'Inbound orders', 'Payment terms', 'Purchase value']) {
+      expect(r.finance.rows.find((x) => x.label === label)!.value, label).toBeCloseTo(v(label), 6);
+    }
+    expect(r.finance.roi).toBeCloseTo(v('ROI'), 9);
+  });
+  it('KPI Purchasing (dashboard tab 4: rejection 2,9%, reliability 92,1%, chi phí NL 39,5%) và điểm phòng = R0', () => {
+    const title = String(rows4.find((x) => /dashboard:/i.test(String(x?.[0] ?? '')))![0]);
+    const pctIn = (re: RegExp) => Number(title.match(re)![1].replace(',', '.')) / 100;
+    expect(r.purchasing.kpi.rejection).toBeCloseTo(pctIn(/rejection TB\s*([\d,]+)%/), 12);
+    expect(r.purchasing.kpi.reliability).toBeCloseTo(pctIn(/reliability TB\s*([\d,]+)%/), 12);
+    expect(r.purchasing.kpi.rawMaterialCosts).toBeCloseTo(pctIn(/chi phí NL\s*([\d,]+)%/), 12);
+    const ci = d.purchasing.contracts.reduce((s, x) => s + x.contractIndex, 0) / d.purchasing.contracts.length;
+    expect(r.purchasing.kpi.avgContractIndex).toBeCloseTo(ci, 12);
+  });
+  it('công thức đã kiểm chứng: giá cơ bản × CI × lượng mua + phí vận chuyển = Purchase value (tab 4, lệch ≤ €1)', () => {
+    const h = rows4.findIndex((x) => String(x?.[1] ?? '').trim() === 'Nhà cung cấp' && /Basic contract index/.test(String(x?.[3] ?? '')));
+    const HS = rows4[h].map((x) => String(x ?? '').trim());
+    const priceCol = HS.findIndex((x) => /^Giá cơ bản/.test(x));
+    for (const k of d.purchasing.contracts) {
+      const price = rows4.slice(h + 1).find((y) => String(y?.[1] ?? '').trim() === k.supplier)![priceCol] as number;
+      const row = sheetRow(k.supplier);
+      const calc = price * k.contractIndex * (row[col(/^Amount purchased|^Lượng mua|^Đã mua/)] as number ?? d.purchasing.results.find((x) => x.supplier === k.supplier)!.purchasedInRound!) + (row[col(/^Transport cost/)] as number);
+      expect(Math.abs(calc - (row[col(/^Purchase value/)] as number)), k.supplier).toBeLessThanOrEqual(1);
+    }
+  });
+  it('số pallet / FTL = đúng ghi chú tab 3 ("30 pallet = 1 xe tải")', () => {
+    const txt = rowsOf('3_Sản phẩm').flat().map((x) => String(x ?? '')).find((t) => /pallet\s*=\s*1\s*xe tải/i.test(t))!;
+    expect(d.palletsPerFtl).toBe(Number(txt.match(/(\d+)\s*pallet\s*=\s*1\s*xe tải/i)![1]));
+  });
+});

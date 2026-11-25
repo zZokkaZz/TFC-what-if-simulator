@@ -77,7 +77,7 @@ export const ASSUMPTIONS: Assumption[] = [
   { id: 'training', label: 'Số người được training', value: 'Công nhân/ca × số ca, trả 1 lần/round', why: 'Luật ghi €400/người, không rõ bao nhiêu người.' },
   { id: 'mixerHours', label: 'Giờ máy trộn sẵn có', value: 'Bằng giờ dây chuyền (giờ ca + overtime)', why: 'Không có số ca riêng cho máy trộn trong dữ liệu.' },
   { id: 'lineChange', label: 'Chi phí đổi máy trộn/dây chuyền', value: 'Chưa tính (0 €); chỉ đổi phí năm, đầu tư, thông số', why: 'Dữ liệu không có chi phí chuyển đổi.' },
-  { id: 'availability', label: 'Availability nguyên liệu (cho plan adherence)', value: 'Giữ số R0 (Vitamin C 84,3%…) cho tới M2/M3', why: 'Availability phụ thuộc NCC và safety stock NL — sẽ mô hình ở M2/M3.' },
+  { id: 'availability', label: 'Availability nguyên liệu (cho plan adherence)', value: 'R0 (Vitamin C 84,3%…) ± thay đổi theo safety stock/lot size (M2) và NCC: lead time, reliability (M3 Purchasing)', why: 'Dạng cộng thêm so với R0 nên baseline = đúng số game; độ lớn là ước lượng (ASSUMPTIONS.md mục 11, 15).' },
   { id: 'demand', label: 'Nhu cầu, order lines, obsolete', value: 'Giữ số R0 cho tới M2/M3', why: 'Thuộc Sales/SC, chưa mô hình trong M1.' },
   { id: 'daily', label: 'Dao động theo ngày', value: 'Replay 130 ngày tab 11 (tồn tuần × nhu cầu dự báo ≈ TB tuần này + tuần sau), co giãn biên độ theo cỡ lô mới', why: 'Nhịp dao động giữ theo lịch R0 khi đổi interval/lot size; proxy dự báo là ước lượng.' },
   { id: 'intake', label: 'Intake time', value: 'Chỉ dàn đỉnh giờ nhận hàng (dao động × (intake R0/intake)^0,5)', why: 'Tác động lên component availability CHƯA mô hình (M2).' },

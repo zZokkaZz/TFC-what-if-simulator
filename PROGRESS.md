@@ -21,17 +21,19 @@
 | Neo số đề bài | **Số hiển thị = số R0 sheet × (mô hình mới ÷ mô hình baseline)** → không đổi gì thì mọi số = đúng sheet (ROI −7,68%) | `src/model/anchor.ts` |
 | Dashboard KPI | KPI 4 phòng như dashboard game + điểm phòng theo luật + danh sách số còn thiếu | `src/model/kpi.ts`, `src/ui/DashboardTab.tsx` |
 | Sửa sau tự kiểm tra | Câu Investment→ROI theo dấu OP; cảnh báo lot size ↓ → phí vận chuyển/đơn hàng (chưa tính, M3); giải thích interval ngắn ↔ mẻ tối thiểu máy trộn; hiện cả số game in & tổng dòng sheet (OP, Indirect); ±0,00; lockfile | `src/model/warnings.ts`, `src/ui/r0Sources.ts`, `ASSUMPTIONS.md` mục 14 |
+| M3 Purchasing | Ô quyết định NCC + ô đàm phán + 3 ô số game (CI, reliability, rejection) cho 5 NL; purchase value (công thức đã kiểm chứng), phí vận chuyển & phí đơn hàng (ước lượng), payment term → Investment, reliability/lead time → availability, quality bao bì → hỏng máy; KPI Purchasing; cảnh báo; rules Firestore | `src/model/purchasing.ts`, `src/ui/PurchasingTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 15 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 165 test (`npm test`), trong đó quan trọng nhất:
+Test: 200 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
+- `tests/purchasing.test.ts` — M3 Purchasing: hướng tác động, ô số game, cảnh báo, đồng bộ.
 - `tests/fixes-review.test.ts` — các chỗ sửa sau phiên tự kiểm tra (câu ROI khi lỗ, cảnh báo lot size, mẻ tối thiểu máy trộn, số game in, định dạng ±0).
 
 ## 2. Việc tiếp theo (CHỜ người dùng ra lệnh — không tự làm)
 
-1. **M3 — Purchasing + Sales** (xem `ROADMAP_M3_M4_M5.md` mục M3). Người dùng muốn làm **từng mục một**, hỏi trước khi bắt đầu.
+1. **M3 — Sales** (Purchasing đã xong; xem `ROADMAP_M3_M4_M5.md` mục M3 Sales). Người dùng muốn làm **từng mục một**, hỏi trước khi bắt đầu. Các câu hỏi trước M3 (penalty, CI sau đàm phán, round khác, payment terms) người dùng sẽ trả lời sau.
 2. **M4 — Finance đầy đủ** (payment terms → AR/AP, các dòng còn giữ R0).
 3. **M5 — Kịch bản có tên + so sánh + "Copy link kịch bản" + Xuất/Nhập JSON** (snapshot nhóm đã có một phần).
 
@@ -39,7 +41,7 @@ Test: 165 test (`npm test`), trong đó quan trọng nhất:
 
 - **Bản sheet có tiêu đề song ngữ** (bạn Thư sửa trên Google Sheet) — CHƯA upload vào repo. Khi upload: `npm run data`; nếu script báo không nhận ra cột → sửa regex trong `build-data.ts` (nhận cả tên cũ và mới), KHÔNG đoán cột.
 - **Dashboard KPI có 2 loại "thiếu" — đừng nhầm:**
-  - Nhãn **"chưa mô hình"** (số đứng yên = R0): Purchasing (rejection, raw material costs, delivery reliability), Sales (obsolete, SL outbound), điểm phòng Purchasing/Sales → **M3 sẽ nối** vào mô hình (trong `src/model/kpi.ts` đổi `scenarioBasis` + công thức kịch bản). Rejection/reliability NCC mới chỉ có số cam kết → "ước lượng" trừ khi đội nhập số game.
+  - Nhãn **"chưa mô hình"** (số đứng yên = R0): Sales (obsolete, SL outbound), điểm phòng Sales → **M3 Sales sẽ nối** vào mô hình. (Purchasing đã nối ở M3 Purchasing: rejection/reliability "ước lượng", raw material costs "mô hình".) (trong `src/model/kpi.ts` đổi `scenarioBasis` + công thức kịch bản). Rejection/reliability NCC mới chỉ có số cam kết → "ước lượng" trừ khi đội nhập số game.
   - **"R-2: thiếu"** (dấu ? đỏ): số lịch sử game KHÔNG có trong sheet → M3/M4 KHÔNG tạo ra được, **cấm tự điền**; chỉ người dùng bổ sung vào sheet (số có trong game: tab dashboard từng phòng, rê chuột điểm Round -2).
 - **Số dashboard còn thiếu trong sheet** (app đang ghi "thiếu"): R-2 của Purchasing (rejection, raw material costs, delivery reliability), Sales (gross margin tổng, obsolete, SL outbound order lines); nhận xét game của Purchasing/Operations/Sales. Gợi ý người dùng thêm bảng "DASHBOARD" mỗi tab như tab 7 dòng 48–53.
 - **Lỗi trong sheet (người dùng sửa):** tab 1 ô "Availability Vitamin C" = 0 vì công thức trỏ `'7_Supply Chain'!H29` (phải là I29 = 84,3%). App không đọc ô này.
@@ -57,12 +59,16 @@ Test: 165 test (`npm test`), trong đó quan trọng nhất:
 
 ## 5. Việc người dùng phải làm tay (Claude không làm được)
 
+- **M3 Purchasing đổi `firestore.rules` → Publish lại rules** trong Firebase Console (Firestore → Rules). Chưa Publish thì ghi phần Purchasing có `terms` sẽ bị chặn (báo lỗi rõ trên app).
+
 - Upload file .xlsx mới khi sửa Google Sheet.
 - Publish `firestore.rules` trong Firebase Console khi rules đổi.
 - Merge PR và (nếu đổi nhánh) chỉnh Settings → Pages.
 - Giữ và gửi mã đội cho đồng đội qua kênh riêng.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
+
+- 25/11/2026 — M3 Purchasing (session_018GSfKVhedGZtbWSVUzvR7M, nhánh `claude/m3-purchasing`): ô quyết định + mô hình + rules + 35 test mới (200/200) + 40/40 rules. Phát hiện: Purchase value = giá cơ bản × CI × lượng mua + phí vận chuyển (khớp ≤ €1). Chưa làm Sales.
 
 - 25/11/2026 — Phiên tự kiểm tra app (session_018GSfKVhedGZtbWSVUzvR7M): vọc app bằng Playwright (một mình + `?mock=1` 2 tab), sửa 5 mục người dùng duyệt (xem `ASSUMPTIONS.md` mục 14). Câu hỏi còn mở: game có tính safety stock NL theo lượng dùng gồm phần sản xuất thừa (mẻ tối thiểu) không. Câu hỏi trước M3 (penalty, CI sau đàm phán, round khác, payment terms): người dùng sẽ trả lời sau.
 

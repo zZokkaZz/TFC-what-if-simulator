@@ -48,7 +48,7 @@ export function buildKpis(d: Round0Data, res: Results, base: Results): Kpi[] {
     rMinus2: MISSING('Rejection components (TB) Round -2'),
     rMinus1: pd.rejection !== null ? { value: pd.rejection, source: R1_EQ } : MISSING('Rejection R-1'),
     r0: pd.rejection !== null ? { value: pd.rejection, source: purSrc } : MISSING('Rejection components R0'),
-    scenario: pd.rejection, scenarioBasis: 'notModeled', good: 'down', target: null, comment: null,
+    scenario: pd.rejection !== null ? res.purchasing.kpi.rejection : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: null,
   });
   // Raw material costs = purchase value ÷ realized revenue; neo vào số dashboard
   const rmShare = (r: Results) => r.finance.rows.filter((x) => /mua NL/i.test(x.group)).reduce((s, x) => s + x.value, 0) / r.finance.realizedRevenue;
@@ -58,14 +58,14 @@ export function buildKpis(d: Round0Data, res: Results, base: Results): Kpi[] {
     rMinus1: pd.rmCostShare !== null ? { value: pd.rmCostShare, source: R1_EQ } : MISSING('Raw material costs R-1'),
     r0: pd.rmCostShare !== null ? { value: pd.rmCostShare, source: purSrc } : MISSING('Raw material costs R0'),
     scenario: pd.rmCostShare !== null ? pd.rmCostShare * (rmShare(res) / rmShare(base)) : null,
-    scenarioBasis: 'notModeled', good: 'down', target: null, comment: null,
+    scenarioBasis: 'model', good: 'down', target: null, comment: null,
   });
   out.push({
     id: 'pur-rel', dept: 'Purchasing', label: 'Delivery reliability suppliers (%)', unit: 'pct',
     rMinus2: MISSING('Delivery reliability (TB) Round -2'),
     rMinus1: pd.reliability !== null ? { value: pd.reliability, source: R1_EQ } : MISSING('Delivery reliability R-1'),
     r0: pd.reliability !== null ? { value: pd.reliability, source: purSrc } : MISSING('Delivery reliability R0'),
-    scenario: pd.reliability, scenarioBasis: 'notModeled', good: 'up', target: null, comment: null,
+    scenario: pd.reliability !== null ? res.purchasing.kpi.reliability : null, scenarioBasis: 'estimate', good: 'up', target: null, comment: null,
   });
 
   // ---------- Operations (dashboard game: ROI, Cube utilization RM, FG, Plan adherence) ----------
@@ -153,7 +153,7 @@ export function roleScores(d: Round0Data, res: Results, base: Results): RoleScor
   const opsScore = (r: Results) => (r.finance.rows.filter((x) => /sản xuất/i.test(x.group) && !x.isTotal).reduce((s, x) => s + x.value, 0) + sum(r, whRe)) / r.finance.realizedRevenue;
   const stock = (r: Results) => r.finance.rows.find((x) => /^Stock$/i.test(x.label))!.value;
   return [
-    { dept: 'Purchasing', rule, r0: ciR0, scenario: ciR0, unit: 'index', good: 'down', note: 'Contract index TB đơn giản của 5 hợp đồng (tab 4) — game có thể tính trọng số khác (ước lượng). Đổi NCC: M3.' },
+    { dept: 'Purchasing', rule, r0: ciR0, scenario: res.purchasing.kpi.avgContractIndex, unit: 'index', good: 'down', note: 'Contract index TB đơn giản của 5 hợp đồng (tab 4) — game có thể tính trọng số khác (ước lượng). NCC mới / đổi điều kiện mà chưa nhập CI game → dùng CI trước đàm phán.' },
     { dept: 'Operations', rule, r0: opsScore(base), scenario: opsScore(res), unit: 'pct', good: 'down', note: 'Production costs + dòng kho (pallet locations, overflow, tank yard, nhân công kho) ÷ realized revenue (tab 2) — game chưa nói rõ dòng nào là "kho" (ước lượng).' },
     { dept: 'Sales', rule, r0: d.finance.totals.realizedRevenue, scenario: res.finance.realizedRevenue, unit: 'eur', good: 'up', note: 'Realized revenue (tab 2). Doanh thu theo quyết định Sales: M3.' },
     { dept: 'Supply Chain', rule, r0: stock(base), scenario: stock(res), unit: 'eur', good: 'down', note: 'Investment: Stock (tab 2) — giá trị tồn NL + TP.' },

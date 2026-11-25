@@ -119,6 +119,42 @@ export function NumberField(p: FieldBase & { value: number; limit?: NumLimit; st
   );
 }
 
+/**
+ * Ô số BỎ TRỐNG ĐƯỢC (vd "CI game hiển thị"): trống → null (app dùng số trước đàm phán / ước lượng, hiện ở placeholder).
+ * `scale` = hệ số hiển thị (100 để nhập % mà lưu 0–1). Giới hạn `limit` tính theo đơn vị LƯU.
+ */
+export function OptNumberField(p: FieldBase & { value: number | null; placeholder: string; limit: NumLimit; scale?: number; onChange: (v: number | null) => void }) {
+  const k = p.scale ?? 1;
+  const shown = (v: number | null) => (v === null ? '' : String(Math.round(v * k * 1e6) / 1e6));
+  const [text, setText] = useState(shown(p.value));
+  const [err, setErr] = useState<string | null>(null);
+  const [focus, setFocus] = useState(false);
+  useEffect(() => { if (!focus) { setText(shown(p.value)); setErr(null); } }, [p.value, focus]);
+  const lim = { ...p.limit, min: p.limit.min * k, max: p.limit.max * k };
+  return (
+    <label class={`field${p.changed ? ' changed' : ''}${err ? ' invalid' : ''}`}>
+      <span class="f-label">{p.label}{p.unit && <em> ({p.unit})</em>}</span>
+      <input
+        type="text" inputMode="decimal" disabled={p.disabled} value={text} placeholder={p.placeholder} aria-invalid={!!err}
+        onFocus={() => setFocus(true)}
+        onBlur={() => { setFocus(false); if (err) { setText(shown(p.value)); setErr(null); } }}
+        onInput={(e) => {
+          const raw = (e.currentTarget as HTMLInputElement).value;
+          setText(raw);
+          if (raw.trim() === '') { setErr(null); p.onChange(null); return; }
+          const v = Number(raw.trim().replace(',', '.'));
+          const msg = checkNumber(v, lim);
+          setErr(msg);
+          if (!msg) p.onChange(v / k);
+        }}
+      />
+      {err && <span class="f-err">⚠ {err} — chưa lưu.</span>}
+      {!err && <span class="f-range">Bỏ trống được · cho phép {lim.min.toLocaleString('vi-VN')}–{lim.max.toLocaleString('vi-VN')}</span>}
+      {p.hint && <span class="f-hint">{p.hint}</span>}
+    </label>
+  );
+}
+
 export function SelectField<T extends string | number>(p: FieldBase & { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
   return (
     <label class={`field${p.changed ? ' changed' : ''}`}>

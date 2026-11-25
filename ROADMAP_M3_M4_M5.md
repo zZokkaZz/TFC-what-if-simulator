@@ -17,7 +17,9 @@
 
 ---
 
-## M3 — Purchasing
+## M3 — Purchasing ✅ ĐÃ XONG (25/11/2026 — xem ASSUMPTIONS.md mục 15)
+
+> Phát hiện khi làm: ✅ **Purchase value = giá cơ bản × CI × lượng mua + phí vận chuyển** (khớp ≤ €1) — mục "giá thực trả ≠ giá × CI" bên dưới là do giá thực trả đã gồm phí vận chuyển. Delivery window & quality nước ép: chỉ cảnh báo (người dùng duyệt).
 
 ### Dữ liệu có trong sheet (tab 4, đã đọc vào `round0.json`)
 - `purchasing.contracts`: 5 hợp đồng hiện tại (CI, quality, lead time, cert, nước, vận chuyển, free capacity, payment term, trade unit, reliability cam kết, delivery window, vận chuyển chọn được).

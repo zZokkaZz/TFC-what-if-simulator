@@ -63,7 +63,11 @@ function Tile({ k }: { k: Kpi }) {
         {k.unit === 'weeks' && v !== null && <span class="kt-unit">tuần</span>}
       </div>
       <div class="kt-delta">
-        {moved ? <span class={`arrow ${cls}`}>{d > 0 ? '▲' : '▼'} {k.unit === 'pct' ? signed(d, 'pt') : k.unit === 'eur' ? signed(d, 'eur') : signed(d, 'num', 2)}</span> : <span class="muted">= R0 (chưa đổi)</span>}
+        {moved ? (() => {
+          const txt = k.unit === 'pct' ? signed(d, 'pt') : k.unit === 'eur' ? signed(d, 'eur') : signed(d, 'num', 2);
+          // Chênh lệch làm tròn về 0 → không vẽ mũi tên (tránh "▲ ±0,0")
+          return <span class={`arrow ${txt.startsWith('±') ? 'neutral' : cls}`}>{txt.startsWith('±') ? '≈' : d > 0 ? '▲' : '▼'} {txt}</span>;
+        })() : <span class="muted">= R0 (chưa đổi)</span>}
         {k.scenarioBasis !== 'model' && <span class={`badge ${k.scenarioBasis === 'estimate' ? 'badge-estimate' : 'badge-r0'}`} title={k.scenarioBasis === 'estimate' ? 'Thay đổi theo kịch bản là ước lượng' : 'Chưa mô hình — giữ số R0 (M3)'}>{k.scenarioBasis === 'estimate' ? 'ước lượng' : 'chưa mô hình'}</span>}
       </div>
       {k.target && v !== null && (
@@ -121,7 +125,10 @@ export function DashboardTab({ data, res, baseRes }: { data: Round0Data; res: Re
               return (
                 <div class={`role-score ${moved ? (better ? 'better' : 'worse') : 'same'}`}>
                   <b>Điểm phòng (theo luật game):</b> <AnimatedNumber value={s.scenario} format={f} />
-                  {moved ? <span class={`arrow ${better ? 'better' : 'worse'}`}> {d > 0 ? '▲' : '▼'} {s.unit === 'pct' ? signed(d, 'pt', 2) : s.unit === 'eur' ? signed(d, 'eur') : signed(d, 'num', 4)}</span> : <span class="muted"> = R0</span>}
+                  {moved ? (() => {
+                    const txt = s.unit === 'pct' ? signed(d, 'pt', 2) : s.unit === 'eur' ? signed(d, 'eur') : signed(d, 'num', 4);
+                    return <span class={`arrow ${txt.startsWith('±') ? 'neutral' : better ? 'better' : 'worse'}`}> {txt.startsWith('±') ? '≈' : d > 0 ? '▲' : '▼'} {txt}</span>;
+                  })() : <span class="muted"> = R0</span>}
                   <span class="muted"> · {s.good === 'down' ? 'thấp là tốt' : 'cao là tốt'}</span>
                   <div class="small-text">{s.note}</div>
                 </div>

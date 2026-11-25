@@ -50,17 +50,20 @@ describe('1. Investment → ROI theo dấu Operating profit', () => {
   });
 });
 
-describe('2. Lot size NL giảm → cảnh báo phí vận chuyển & đơn hàng chưa tính', () => {
-  it('lot size 4 → 2: có cảnh báo, ROI rows là "chưa mô hình" (delta null), không có số tự chế', () => {
+describe('2. Lot size NL giảm → cảnh báo phí vận chuyển & đơn hàng (M3: đã tính, ước lượng)', () => {
+  // Trước M3 cảnh báo ghi "chưa tính"; M3 Purchasing tính phí vận chuyển & phí đơn hàng theo số chuyến (ước lượng, neo R0).
+  it('lot size 4 → 2: có cảnh báo gắn "ước lượng", dòng ROI có số (phí tăng), không còn "chưa tính"', () => {
     const { i, r } = run((x) => allComp(x, { lotSizeWeeks: 2 }));
     const w = crossWarnings(d, base, i, r, b).find((x) => x.id === 'sc-lot-trips')!;
     expect(w).toBeTruthy();
-    expect(w.title).toMatch(/phí vận chuyển & phí đơn hàng tăng \(chưa tính, M3\)/);
+    expect(w.title).toMatch(/phí vận chuyển & phí đơn hàng tăng \(ước lượng\)/);
+    expect(w.title).not.toMatch(/chưa tính/);
     expect(w.roi.length).toBeGreaterThan(0);
-    expect(w.roi.every((x) => x.delta === null)).toBe(true);
-    // Purchase value & admin đơn hàng vẫn giữ R0 (chưa mô hình) — cảnh báo là lý do
+    expect(w.roi.every((x) => x.delta !== null)).toBe(true);
     const row = (re: RegExp) => r.finance.rows.find((x) => re.test(x.label))!;
-    expect(row(/^Inbound orders$/).value).toBe(row(/^Inbound orders$/).r0);
+    // số chuyến ×2 → phí đơn hàng nhập ×2 (neo R0 × tỷ lệ số chuyến)
+    expect(row(/^Inbound orders$/).value).toBeCloseTo(row(/^Inbound orders$/).r0! * 2, 6);
+    expect(r.purchasing.transportCost).toBeGreaterThan(b.purchasing.transportCost);
   });
   it('lot size tăng hoặc không đổi → không có cảnh báo này', () => {
     expect(crossWarnings(d, base, base, b, b).some((x) => x.id === 'sc-lot-trips')).toBe(false);

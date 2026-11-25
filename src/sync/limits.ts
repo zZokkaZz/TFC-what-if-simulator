@@ -20,6 +20,19 @@ export const SC_LIMITS = {
   productionIntervalDays: { min: 1, max: 130, int: true, label: 'Production interval', unit: 'ngày' } as NumLimit,
 };
 
+/** Purchasing — giới hạn chống nhập nhầm (không phải luật game). Tỷ lệ lưu dạng 0–1. Khớp firestore.rules. */
+export const PUR_LIMITS = {
+  paymentTermWeeks: { min: 0, max: 52, int: true, label: 'Payment term', unit: 'tuần' } as NumLimit,
+  agreedReliability: { min: 0.5, max: 1, label: 'Agreed delivery reliability' } as NumLimit,
+  ciGame: { min: 0.5, max: 2, label: 'Contract index (game hiển thị)' } as NumLimit,
+  reliabilityActual: { min: 0, max: 1, label: 'Reliability thực tế' } as NumLimit,
+  rejectionActual: { min: 0, max: 0.5, label: 'Rejection thực tế' } as NumLimit,
+};
+/** Ô chữ của điều kiện hợp đồng: độ dài tối đa (rules: shortStr). */
+export const PUR_TEXT = ['transport', 'tradeUnit', 'quality', 'deliveryWindow'] as const;
+export const PUR_TEXT_MAX = 20;
+export const PUR_COMPONENTS = ['Pack', 'PET', 'Orange', 'Mango', 'Vitamin C'] as const;
+
 export interface Issue { path: string; label: string; value: string; message: string }
 
 const fmt = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('vi-VN') : JSON.stringify(v));
@@ -54,6 +67,15 @@ export function validateDept(dept: Dept, data: unknown): Issue[] {
     }
   } else if (dept === 'purchasing') {
     for (const [c, v] of Object.entries((d.suppliers ?? {}) as Record<string, unknown>)) if (typeof v !== 'string' || v.length > 60) add(`purchasing.suppliers.${c}`, `NCC ${c}`, v, 'tên NCC không hợp lệ');
+    for (const [c, t] of Object.entries((d.terms ?? {}) as Record<string, Record<string, unknown>>)) {
+      if (!(PUR_COMPONENTS as readonly string[]).includes(c)) { add(`purchasing.terms.${c}`, `Điều kiện ${c}`, c, 'nguyên liệu không hợp lệ'); continue; }
+      for (const k of PUR_TEXT) if (typeof t?.[k] !== 'string' || (t[k] as string).length > PUR_TEXT_MAX) add(`purchasing.terms.${c}.${k}`, `${k} (${c})`, t?.[k], 'giá trị không hợp lệ');
+      add(`purchasing.terms.${c}.paymentTermWeeks`, `Payment term (${c})`, t?.paymentTermWeeks, checkNumber(t?.paymentTermWeeks, PUR_LIMITS.paymentTermWeeks));
+      add(`purchasing.terms.${c}.agreedReliability`, `Reliability cam kết (${c})`, t?.agreedReliability, checkNumber(t?.agreedReliability, PUR_LIMITS.agreedReliability));
+      for (const k of ['ciGame', 'reliabilityActual', 'rejectionActual'] as const) {
+        if (t?.[k] !== null) add(`purchasing.terms.${c}.${k}`, `${PUR_LIMITS[k].label} (${c})`, t?.[k], checkNumber(t?.[k], PUR_LIMITS[k]));
+      }
+    }
   }
   return out;
 }

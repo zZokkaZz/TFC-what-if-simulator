@@ -84,17 +84,84 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
     };
     out.push({
       id: 'sc-lot-trips', severity: 'warn', from: 'SC', to: ['Purchasing', 'Finance'],
-      title: 'Giảm lot size làm tăng số chuyến giao → phí vận chuyển & phí đơn hàng tăng (chưa tính, M3)',
-      detail: `${lotDown.map(trips).join('; ')}. Phí mỗi chuyến của NCC (Purchase value / transport) và phí đơn hàng nhập (Inbound orders, Inbound order lines) CHƯA mô hình — đang giữ số R0, nên ROI hiện trông tốt hơn thực tế.`,
-      roi: [notModeled('Phí vận chuyển NCC (trong Purchase value)', 'M3 — chưa tính'), notModeled('Inbound orders / Inbound order lines', 'M3 — chưa tính')],
+      title: 'Giảm lot size làm tăng số chuyến giao → phí vận chuyển & phí đơn hàng tăng (ước lượng)',
+      detail: `${lotDown.map(trips).join('; ')}. Phí vận chuyển (trong Purchase value) = phí R0 × tỷ lệ mô hình "phí mỗi chuyến × số chuyến + phí đơn vị" (tab 4); phí đơn hàng nhập = số R0 × tỷ lệ số chuyến — đều là ước lượng, game không công bố công thức.`,
+      roi: [
+        ...lotDown.map((c) => imp(`Purchase value ${c.key} (gồm vận chuyển)`, new RegExp(`\\(${c.key}\\)`))),
+        imp('Inbound order lines', /^Inbound order lines$/), imp('Inbound orders', /^Inbound orders$/),
+      ],
     });
+  }
+  // --- Purchasing: NCC, ô đàm phán, số game ---
+  const purChanged = (c: string) => changed(base, cur, (i) => [i.purchasing.suppliers[c as keyof typeof i.purchasing.suppliers], i.purchasing.terms?.[c as keyof typeof i.purchasing.terms]]);
+  for (const p of res.purchasing.components) {
+    const pb = baseRes.purchasing.components.find((x) => x.key === p.key)!;
+    const t = cur.purchasing.terms[p.key];
+    const rowRe = new RegExp(`\\(${p.key}\\)`);
+    if (!purChanged(p.key)) continue;
+    // Giá / purchase value
+    const missing: string[] = [];
+    if (p.ciBasis !== 'game' && (p.ciStale || !p.isR0Supplier)) missing.push(`contract index (đang dùng ${p.contractIndex.toLocaleString('vi-VN', { maximumFractionDigits: 4 })} ${p.isR0Supplier ? 'của hợp đồng R0' : 'niêm yết thị trường'}, trước đàm phán)`);
+    if (!p.isR0Supplier && t.reliabilityActual === null) missing.push(`reliability thực tế (ước lượng ${pct(p.reliability)} = cam kết − chênh lệch TB R0)`);
+    if (!p.isR0Supplier && t.rejectionActual === null) missing.push(`rejection (ước lượng ${pct(p.rejection)} = mức R0 của ${p.key})`);
+    out.push({
+      id: `pur-${p.key}`, severity: missing.length ? 'warn' : 'info', from: 'Purchasing', to: ['SC', 'Ops', 'Finance'],
+      title: `${p.key}: ${p.isR0Supplier ? 'đổi điều kiện hợp đồng' : `đổi NCC ${p.supplierR0} → ${p.supplier}`} → purchase value €${n0(pb.purchaseValue)} → €${n0(p.purchaseValue)}`,
+      detail: `Giá cơ bản €${p.basePrice.toLocaleString('vi-VN')} × CI ${p.contractIndex.toLocaleString('vi-VN', { maximumFractionDigits: 4 })}; lead time ${pb.leadTimeDays} → ${p.leadTimeDays} ngày (${p.transport}); reliability ${pct(pb.reliability)} → ${pct(p.reliability)}; trade unit ${pb.tradeUnit} → ${p.tradeUnit}; phí vận chuyển €${n0(pb.transportCost)} → €${n0(p.transportCost)} (ước lượng).${missing.length ? ` ⚠ Chưa nhập số game: ${missing.join('; ')}. Bấm Calculate trong game rồi nhập ở tab Purchasing.` : ''}`,
+      roi: [imp(`Purchase value ${p.key}`, rowRe), imp('Investment: Payment terms', /^Payment terms$/), imp('Investment: Stock', /^Stock$/)],
+    });
+    if (t.deliveryWindow !== pb.deliveryWindow) {
+      const order = ['4 hours', '1 day', '2 days', '1 week'];
+      const wider = order.indexOf(t.deliveryWindow) > order.indexOf(pb.deliveryWindow);
+      out.push({
+        id: `pur-window-${p.key}`, severity: wider ? 'warn' : 'info', from: 'Purchasing', to: ['Ops', 'SC'],
+        title: `${p.key}: delivery window ${pb.deliveryWindow} → ${t.deliveryWindow}`,
+        detail: wider
+          ? 'Luật game: window rộng thì rẻ hơn nhưng hàng về lệch ngày nhiều hơn → khó xếp nhân công kho NL, cần safety stock NL cao hơn. CHƯA đưa vào số (game không cho độ lớn); giá chỉ đổi khi nhập CI game.'
+          : 'Window hẹp hơn: hàng về đúng giờ hơn nhưng đắt hơn (nhập CI game). Tác động lên số chưa mô hình.',
+        roi: [notModeled('Availability / safety stock NL', 'delivery window chưa mô hình')],
+      });
+    }
+    if ((p.key === 'Pack' || p.key === 'PET') && p.quality !== pb.quality) {
+      out.push({
+        id: `pur-quality-${p.key}`, severity: 'info', from: 'Purchasing', to: ['Ops'],
+        title: `${p.key}: quality ${pb.quality} → ${p.quality} → hỏng dây chuyền ${n1(baseRes.ops.line.breakdown)} → ${n1(o.line.breakdown)} giờ/tuần`,
+        detail: 'Luật game: bao bì Poor gây hỏng dây chuyền. Độ lớn là ước lượng (Poor ×1,6, Middle ×1,25 so với High — chỉnh ở tab "Giả định & R0").',
+        roi: [imp('Flexible manpower (bottling)', /^Flexible manpower \(bottling\)/)],
+      });
+    }
+    if (p.key !== 'Pack' && p.key !== 'PET' && p.quality !== 'High') {
+      out.push({
+        id: `pur-juice-${p.key}`, severity: 'warn', from: 'Purchasing', to: ['Ops', 'Sales'],
+        title: `${p.key}: quality ${p.quality}`,
+        detail: 'Luật game: thành phẩm không đạt kiểm tra bị hủy. Game không cho độ lớn → CHƯA đưa vào số (Costs of scrap, service level giữ nguyên).',
+        roi: [notModeled('Costs of scrap / rejects', 'quality NL nước ép chưa mô hình')],
+      });
+    }
+    const listed = data.purchasing.market.find((m) => m.component === p.key && m.supplier === p.supplier);
+    if (!p.isR0Supplier && listed && (!listed.certified || listed.freeCapacity < 0.1)) {
+      out.push({
+        id: `pur-risk-${p.key}`, severity: 'info', from: 'Purchasing', to: ['SC', 'Ops'],
+        title: `${p.supplier}: ${[!listed.certified ? 'không certification' : '', listed.freeCapacity < 0.1 ? `free capacity ${pct(listed.freeCapacity, 0)}` : ''].filter(Boolean).join(', ')}`,
+        detail: 'Luật game: free capacity thấp hoặc không certification thì NCC hay giao trễ, chất lượng không đều. Nên nhập reliability/rejection thực tế khi có số game.',
+        roi: [notModeled('Reliability / rejection thực tế', 'nhập số game')],
+      });
+    }
+    if (Math.abs(t.paymentTermWeeks - pb.paymentTermWeeks) > 1e-9) {
+      out.push({
+        id: `pur-pay-${p.key}`, severity: 'info', from: 'Purchasing', to: ['Finance'],
+        title: `${p.key}: payment term ${pb.paymentTermWeeks} → ${t.paymentTermWeeks} tuần`,
+        detail: `Phải trả NCC ước lượng = purchase value/tuần × payment term → Investment: Payment terms đổi. Payment term dài thì NCC tăng giá (CLAUDE.md) — nhập CI game sau Calculate. ${investmentRoiNote(res.finance.operatingProfit, res.finance.investment, baseRes.finance.investment)}`,
+        roi: [imp('Investment: Payment terms', /^Payment terms$/)],
+      });
+    }
   }
   // --- SC/Purchasing/Ops(intake) → availability NL → plan adherence ---
   for (const c of res.sc.components) {
     const b = baseRes.sc.components.find((x) => x.key === c.key)!;
     if (c.availability < b.availability - 0.005) {
       out.push({
-        id: `avail-${c.key}`, severity: c.availability < 0.9 ? 'critical' : 'warn', from: 'SC', to: ['Ops', 'Sales'],
+        id: `avail-${c.key}`, severity: c.availability < 0.9 ? 'critical' : 'warn', from: purChanged(c.key) ? 'Purchasing' : 'SC', to: ['Ops', 'Sales'],
         title: `Availability ${c.key} giảm ${pct(b.availability)} → ${pct(c.availability)}`,
         detail: `Safety stock ${n1(c.safetyStockWeeks)} tuần (gợi ý ≥ ${n1(c.recommendedSsWeeks)} tuần cho 99%), lead time ${n1(c.leadTimeWeeks)} tuần, reliability NCC ${pct(c.reliability)}. Thiếu NL làm plan adherence ${pct(baseRes.ops.line.planAdherence)} → ${pct(o.line.planAdherence)} và service level TP giảm.`,
         roi: [notModeled('Penalty service level (doanh thu)', 'Sales — M3 chưa mô hình'), notModeled('Costs of scrap', 'chưa mô hình')],
@@ -107,7 +174,7 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
       out.push({
         id: `avail-low-${c.key}`, severity: 'critical', from: 'Purchasing', to: ['SC', 'Ops', 'Sales'],
         title: `${c.key}: availability chỉ ${pct(c.availability)}${c.stockoutDaysR0 ? ` (R0 hết hàng ${c.stockoutDaysR0}/130 ngày)` : ''}`,
-        detail: `NCC ${c.supplier}: lead time ${n1(c.leadTimeWeeks)} tuần, reliability ${pct(c.reliability)}. Safety stock đang ${n1(c.safetyStockWeeks)} tuần, gợi ý ≥ ${n1(c.recommendedSsWeeks)} tuần (ước lượng) — hoặc Purchasing đổi NCC nhanh/tin cậy hơn (M3).`,
+        detail: `NCC ${c.supplier}: lead time ${n1(c.leadTimeWeeks)} tuần, reliability ${pct(c.reliability)}. Safety stock đang ${n1(c.safetyStockWeeks)} tuần, gợi ý ≥ ${n1(c.recommendedSsWeeks)} tuần (ước lượng) — hoặc Purchasing đổi NCC nhanh/tin cậy hơn (tab Purchasing).`,
         roi: [
           notModeled('Penalty service level', 'Sales — M3'),
           ...(cur.sc.components[c.key].safetyStockWeeks > base.sc.components[c.key].safetyStockWeeks ? [imp('Interest on components (do tăng SS)', /^Interest on components/)] : []),

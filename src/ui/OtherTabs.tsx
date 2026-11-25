@@ -10,27 +10,6 @@ import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
 
 const Pending = ({ m }: { m: string }) => <p class="pending">Quyết định của phòng này sẽ sửa được ở <b>{m}</b>. Hiện hiển thị dữ liệu Round 0 thô từ file Excel.</p>;
 
-export function PurchasingTab({ data }: { data: Round0Data }) {
-  const p = data.purchasing;
-  return (
-    <div class="single">
-      <Pending m="M3" />
-      <Card title="Hợp đồng hiện tại">
-        <Table head={['Component', 'NCC', 'Contract index', 'Quality', 'Lead time (ngày)', 'Trade unit', 'Reliability cam kết', 'Delivery window', 'Payment term (tuần)']}
-          rows={p.contracts.map((s) => [s.component, s.supplier, num(s.contractIndex, 4), s.quality, s.leadTimeDays, s.tradeUnit, pct(s.agreedReliability, 0), s.deliveryWindow, s.paymentTermWeeks])} />
-      </Card>
-      <Card title="Kết quả NCC R0">
-        <Table head={['NCC', 'Reliability thực tế', 'Rejection', 'Purchase value', 'Transport', 'Transport/purchase', 'Giá thực trả', 'Cỡ đơn']}
-          rows={p.results.map((r) => [r.supplier, pct(r.reliability), pct(r.rejection), eur(r.purchaseValue), eur(r.transportCost), pct(r.transportCost / r.purchaseValue, 0), `€${num(r.pricePaid, 4)}`, num(r.orderSize)])} />
-      </Card>
-      <Card title={`Thị trường NCC (${p.market.length} NCC)`}>
-        <Table head={['Component', 'NCC', 'Đang dùng', 'CI', 'Quality', 'Lead time', 'Cert.', 'Vận chuyển', 'Free cap.', 'Trade unit', 'Reliability', 'Window']}
-          rows={p.market.map((s) => [s.component, s.supplier, s.inUse ? '●' : '', num(s.contractIndex, 4), s.quality, s.leadTimeDays, s.certified ? 'Có' : '', s.transport, pct(s.freeCapacity, 0), s.tradeUnit, pct(s.agreedReliability, 0), s.deliveryWindow])} />
-      </Card>
-    </div>
-  );
-}
-
 export function SalesTab({ data }: { data: Round0Data }) {
   const s = data.sales;
   return (

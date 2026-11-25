@@ -24,13 +24,24 @@ const LABELS: [RegExp, Dept, string][] = [
   [/^sc\.products\..*\.safetyStockWeeks$/, 'SC', 'safety stock TP'],
   [/^sc\.frozenPeriodWeeks$/, 'SC', 'frozen period'],
   [/^purchasing\.suppliers\./, 'Purchasing', 'NCC'],
+  [/^purchasing\.terms\..*\.transport$/, 'Purchasing', 'vận chuyển'],
+  [/^purchasing\.terms\..*\.tradeUnit$/, 'Purchasing', 'trade unit NL'],
+  [/^purchasing\.terms\..*\.quality$/, 'Purchasing', 'quality NL'],
+  [/^purchasing\.terms\..*\.deliveryWindow$/, 'Purchasing', 'delivery window'],
+  [/^purchasing\.terms\..*\.paymentTermWeeks$/, 'Purchasing', 'payment term NCC'],
+  [/^purchasing\.terms\..*\.agreedReliability$/, 'Purchasing', 'reliability cam kết'],
+  [/^purchasing\.terms\..*\.ciGame$/, 'Purchasing', 'CI game'],
+  [/^purchasing\.terms\..*\.reliabilityActual$/, 'Purchasing', 'reliability thực tế'],
+  [/^purchasing\.terms\..*\.rejectionActual$/, 'Purchasing', 'rejection thực tế'],
 ];
 
 const INTERVAL = /^sc\.products\..*\.productionIntervalDays$/;
 const LINE_BASE = [/^ops\.bottlingLine$/, /^ops\.increaseSpeed$/, /^ops\.mixer$/, INTERVAL];
-const BREAKDOWN = [...LINE_BASE, /^ops\.preventiveMaintenance$/, /^ops\.breakdownTraining$/, /^ops\.rmInspection\.(Pack|PET)$/, /^purchasing\.suppliers\.(Pack|PET)$/];
+const PUR = /^purchasing\./;
+const PUR_QUALITY = /^purchasing\.(suppliers\.(Pack|PET)|terms\.(Pack|PET)\.quality)$/;
+const BREAKDOWN = [...LINE_BASE, /^ops\.preventiveMaintenance$/, /^ops\.breakdownTraining$/, /^ops\.rmInspection\.(Pack|PET)$/, PUR_QUALITY];
 const LINE_ALL = [...BREAKDOWN, /^ops\.smed$/, /^ops\.shifts$/];
-const RM_STOCK = [/^ops\.rmPalletLocations$/, /^sc\.components\./, /^purchasing\.suppliers\./, /^ops\.mixer$/];
+const RM_STOCK = [/^ops\.rmPalletLocations$/, /^sc\.components\./, PUR, /^ops\.mixer$/];
 const RM_HOURS = [...RM_STOCK, /^ops\.rmInspection\./, /^ops\.intakeDays$/, INTERVAL];
 const FG_STOCK = [/^ops\.fgPalletLocations$/, /^sc\.products\./, /^ops\.mixer$/];
 
@@ -40,9 +51,9 @@ export const DRIVERS: Record<string, RegExp[]> = {
   breakdown: BREAKDOWN,
   maintenance: [/^ops\.preventiveMaintenance$/],
   lineLoad: LINE_ALL,
-  adherence: [...LINE_ALL, /^sc\.components\./, /^ops\.intakeDays$/, /^purchasing\.suppliers\./],
-  avail: [/^sc\.components\./, /^ops\.intakeDays$/, /^purchasing\.suppliers\./],
-  scStock: [/^sc\./, /^ops\.mixer$/, /^purchasing\.suppliers\./],
+  adherence: [...LINE_ALL, /^sc\.components\./, /^ops\.intakeDays$/, PUR],
+  avail: [/^sc\.components\./, /^ops\.intakeDays$/, PUR],
+  scStock: [/^sc\./, /^ops\.mixer$/, PUR],
   startup: [/^ops\.bottlingLine$/, /^ops\.increaseSpeed$/, INTERVAL],
   mixer: [/^ops\.mixer$/, INTERVAL],
   rmStock: RM_STOCK,
@@ -51,7 +62,11 @@ export const DRIVERS: Record<string, RegExp[]> = {
   fgStock: FG_STOCK,
   fgHours: [...FG_STOCK, INTERVAL],
   fgFlex: [...FG_STOCK, INTERVAL, /^ops\.fgFte$/],
-  tank: [/^sc\.components\.Orange/, /^purchasing\.suppliers\.Orange/, INTERVAL],
+  tank: [/^sc\.components\.(Orange|Mango|Vitamin C)/, /^purchasing\.(suppliers|terms)\.(Orange|Mango|Vitamin C)/, INTERVAL],
+  // M3 Purchasing
+  purchase: [PUR, /^sc\.components\./, /^ops\.mixer$/, INTERVAL],
+  trips: [/^sc\.components\..*\.lotSizeWeeks$/, PUR, /^ops\.mixer$/, INTERVAL],
+  payterm: [/^purchasing\.terms\..*\.paymentTermWeeks$/, PUR, /^sc\.components\./],
 };
 
 function flatten(o: unknown, prefix = '', out: Record<string, unknown> = {}): Record<string, unknown> {
