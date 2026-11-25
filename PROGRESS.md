@@ -26,7 +26,7 @@
 | Sửa sau rà soát | Dữ liệu mới (tab 5 D29, tab 6 cột mới); tiêu đề mơ hồ → lỗi; penalty có trần + cờ "ngoài vùng dữ liệu R0"; màu Investment theo ROI; tank yard 2 nguồn; bảng nguyên văn tab 6 | `scripts/build-data.ts`, `src/model/sales.ts`, `ASSUMPTIONS.md` mục 17 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 229 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 240 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
@@ -71,6 +71,7 @@ Test: 229 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
+- 25/11/2026 — Gom hệ số ước lượng chưa xác minh vào `COEFFS` (`src/model/assumptions.ts`): mốc ngoài vùng R0, mũ penalty, độ dốc capacity V1 phương án B/C. Có dữ liệu trial → sửa ở đó, chạy `npm run verify`.
 - 25/11/2026 — Rà soát 4 phòng (chỉ đọc) + PR sửa lỗi C1, V3, T1–T4 (nhánh `claude/fix-audit`). Còn chờ người dùng chọn phương án: **C2** (obsolete/scrap theo tuổi tồn — đã duyệt hướng) và **V1** (tách adherence thiếu NL / capacity — đang chọn phương án).
 
 - 25/11/2026 — M3 Sales phần service level (nhánh `claude/m3-sales`): SL dự kiến → penalty → realized revenue (ước lượng, neo từng khách), kiểm chứng revenue = contracted + penalty (khớp tuyệt đối), frozen period chưa mô hình, 217/217. Cần người dùng xem độ lớn (vd thêm ca → penalty = 0).

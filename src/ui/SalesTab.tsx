@@ -9,6 +9,7 @@ import { eur, num, pct } from './format';
 import { causesFor } from './trace';
 import { WarningsPanel } from './WarningsPanel';
 import { RawTable } from './RawTable';
+import { COEFFS } from '../model/assumptions';
 
 interface Props { data: Round0Data; res: Results; baseRes: Results; changed: string[]; warnings: Warning[] }
 
@@ -26,7 +27,7 @@ export function SalesTab({ data, res, baseRes, changed, warnings }: Props) {
   return (
     <div class="single">
       <p class="pending">Phần <b>service level → penalty → doanh thu</b> đã nối (ước lượng). Ô quyết định hợp đồng Sales (SL hứa, shelf life, order deadline, trade unit, promotion) <b>chưa có</b> — contracted sales giữ số R0.</p>
-      {S.customers.some((x) => x.outOfRange) && <p class="lock">⚠ <b>Ngoài vùng dữ liệu R0:</b> {S.customers.filter((x) => x.outOfRange).map((x) => x.customer).join(', ')} — service level rơi xa R0 (mức thiếu &gt; 2 × R0), penalty là ngoại suy tuyến tính từ 1 điểm R0{S.customers.some((x) => x.capped) ? '; có khách bị chặn ở doanh thu 0' : ''}. Chỉ nên đọc chiều hướng, không đọc độ lớn.</p>}
+      {S.customers.some((x) => x.outOfRange) && <p class="lock">⚠ <b>Ngoài vùng dữ liệu R0:</b> {S.customers.filter((x) => x.outOfRange).map((x) => x.customer).join(', ')} — service level rơi xa R0 (mức thiếu &gt; {COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × R0, hệ số chưa xác minh), penalty là ngoại suy tuyến tính từ 1 điểm R0{S.customers.some((x) => x.capped) ? '; có khách bị chặn ở doanh thu 0' : ''}. Chỉ nên đọc chiều hướng, không đọc độ lớn.</p>}
       <WarningsPanel warnings={warnings} filterTo="Sales" title="Cảnh báo liên quan Sales" />
 
       <Card title="Tổng quan Sales">
@@ -45,7 +46,7 @@ export function SalesTab({ data, res, baseRes, changed, warnings }: Props) {
             <tbody>
               {S.customers.map((x) => (
                 <tr>
-                  <td>{x.customer}{x.outOfRange && <> <span class="badge badge-oor" title={`Mức thiếu SL ${num(x.shortfall * 100, 1)} điểm > 2 × mức thiếu R0 (${num(x.shortfallR0 * 100, 1)} điểm): penalty ngoại suy xa điểm R0 duy nhất, kém tin cậy`}>ngoài vùng dữ liệu R0</span></>}{x.capped && <div class="warn-text small-text">penalty đã chặn = contracted (doanh thu 0)</div>}</td>
+                  <td>{x.customer}{x.outOfRange && <> <span class="badge badge-oor" title={`Mức thiếu SL ${num(x.shortfall * 100, 1)} điểm > ${COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × mức thiếu R0 (${num(x.shortfallR0 * 100, 1)} điểm): penalty ngoại suy xa điểm R0 duy nhất, kém tin cậy`}>ngoài vùng dữ liệu R0</span></>}{x.capped && <div class="warn-text small-text">penalty đã chặn = contracted (doanh thu 0)</div>}</td>
                   <td>{x.serviceLevelType}</td>
                   <td>{pct(x.promised, 0)}</td>
                   <td><Cell v={x.slOrderLines} r0={x.slOrderLinesR0} f={(v) => pct(v)} /></td>

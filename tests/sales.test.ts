@@ -7,6 +7,7 @@ import type { Inputs } from '../src/model/types';
 import { baselineInputs, simulate } from '../src/model/simulate';
 import { adherenceSlSlope } from '../src/model/supplyChain';
 import { crossWarnings } from '../src/model/warnings';
+import { COEFFS } from '../src/model/assumptions';
 
 const XLSX: typeof import('xlsx') = createRequire(import.meta.url)('xlsx');
 const d = data as unknown as Round0Data;
@@ -77,7 +78,7 @@ describe('Service level ← availability NL + plan adherence + safety stock TP',
   });
   it('penalty tỷ lệ với mức thiếu SL của từng khách (neo R0)', () => {
     const { r } = run((x) => allProd(x, { safetyStockWeeks: 2 }));
-    for (const c of r.sales.customers) expect(c.penalty).toBeCloseTo(c.penaltyR0 * (c.shortfall / c.shortfallR0), 6);
+    for (const c of r.sales.customers) expect(c.penalty).toBeCloseTo(c.penaltyR0 * Math.pow(c.shortfall / c.shortfallR0, COEFFS.penaltyShortfallExponent.value), 6);
   });
   it('Contracted sales giữ R0 (nhu cầu, giá chưa mô hình)', () => {
     const { r } = run((x) => allProd(x, { safetyStockWeeks: 1 }));
@@ -117,14 +118,17 @@ describe('C1: penalty bị chặn — doanh thu từng khách không âm; cờ "
     expect(r.sales.customers.some((c) => c.capped)).toBe(true); // F&G: ngoại suy tuyến tính vượt contracted
     expect(r.finance.realizedRevenue).toBeCloseTo(r.sales.realizedRevenue, 6);
   });
-  it('safety stock TP 3 → 2 (mức thiếu < 2 × R0): trong vùng; 3 → 1: ngoài vùng ở F&G', () => {
-    const r2 = run((x) => allProd(x, { safetyStockWeeks: 2 })).r;
-    expect(r2.sales.customers.every((c) => !c.outOfRange)).toBe(true);
-    const r1 = run((x) => allProd(x, { safetyStockWeeks: 1 })).r;
-    const fg = r1.sales.customers.find((c) => c.customer === 'Food & Groceries')!;
-    expect(fg.shortfall).toBeGreaterThan(2 * fg.shortfallR0);
-    expect(fg.outOfRange).toBe(true);
-    expect(fg.capped).toBe(false);
+  it('cờ ngoài vùng theo mốc COEFFS.outOfRangeFactor (giá trị hiện tại: SS TP 3 → 2 trong vùng, 3 → 1 ngoài vùng ở F&G)', () => {
+    const k = COEFFS.outOfRangeFactor.value;
+    for (const ss of [2, 1]) {
+      const r = run((x) => allProd(x, { safetyStockWeeks: ss })).r;
+      for (const c of r.sales.customers) expect(c.outOfRange).toBe(c.capped || c.shortfall > k * c.shortfallR0);
+    }
+    // Ảnh chụp với giá trị hiện tại (k = 2) — đổi k thì kiểm tra lại 2 dòng dưới
+    if (k === 2) {
+      expect(run((x) => allProd(x, { safetyStockWeeks: 2 })).r.sales.customers.every((c) => !c.outOfRange)).toBe(true);
+      expect(run((x) => allProd(x, { safetyStockWeeks: 1 })).r.sales.customers.find((c) => c.customer === 'Food & Groceries')!.outOfRange).toBe(true);
+    }
   });
   it('cảnh báo service level ghi "NGOÀI VÙNG DỮ LIỆU R0" khi có khách ngoài vùng', () => {
     const { i, r } = run((x) => { x.ops.shifts = 1; });

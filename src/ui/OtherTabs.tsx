@@ -2,7 +2,7 @@
 import type { Round0Data } from '../data/types';
 import type { Results, RoiNode } from '../model/types';
 import { dataChecks } from '../model/dataChecks';
-import { ASSUMPTIONS, EDITABLE_EST, EST } from '../model/assumptions';
+import { ASSUMPTIONS, COEFFS, EDITABLE_EST, EST, type Coeff } from '../model/assumptions';
 import { getCalibration } from '../model/simulate';
 import { Badge, Card, Table } from './components';
 import { eur, num, pct, signed } from './format';
@@ -136,6 +136,11 @@ export function AssumptionsTab({ data, estOver, setEstOver }: { data: Round0Data
             );
           })}
         </div>
+      </Card>
+      <Card title="Hệ số ước lượng chưa xác minh (một chỗ: src/model/assumptions.ts → COEFFS)">
+        <p class="muted">Khi có dữ liệu vòng trial: sửa giá trị và trạng thái tại <code>COEFFS</code> rồi chạy <code>npm run verify</code>. Không chỉnh được trên giao diện (để cả nhóm dùng cùng một số).</p>
+        <Table head={['Hệ số', 'Giá trị', 'Trạng thái', 'Nguồn', 'Dùng ở', 'Xác minh bằng']}
+          rows={(Object.entries(COEFFS) as [string, Coeff][]).map(([id, c]) => [<span title={id}>{c.label}</span>, `${num(c.value, 2)}${c.unit ? ' ' + c.unit : ''}`, <span class={c.status === 'đã xác minh' ? 'ok' : 'warn-text'}>{c.status}</span>, c.source, c.usedIn, c.verifyWith])} />
       </Card>
       <DataCheckCard data={data} />
       <Card title="Hệ số hiệu chỉnh (tự tính từ số Round 0)">

@@ -4,6 +4,7 @@ import type { Round0Data } from '../data/types';
 import type { Inputs, OpsInputs } from '../model/types';
 import { baselineInputs, simulate } from '../model/simulate';
 import { withEst } from '../model/assumptions';
+import { COEFFS } from '../model/assumptions';
 import type { Dept } from '../sync/types';
 import { DEPTS, DEPT_SHORT, ROLE_LABEL } from '../sync/types';
 import { loadInputs, loadTab, saveInputs, saveTab } from './state';
@@ -114,7 +115,7 @@ export function App() {
           <b>TFC What-if</b>
           <span>Ops + SC + Purchasing + Sales (SL) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
-        <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}${res.sales.customers.some((c) => c.outOfRange) ? ' · ⚠ ngoài vùng dữ liệu R0' : ''}`} subTitle={res.sales.customers.some((c) => c.outOfRange) ? 'Service level của ít nhất 1 khách rơi xa R0 (mức thiếu > 2 × R0): penalty/doanh thu là ngoại suy — xem tab Sales' : undefined} />
+        <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}${res.sales.customers.some((c) => c.outOfRange) ? ' · ⚠ ngoài vùng dữ liệu R0' : ''}`} subTitle={res.sales.customers.some((c) => c.outOfRange) ? `Service level của ít nhất 1 khách rơi xa R0 (mức thiếu > ${COEFFS.outOfRangeFactor.value.toLocaleString('vi-VN')} × R0, hệ số chưa xác minh): penalty/doanh thu là ngoại suy — xem tab Sales` : undefined} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} sub={r0TwoSources(data, 'operatingProfit')} subTitle={R0_SOURCE_NOTE} />
         <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={Math.abs(dInv) < 0.5 ? 'neutral' : cls(invRoiEffect)} title={f.operatingProfit < 0 ? 'Đang lỗ: Investment tăng làm ROI tốt lên, giảm làm ROI xấu đi (màu theo tác động lên ROI)' : 'Màu theo tác động lên ROI'} />
         <div class="top-actions">

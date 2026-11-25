@@ -277,3 +277,16 @@ Theo yêu cầu người dùng: nối service level ước tính (availability N
 - **"Ngoài vùng dữ liệu R0"** (quy ước hiển thị, không phải luật game): mức thiếu SL > **2 ×** mức thiếu R0 của khách, hoặc R0 không thiếu mà kịch bản thiếu, hoặc penalty bị chặn. Penalty là ngoại suy tuyến tính từ 1 điểm R0 duy nhất mỗi khách → chỉ nên đọc chiều hướng. Hiện ở tab Sales, cảnh báo service level và dưới ROI trên thanh trên.
 - **Tank yard hai nguồn**: tab 10 Usage = 6 (app neo tank TB theo số này), ghi chú tab 5 = 5,85. App hiện cả hai (luật 4).
 - **Màu Investment trên thanh trên** theo tác động lên ROI (đang lỗ: Investment tăng → ROI tốt lên → xanh).
+
+### 17b. Hệ số ước lượng chưa xác minh — một chỗ duy nhất
+
+Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số có: giá trị, nguồn, trạng thái ("chưa xác minh" / "đã xác minh"), file dùng, dữ liệu cần để xác minh. Tab "Giả định & R0" hiện nguyên bảng này.
+
+| Hệ số | Giá trị | Trạng thái | Dùng ở |
+|---|---|---|---|
+| `outOfRangeFactor` — mốc "ngoài vùng dữ liệu R0" | 2 lần mức thiếu R0 | chưa xác minh | `src/model/sales.ts` |
+| `penaltyShortfallExponent` — penalty theo mức thiếu | 1 (tuyến tính) | chưa xác minh | `src/model/sales.ts` |
+| `capacitySlopeB` — V1 phương án B | 0,5 | chưa xác minh | chưa dùng (chờ chọn) |
+| `capacitySlopeC` — V1 phương án C | 0,25 | chưa xác minh | chưa dùng (chờ chọn) |
+
+**Khi có dữ liệu vòng trial:** sửa `value` (và `status`, `source`) trong `COEFFS` → `npm run verify`. Test đọc giá trị từ `COEFFS`, không gõ lại số; baseline R0 không phụ thuộc các hệ số này (đã thử đổi mốc 2 → 3 và mũ 1 → 1,3: 240/240 vẫn xanh). `tests/coeffs.test.ts` còn kiểm tra mục `usedIn` khớp thực tế: hệ số ghi "chưa dùng" mà có file đọc (hoặc ngược lại) thì test đỏ.

@@ -3,6 +3,66 @@
 // Đổi số ở đây thì baseline R0 KHÔNG đổi (các hệ số đều tính tương đối so với điều kiện R0),
 // chỉ đổi độ nhạy khi thử kịch bản.
 
+// ======================= HỆ SỐ ƯỚC LƯỢNG CHƯA XÁC MINH — MỘT CHỖ DUY NHẤT =======================
+// Mỗi hệ số: giá trị, nguồn (vì sao chọn số này), trạng thái, dùng ở đâu, kiểm chứng bằng dữ liệu gì.
+// Khi có dữ liệu vòng trial: sửa `value` (và `status` → 'đã xác minh', ghi nguồn mới) TẠI ĐÂY rồi chạy `npm run verify`.
+// Không gõ lại các số này ở file khác — code và test đều đọc từ COEFFS.
+
+export type CoeffStatus = 'chưa xác minh' | 'đã xác minh';
+
+export interface Coeff {
+  value: number;
+  label: string;
+  unit?: string;
+  /** Vì sao chọn số này (luật, dữ liệu, hay đề xuất) */
+  source: string;
+  status: CoeffStatus;
+  /** Code nào dùng; "chưa dùng" = đã đăng ký nhưng chờ người dùng chọn phương án */
+  usedIn: string;
+  /** Dữ liệu cần có để xác minh / thay số */
+  verifyWith: string;
+}
+
+export const COEFFS = {
+  outOfRangeFactor: {
+    value: 2,
+    label: 'Mốc "ngoài vùng dữ liệu R0" (mức thiếu SL ÷ mức thiếu R0)',
+    unit: 'lần',
+    source: 'Quy ước hiển thị do Claude đề xuất khi rà soát 25/11 — không phải luật game. Penalty mỗi khách chỉ có 1 điểm R0, ngoại suy tuyến tính quá 2 lần mức thiếu R0 bị coi là kém tin cậy.',
+    status: 'chưa xác minh',
+    usedIn: 'src/model/sales.ts (cờ outOfRange)',
+    verifyWith: 'Penalty và SL order lines từng khách ở các vòng trial: nếu quan hệ penalty–mức thiếu vẫn tuyến tính ở mức thiếu lớn hơn thì nới mốc.',
+  },
+  penaltyShortfallExponent: {
+    value: 1,
+    label: 'Số mũ penalty theo mức thiếu SL (1 = tuyến tính)',
+    source: 'Giả định khi làm M3 Sales: penalty = penalty R0 × (mức thiếu mới ÷ mức thiếu R0)^mũ. R0 3 khách cho tỷ lệ penalty/điểm thiếu khác nhau (5,12% / 2,53% / 1,88%) nên không ước lượng được mũ chung.',
+    status: 'chưa xác minh',
+    usedIn: 'src/model/sales.ts (penalty)',
+    verifyWith: 'Ít nhất 2 điểm (SL, penalty) cho cùng một khách từ các vòng trial → ước lượng mũ.',
+  },
+  capacitySlopeB: {
+    value: 0.5,
+    label: 'V1 phương án B — độ dốc SL theo plan adherence phần capacity, tại R0',
+    unit: 'điểm SL / điểm adherence',
+    source: 'Đề xuất (rà soát 25/11): R0 KHÔNG có điểm dữ liệu cho phần capacity (mọi SKU cùng capacity); chọn ≈ ½ độ dốc phần thiếu NL (0,974, hồi quy 6 SKU R0). Dạng bão hòa mũ: tỷ lệ thiếu × e^(−dốc/thiếu TB R0 × Δadherence).',
+    status: 'chưa xác minh',
+    usedIn: 'chưa dùng — chờ người dùng chọn phương án V1 (B hoặc C)',
+    verifyWith: 'Vòng trial có đổi số ca / SMED / PM: so plan adherence và SL pieces trước–sau.',
+  },
+  capacitySlopeC: {
+    value: 0.25,
+    label: 'V1 phương án C — độ dốc SL theo plan adherence phần capacity, tại R0 (thận trọng)',
+    unit: 'điểm SL / điểm adherence',
+    source: 'Như phương án B nhưng giảm một nửa (≈ ¼ độ dốc phần thiếu NL), cùng dạng bão hòa mũ.',
+    status: 'chưa xác minh',
+    usedIn: 'chưa dùng — chờ người dùng chọn phương án V1 (B hoặc C)',
+    verifyWith: 'Như phương án B.',
+  },
+} satisfies Record<string, Coeff>;
+
+export type CoeffId = keyof typeof COEFFS;
+
 export interface Assumption {
   id: string;
   label: string;
