@@ -569,6 +569,18 @@ const salesOptions: SalesOption[] = !hasOptionBlock ? [] : (() => {
       r0: Object.fromEntries(r0Cols.map((c) => { const v = r[c.i]; return [c.customer, v === null || v === undefined || v === '' ? null : typeof v === 'number' ? v : String(v).trim()]; })),
       impact: t.str(r, /^Tác động/),
     };
+  }).map((o) => {
+    // Promotional pressure: % nhu cầu thêm của từng lựa chọn nằm trong câu tác động ("None 0%; Light 0,5–1,0%; …")
+    if (o.key !== 'promotionalPressure' || !o.choices) return o;
+    const levels: Record<string, { min: number; max: number }> = {};
+    for (const c of o.choices) {
+      const m = o.impact.match(new RegExp(`${c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+([\\d.,]+)\\s*%?(?:\\s*[–-]\\s*([\\d.,]+))?\\s*%`));
+      if (!m) fail(`Promotional pressure: câu tác động không có % nhu cầu thêm cho "${c}" (${o.impact})`);
+      const lo = parseVN(m[1]), hi = m[2] ? parseVN(m[2]) : lo;
+      if (lo === null || hi === null) fail(`Promotional pressure "${c}": không đọc được số (${m[0]})`);
+      levels[c] = { min: lo / 100, max: hi / 100 };
+    }
+    return { ...o, levels };
   });
 })();
 // Ghi chú ngay dưới khối lựa chọn (tab 6 còn dòng "Nguồn" khác ở phía trên → chỉ lấy từ dòng tiêu đề khối trở xuống)

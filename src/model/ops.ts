@@ -70,7 +70,7 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, b
   const line = data.ops.lines.find((l) => l.name === o.bottlingLine) ?? data.ops.lines[0];
   const lineR0 = data.ops.lines.find((l) => l.name === data.ops.decisions.bottlingLine)!;
   const mixer = data.ops.mixers.find((m) => m.name === o.mixer) ?? data.ops.mixers[0];
-  const demand = demandBySku(data);
+  const demand = demandBySku(data, inputs); // R0 × promotion (ô Sales)
   const unitCost = unitCostBySku(data);
   const obsolete = obsoleteBySku(data);
   const prodOf = (s: SkuKey) => data.products.find((p) => p.key === s)!;

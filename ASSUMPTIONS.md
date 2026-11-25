@@ -1,6 +1,6 @@
 # ASSUMPTIONS — Giả định & hiệu chỉnh của TFC Simulator
 
-Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu + M3 Sales mục 1 (trade unit, order deadline, CI game khách)** (ô SL hứa, shelf life, payment term khách, promotion chưa làm). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
+Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu + M3 Sales đủ ô hợp đồng (trade unit, order deadline, SL type, SL hứa, shelf life, payment term, promotion, horizon, CI game)** (chưa có ô: shortage rule, SKU bán cho khách). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
 
 Nhãn trên giao diện:
 - **ước lượng**: giả định không có trong luật game.
@@ -290,6 +290,7 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 | `capacitySlopeC` — V1 phương án C | 0,25 | chưa xác minh | chưa dùng (chờ chọn) |
 | `salesCiPerStepTradeUnit` — CI khách mỗi bậc trade unit nhỏ hơn | 0 | chưa xác minh | `src/model/sales.ts` (mục 19) |
 | `salesCiPerStepOrderDeadline` — CI khách mỗi bậc deadline muộn hơn | 0 | chưa xác minh | `src/model/sales.ts` (mục 19) |
+| `salesCiPerPointServiceLevel`, `salesCiPerStepSlType`, `salesCiPerPointShelfLife`, `salesCiPerWeekPaymentTerm`, `salesCiPerStepPromotion`, `salesCiPerStepPromotionHorizon` | 0 | chưa xác minh | `src/model/sales.ts` (mục 20) |
 
 **Khi có dữ liệu vòng trial:** sửa `value` (và `status`, `source`) trong `COEFFS` → `npm run verify`. Test đọc giá trị từ `COEFFS`, không gõ lại số; baseline R0 không phụ thuộc các hệ số này (đã thử đổi mốc 2 → 3 và mũ 1 → 1,3: 240/240 vẫn xanh). `tests/coeffs.test.ts` còn kiểm tra mục `usedIn` khớp thực tế: hệ số ghi "chưa dùng" mà có file đọc (hoặc ngược lại) thì test đỏ.
 
@@ -384,3 +385,45 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 | F&G nhập CI game 1,05 (R0 1,0085) | 38,9 | 100,0 | €3.725 | −6,60% |
 
 **Đồng bộ:** `inputs.sales = { customers: { [khách]: { tradeUnit, orderDeadline, ciGame } } }`. Sanitize bỏ nhánh "sales rỗng" (bản lưu cũ `{}` → baseline). `firestore.rules`: `validSales` / `validCustMap` / `validCust` viết tối giản (chỉ chặn độ dài chuỗi ≤ 20, CI 0,5–2, khách & trường lạ, khóa phẳng cũ). `scripts/test-rules.mjs` 49/49 trên emulator. **Người dùng cần Publish lại rules** — chưa Publish thì phần Sales không lưu được lên bản chung (app báo lỗi rõ).
+
+## 20. M3 Sales — 4 mục cuối: shelf life, promotion (+ horizon), SL hứa + SL type, payment term khách (25/11/2026)
+
+Lựa chọn / khoảng của mọi ô đọc từ tab 6 "LỰA CHỌN HỢP ĐỒNG SALES" (SL type, promotion, horizon: dropdown; SL hứa 75–100%, shelf life 40–85%, payment term 1–8 tuần: khoảng). **Không đổi gì → đúng sheet**: ROI −7,68%, Payment terms 365.589, Costs of scrap 40.203, nhu cầu SKU tab 3 / tab 7, ô baseline = giá trị R0 của khối lựa chọn (test đọc thẳng Excel).
+
+| Ô | Đi vào số nào | Cơ sở |
+|---|---|---|
+| **Shelf life yêu cầu** | Tuổi tồn cho phép của SKU = hạn dùng 20 tuần (tab 3) × (1 − shelf life **cao nhất** của các khách mua SKU) → obsolete theo tuổi tồn (C2, mục 18) → giá trị obsolete/tuần → Costs of scrap | Luật tab 6 F59 (công thức tuổi); "cao nhất trong các khách mua" là giả định (game có thể phân hàng già cho khách đòi thấp hơn — chưa rõ). Hạ shelf life một khách không đổi số nếu khách khác cùng SKU vẫn đòi cao hơn |
+| **Promotional pressure** | Bán thêm cặp khách × SKU = % bán thêm R0 (tab 6) × (điểm giữa khoảng mức mới ÷ điểm giữa Middle); nhu cầu = R0 × (1 + bán thêm mới) ÷ (1 + bán thêm R0). Nhu cầu SKU → sản xuất, dây chuyền (plan adherence), máy trộn, mua NL, tồn kho, giờ kho, soạn hàng; contracted sales ∝ Σ nhu cầu × giá (tab 6); giá trị obsolete/tuần ∝ lượng | Khoảng % đọc từ câu tác động tab 6 F63 (None 0 · Light 0,5–1 · Middle 1,5–2 · Heavy 4–5,5%), dùng điểm giữa. Neo vào % bán thêm thực tế R0 nên ×2 Value for money và ×2 slowmover đã nằm sẵn trong số R0 (tab 6 B69 kiểm chứng R0 khớp luật) — app KHÔNG tự đoán cặp nào là slowmover |
+| — biến động nhu cầu | σ tuần của SKU co giãn theo nhu cầu (CV giữ R0) → safety stock tính theo tuần vẫn bảo vệ như cũ | **Chưa mô hình:** khuyến mãi làm nhu cầu biến động hơn (luật) — không có độ lớn |
+| — số dòng đơn | Giữ R0 (dòng đơn to hơn) | Ước lượng |
+| **Promotion horizon** | **Chưa mô hình vào số** — chỉ cảnh báo chiều hướng (dài → dễ lên kế hoạch) | Info Center không cho độ lớn |
+| **Service level hứa** | Mức thiếu = max(0, SL hứa − SL theo loại đo); penalty = penalty R0 × (contracted ÷ R0) × (thiếu mới ÷ thiếu R0)^mũ (cách neo đã chốt, mục 16–17) | Đạt/vượt → 0; thưởng khi vượt chưa tính. SL hứa cao nhất của khách mua SKU → gợi ý safety stock TP (SC), app không tự đổi safety stock |
+| **SL type** | Loại đo: Units = SL pieces, Order lines, Orders của khách (tab 6) + cùng thay đổi kịch bản | R0 chỉ có penalty cho loại Order lines → đổi loại đo mà còn thiếu = **"ngoài vùng dữ liệu R0"** |
+| **Payment term khách** | Phải thu AR = revenue khách ÷ 26 × payment term; Investment "Payment terms" = 365.589 + Δ AR − Δ AP (Purchasing) | Ước lượng; tab 2 chỉ có số ròng. **Hệ quả mới:** mọi thay đổi doanh thu (penalty, promotion) cũng đổi AR → Investment. Ví dụ SS TP 3 → 1: ROI −23,33% (mục 16) → −22,86% vì AR giảm theo doanh thu |
+| **Contract index** khi đổi các ô trên | CI R0 × (1 + Σ hệ số × bậc), 6 hệ số mới trong COEFFS = **0** (người dùng chốt); đội nhập "CI game hiển thị" | Hướng theo Info Center (tab 6 F58–F64); hướng của SL type và horizon là suy diễn |
+
+**Ghi chú trên web** (cạnh ô, khi CI game trống): đổi theo hướng làm CI tăng (SL hứa cao hơn, shelf life cao hơn, payment term dài hơn, trade unit nhỏ hơn, deadline muộn hơn, promotion thấp hơn, horizon ngắn hơn, SL type khó đo hơn) → *"Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế…"*; theo hướng làm CI giảm → *"Chưa tính phần giá giảm (CI) — lựa chọn này đang trông tốt hơn thực tế. Nhập CI game hiển thị để tính đúng."*
+
+**Bảng kịch bản (đổi 1 ô, khách Food & Groceries, CI game trống):**
+
+| Kịch bản | ROI | ROI thận trọng | Δ Revenue | Δ Penalty | Δ Scrap | Δ Op. profit | Δ Payment terms | Δ Investment | Plan adherence | Ngoài vùng R0 (F&G) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| R0 | -7,68% | -7,68% | 0 | 0 | 0 | 0 | 0 | 0 | 78,7% |  |
+| SL hứa F&G 95 → 98% | -12,78% | -12,78% | −199.552 | −199.552 | 0 | −199.552 | −30.700 | −30.700 | 78,7% |  |
+| SL hứa F&G 95 → 90% | -1,33% | -1,33% | +252.766 | +252.766 | 0 | +252.766 | +38.887 | +38.887 | 78,7% |  |
+| SL type F&G → Units | -1,67% | -1,67% | +239.463 | +239.463 | 0 | +239.463 | +36.840 | +36.840 | 78,7% | có |
+| SL type F&G → Orders | -17,44% | -17,44% | −379.149 | −379.149 | 0 | −379.149 | −58.331 | −58.331 | 78,7% | có |
+| Shelf life F&G 75 → 80% | -9,78% | -9,78% | 0 | 0 | +83.604 | −83.604 | 0 | 0 | 78,7% |  |
+| Shelf life F&G 75 → 70% | -7,68% | -7,68% | 0 | 0 | 0 | 0 | 0 | 0 | 78,7% |  |
+| Shelf life cả 3 khách → 70% | -6,81% | -6,81% | 0 | 0 | −34.629 | +34.629 | 0 | 0 | 78,7% |  |
+| Promotion F&G Middle → Heavy | -8,16% | -8,16% | +22.092 | −51.119 | +1.115 | −19.887 | −116 | +8.558 | 77,6% |  |
+| Promotion F&G Middle → Light | -7,56% | -7,70% | −8.659 | +15.745 | −372 | +5.045 | −172 | −3.063 | 79,1% |  |
+| Promotion F&G Middle → None | -7,48% | -7,71% | −15.565 | +27.141 | −650 | +8.453 | −358 | −5.418 | 79,4% |  |
+| Horizon F&G Short → Long | -7,68% | -7,68% | 0 | 0 | 0 | 0 | 0 | 0 | 78,7% |  |
+| Payment term F&G 4 → 8 tuần | -7,39% | -7,39% | 0 | 0 | 0 | 0 | +160.790 | +160.790 | 78,7% |  |
+| Payment term F&G 4 → 2 tuần | -7,84% | -7,84% | 0 | 0 | 0 | 0 | −80.395 | −80.395 | 78,7% |  |
+| (so sánh) SS TP 3 → 1 tuần | -22,86% | -22,86% | −611.441 | −611.441 | −39.924 | −564.360 | −94.068 | −180.242 | 78,7% | có |
+
+Đọc bảng: SL type / SL hứa đổi penalty rất mạnh vì penalty F&G R0 lớn (−252.766) và neo tuyến tính từ 1 điểm R0 — SL type đã gắn "ngoài vùng dữ liệu R0". Payment term dài hơn làm ROI "tốt lên" chỉ vì đang lỗ (Investment lớn hơn chia khoản lỗ). Promotion Heavy: doanh thu +, nhưng tải dây chuyền ↑ → plan adherence ↓ → penalty ↑ (CI giảm do khuyến mãi chưa tính → thực tế còn xấu hơn).
+
+**Firestore rules:** `validCust` thêm 6 trường (khoảng như trên; bản 3 trường cũ vẫn hợp lệ). `scripts/test-rules.mjs` 59/59 (gồm ca 9 trường × 3 khách, điền CI game). **Người dùng cần Publish lại rules.**

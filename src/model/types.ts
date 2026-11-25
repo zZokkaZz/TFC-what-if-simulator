@@ -45,9 +45,20 @@ export interface PurchasingInputs {
   terms: Record<ComponentKey, PurchasingTerms>;
 }
 
-/** Điều khoản hợp đồng một khách (ô Negotiate trong game; lựa chọn đọc từ tab 6 "LỰA CHỌN HỢP ĐỒNG SALES").
- *  Mục 1 (25/11): trade unit, order deadline, CI game hiển thị. Các ô khác (SL hứa, shelf life, payment term, promotion) làm sau. */
+/** Điều khoản hợp đồng một khách (ô Negotiate trong game; lựa chọn / khoảng đọc từ tab 6 "LỰA CHỌN HỢP ĐỒNG SALES"). */
 export interface SalesCustomerTerms {
+  /** "Units" / "Order lines" / "Orders" (chuỗi của sheet) */
+  serviceLevelType: string;
+  /** Service level hứa, 0–1 (sheet ghi 75–100) */
+  serviceLevel: number;
+  /** Shelf life yêu cầu, 0–1 (sheet ghi 40–85) */
+  shelfLife: number;
+  /** Payment term khách (tuần, số nguyên) */
+  paymentTermWeeks: number;
+  /** None / Light / Middle / Heavy (chuỗi của sheet) */
+  promotionalPressure: string;
+  /** Short / Middle / Long (chuỗi của sheet) */
+  promotionHorizon: string;
   /** Đúng chuỗi lựa chọn của sheet, vd "Box (outer box)" / "Pallet layer" / "Pallet" */
   tradeUnit: string;
   /** Đúng chuỗi lựa chọn của sheet, vd "12.00" … "20.00" */
@@ -248,6 +259,18 @@ export interface Results {
   conservative: { sales: SalesResults; realizedRevenue: number; operatingProfit: number; roi: number };
 }
 
+/** Bậc thay đổi điều khoản (dương = CI tăng theo hướng Info Center). SL & shelf life tính theo điểm %, payment term theo tuần. */
+export interface SalesCiSteps {
+  tradeUnit: number;
+  orderDeadline: number;
+  serviceLevel: number;
+  serviceLevelType: number;
+  shelfLife: number;
+  paymentTerm: number;
+  promotionalPressure: number;
+  promotionHorizon: number;
+}
+
 /** Nguồn của contract index khách: sheet (= R0, chưa đổi điều khoản), game (đội nhập), estimate (R0 × hệ số COEFFS). */
 export type SalesCiBasis = 'sheet' | 'game' | 'estimate';
 
@@ -259,12 +282,25 @@ export interface SalesCustomerResult {
   ciBasis: SalesCiBasis;
   /** Đã đổi điều khoản hợp đồng mà chưa nhập CI game → CI là ước lượng */
   ciStale: boolean;
-  /** Số bậc thay đổi so với R0 (dương = hướng làm CI tăng theo Info Center) */
-  ciSteps: { tradeUnit: number; orderDeadline: number };
+  /** Số bậc thay đổi so với R0 (dương = hướng làm CI tăng theo Info Center; 0 = không đổi) */
+  ciSteps: SalesCiSteps;
+  terms: SalesCustomerTerms;
+  termsR0: SalesCustomerTerms;
   tradeUnit: string;
   tradeUnitR0: string;
   orderDeadline: string;
   orderDeadlineR0: string;
+  /** Nhu cầu (đv/tuần) theo promotion: R0 tab 6 và kịch bản */
+  demandR0: number;
+  demand: number;
+  /** SL theo loại đo đang hứa (kịch bản) và R0 theo loại đo R0 */
+  slMeasured: number;
+  slMeasuredR0: number;
+  slOrdersR0: number;
+  slOrders: number;
+  /** Phải thu (AR) ước lượng = revenue/tuần × payment term */
+  arR0: number;
+  ar: number;
   serviceLevelType: string;
   promised: number; // SL hứa (tab 6)
   slOrderLinesR0: number;
@@ -295,6 +331,8 @@ export interface SalesResults {
   slOutbound: number | null;
   /** Độ dốc SL theo plan adherence (hồi quy 6 SKU R0) */
   adherenceSlope: { slope: number; r2: number };
+  /** Thay đổi phải thu (AR) so với baseline → dòng Investment "Payment terms" (ước lượng, neo R0) */
+  arDelta: number;
 }
 
 /** Nguồn của một số Purchasing: sheet (= R0), game (đội nhập), estimate (ước lượng), scaled (R0 × tỷ lệ mô hình). */

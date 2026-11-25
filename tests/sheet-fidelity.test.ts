@@ -283,3 +283,40 @@ describe('Sales mục 1: khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) = đ�
     expect(r.ops.fg.hoursPerWeek).toBe(d.ops.results.fg.hoursPerWeek);
   });
 });
+
+describe('Sales 4 mục cuối: baseline = đúng từng ô Excel', () => {
+  const r = simulate(baselineInputs(d), d);
+  const base = baselineInputs(d);
+  const rows6 = rowsOf('6_Sales');
+  const h = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Ô quyết định');
+  const H = rows6[h].map((x) => String(x ?? '').normalize('NFC').trim());
+  const rowOf = (re: RegExp) => rows6.slice(h + 1).find((x) => re.test(String(x?.[0] ?? '')))!;
+  const r0Col = (c: string) => uniqueCol(H, new RegExp(`^R0 ${c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+  const fin = rowsOf('2_Finance');
+  const v2 = (label: string) => fin.find((x) => String(x?.[1] ?? '').trim().normalize('NFC') === label.normalize('NFC'))![2] as number;
+  it('ô baseline SL type / SL % / shelf life % / payment term / promotion / horizon = đúng ô R0 khối lựa chọn', () => {
+    for (const c of d.sales.contracts.map((x) => x.customer)) {
+      const t = base.sales.customers[c];
+      expect(t.serviceLevelType).toBe(String(rowOf(/^Service level type/)[r0Col(c)]).trim());
+      expect(t.serviceLevel).toBeCloseTo((rowOf(/^Service level \(%\)/)[r0Col(c)] as number) / 100, 12);
+      expect(t.shelfLife).toBeCloseTo((rowOf(/^Shelf life/)[r0Col(c)] as number) / 100, 12);
+      expect(t.paymentTermWeeks).toBe(rowOf(/^Payment term/)[r0Col(c)]);
+      expect(t.promotionalPressure).toBe(String(rowOf(/^Promotional pressure/)[r0Col(c)]).trim());
+      expect(t.promotionHorizon).toBe(String(rowOf(/^Promotion horizon/)[r0Col(c)]).trim());
+    }
+  });
+  it('% nhu cầu thêm theo promotion = đúng câu trong ô tác động tab 6', () => {
+    const txt = String(rowOf(/^Promotional pressure/)[uniqueCol(H, /^Tác động/)]);
+    const lv = d.sales.options.find((o) => o.key === 'promotionalPressure')!.levels!;
+    expect(txt).toContain('Middle 1,5–2,0%');
+    expect(lv.Middle).toEqual({ min: 0.015, max: 0.02 });
+    expect(lv.Heavy).toEqual({ min: 0.04, max: 0.055 });
+    expect(lv.Light).toEqual({ min: 0.005, max: 0.01 });
+    expect(lv.None).toEqual({ min: 0, max: 0 });
+  });
+  it('Payment terms (Investment) = đúng ô tab 2; Costs of scrap = tab 2; nhu cầu SKU (tab 7) giữ đúng sheet', () => {
+    expect(r.finance.rows.find((x) => x.label === 'Payment terms')!.value).toBe(v2('Payment terms'));
+    expect(r.finance.rows.find((x) => x.label === 'Costs of scrap')!.value).toBe(v2('Costs of scrap'));
+    for (const p of r.sc.products) expect(p.sheet.demandPerWeek.value).toBe(d.supplyChain.productStock.find((x) => x.sku === p.sku)!.demandPerWeek);
+  });
+});

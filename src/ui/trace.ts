@@ -36,19 +36,27 @@ const LABELS: [RegExp, Dept, string][] = [
   [/^sales\.customers\..*\.tradeUnit$/, 'Sales', 'trade unit khách'],
   [/^sales\.customers\..*\.orderDeadline$/, 'Sales', 'order deadline'],
   [/^sales\.customers\..*\.ciGame$/, 'Sales', 'CI game khách'],
+  [/^sales\.customers\..*\.serviceLevelType$/, 'Sales', 'SL type'],
+  [/^sales\.customers\..*\.serviceLevel$/, 'Sales', 'SL hứa'],
+  [/^sales\.customers\..*\.shelfLife$/, 'Sales', 'shelf life'],
+  [/^sales\.customers\..*\.paymentTermWeeks$/, 'Sales', 'payment term khách'],
+  [/^sales\.customers\..*\.promotionalPressure$/, 'Sales', 'promotion'],
+  [/^sales\.customers\..*\.promotionHorizon$/, 'Sales', 'promotion horizon'],
 ];
 
 const INTERVAL = /^sc\.products\..*\.productionIntervalDays$/;
-const LINE_BASE = [/^ops\.bottlingLine$/, /^ops\.increaseSpeed$/, /^ops\.mixer$/, INTERVAL];
+const LINE_BASE = [/^ops\.bottlingLine$/, /^ops\.increaseSpeed$/, /^ops\.mixer$/, INTERVAL, /^sales\.customers\..*\.promotionalPressure$/];
 const PUR = /^purchasing\./;
 const PUR_QUALITY = /^purchasing\.(suppliers\.(Pack|PET)|terms\.(Pack|PET)\.quality)$/;
 const BREAKDOWN = [...LINE_BASE, /^ops\.preventiveMaintenance$/, /^ops\.breakdownTraining$/, /^ops\.rmInspection\.(Pack|PET)$/, PUR_QUALITY];
 const LINE_ALL = [...BREAKDOWN, /^ops\.smed$/, /^ops\.shifts$/];
-const RM_STOCK = [/^ops\.rmPalletLocations$/, /^sc\.components\./, PUR, /^ops\.mixer$/];
+const RM_STOCK = [/^ops\.rmPalletLocations$/, /^sc\.components\./, PUR, /^ops\.mixer$/, /^sales\.customers\..*\.promotionalPressure$/];
 const RM_HOURS = [...RM_STOCK, /^ops\.rmInspection\./, /^ops\.intakeDays$/, INTERVAL];
-const FG_STOCK = [/^ops\.fgPalletLocations$/, /^sc\.products\./, /^ops\.mixer$/];
+const FG_STOCK = [/^ops\.fgPalletLocations$/, /^sc\.products\./, /^ops\.mixer$/, /^sales\.customers\..*\.(promotionalPressure|shelfLife)$/];
 const SALES_TU = /^sales\.customers\..*\.tradeUnit$/;
-const SALES_CI = /^sales\.customers\..*\.(tradeUnit|orderDeadline|ciGame)$/;
+const SALES_CI = /^sales\.customers\./;
+const SALES_PROMO = /^sales\.customers\..*\.promotionalPressure$/;
+const SALES_SHELF = /^sales\.customers\..*\.shelfLife$/;
 
 export const DRIVERS: Record<string, RegExp[]> = {
   run: LINE_BASE,
@@ -58,7 +66,7 @@ export const DRIVERS: Record<string, RegExp[]> = {
   lineLoad: LINE_ALL,
   adherence: [...LINE_ALL, /^sc\.components\./, /^ops\.intakeDays$/, PUR],
   avail: [/^sc\.components\./, /^ops\.intakeDays$/, PUR],
-  scStock: [/^sc\.(components|products)\./, /^ops\.mixer$/, PUR],
+  scStock: [/^sc\.(components|products)\./, /^ops\.mixer$/, PUR, SALES_PROMO, SALES_SHELF],
   startup: [/^ops\.bottlingLine$/, /^ops\.increaseSpeed$/, INTERVAL],
   mixer: [/^ops\.mixer$/, INTERVAL],
   rmStock: RM_STOCK,
@@ -69,13 +77,13 @@ export const DRIVERS: Record<string, RegExp[]> = {
   fgFlex: [...FG_STOCK, INTERVAL, /^ops\.fgFte$/, SALES_TU],
   tank: [/^sc\.components\.(Orange|Mango|Vitamin C)/, /^purchasing\.(suppliers|terms)\.(Orange|Mango|Vitamin C)/, INTERVAL],
   // M3 Purchasing
-  purchase: [PUR, /^sc\.components\./, /^ops\.mixer$/, INTERVAL],
+  purchase: [PUR, /^sc\.components\./, /^ops\.mixer$/, INTERVAL, SALES_PROMO],
   trips: [/^sc\.components\..*\.lotSizeWeeks$/, PUR, /^ops\.mixer$/, INTERVAL],
   // M3 Sales: SL dự kiến ← safety stock TP, interval (SC) + plan adherence (Ops, NL, NCC); frozen period chưa mô hình
   sales: [/^sc\.(components|products)\./, ...LINE_ALL, /^ops\.intakeDays$/, PUR, SALES_CI],
   // Sales mục 1: contract index khách ← điều khoản hợp đồng (ước lượng) hoặc CI game
   salesCi: [SALES_CI],
-  payterm: [/^purchasing\.terms\..*\.paymentTermWeeks$/, PUR, /^sc\.components\./],
+  payterm: [/^purchasing\.terms\..*\.paymentTermWeeks$/, PUR, /^sc\.components\./, /^sales\.customers\./],
 };
 
 function flatten(o: unknown, prefix = '', out: Record<string, unknown> = {}): Record<string, unknown> {

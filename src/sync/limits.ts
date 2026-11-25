@@ -34,12 +34,16 @@ export const PUR_TEXT_MAX = 20;
 export const PUR_COMPONENTS = ['Pack', 'PET', 'Orange', 'Mango', 'Vitamin C'] as const;
 
 /** Sales — ô hợp đồng từng khách. Tên khách = tab 6 (test kiểm tra khớp dữ liệu và firestore.rules).
- *  Lựa chọn hợp lệ của trade unit / order deadline đọc từ sheet; ở đây (và rules) chỉ chặn độ dài chuỗi. */
+ *  Lựa chọn hợp lệ của ô chữ đọc từ sheet; ở đây (và rules) chỉ chặn độ dài chuỗi.
+ *  Khoảng SL hứa / shelf life / payment term = khoảng game cho phép ghi ở tab 6 (test so với sheet); tỷ lệ lưu dạng 0–1. */
 export const SALES_CUSTOMERS = ['Food & Groceries', 'LAND Market', "Dominick's"] as const;
 export const SALES_LIMITS = {
   ciGame: { min: 0.5, max: 2, label: 'Contract index khách (game hiển thị)' } as NumLimit,
+  serviceLevel: { min: 0.75, max: 1, label: 'Service level hứa' } as NumLimit,
+  shelfLife: { min: 0.4, max: 0.85, label: 'Shelf life yêu cầu' } as NumLimit,
+  paymentTermWeeks: { min: 1, max: 8, int: true, label: 'Payment term khách', unit: 'tuần' } as NumLimit,
 };
-export const SALES_TEXT = ['tradeUnit', 'orderDeadline'] as const;
+export const SALES_TEXT = ['tradeUnit', 'orderDeadline', 'serviceLevelType', 'promotionalPressure', 'promotionHorizon'] as const;
 export const SALES_TEXT_MAX = 20;
 
 export interface Issue { path: string; label: string; value: string; message: string }
@@ -90,6 +94,7 @@ export function validateDept(dept: Dept, data: unknown): Issue[] {
       if (!(SALES_CUSTOMERS as readonly string[]).includes(c)) { add(`sales.customers.${c}`, `Khách ${c}`, c, 'khách hàng không hợp lệ'); continue; }
       for (const k of SALES_TEXT) if (typeof t?.[k] !== 'string' || (t[k] as string).length > SALES_TEXT_MAX) add(`sales.customers.${c}.${k}`, `${k} (${c})`, t?.[k], 'giá trị không hợp lệ');
       if (t?.ciGame !== null) add(`sales.customers.${c}.ciGame`, `${SALES_LIMITS.ciGame.label} (${c})`, t?.ciGame, checkNumber(t?.ciGame, SALES_LIMITS.ciGame));
+      for (const k of ['serviceLevel', 'shelfLife', 'paymentTermWeeks'] as const) add(`sales.customers.${c}.${k}`, `${SALES_LIMITS[k].label} (${c})`, t?.[k], checkNumber(t?.[k], SALES_LIMITS[k]));
     }
   }
   return out;

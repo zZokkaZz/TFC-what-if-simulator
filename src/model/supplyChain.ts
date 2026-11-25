@@ -11,6 +11,7 @@ import { COEFFS } from './assumptions';
 import { ROUND } from './rules';
 import { expectedAbove, Phi } from './stats';
 import type { ActiveSupplier } from './purchasing';
+import { requiredServiceLevel, requiredShelfLife } from './sales';
 
 /** Số đơn vị lưu trữ (pallet location hoặc tank) cho một lượng NL. */
 export function storageOf(data: Round0Data, c: ComponentKey, tradeUnit: string, units: number, est: Est): { kind: 'pallet' | 'tank'; locations: number; containers: number } {
@@ -119,7 +120,9 @@ export function componentRisk(inputs: Inputs, data: Round0Data, cal: Calibration
     const reliability = s.reliability;
     const sigmaWeek = Math.sqrt(production.reduce((acc, p) => {
       const bom = data.products.find((x) => x.key === p.sku)!.bom[c];
-      const sd = (data.weekly.std[p.sku] ?? 0) * cal.prodFactor * bom;
+      // σ co giãn theo nhu cầu (CV giữ R0 — promotion làm nhu cầu biến động hơn: CHƯA mô hình)
+      const dR0 = data.products.find((x) => x.key === p.sku)!.demandPerWeek;
+      const sd = (data.weekly.std[p.sku] ?? 0) * cal.prodFactor * bom * (dR0 > 0 ? p.demandUnits / dR0 : 1);
       return acc + sd * sd;
     }, 0));
     const leadTimeWeeks = s.leadTimeDays / 7 + inputs.ops.intakeDays / ROUND.daysPerWeek;
@@ -139,7 +142,9 @@ export function productRisk(inputs: Inputs, data: Round0Data, production: SkuPro
   const shelf = data.productShelfLifeWeeks;
   for (const p of production) {
     const dec = inputs.sc.products[p.sku];
-    const sigmaWeek = data.weekly.std[p.sku] ?? 0;
+    // σ co giãn theo nhu cầu (promotion): CV giữ R0 — biến động thêm do khuyến mãi CHƯA mô hình
+    const dR0 = data.products.find((x) => x.key === p.sku)?.demandPerWeek ?? 0;
+    const sigmaWeek = (data.weekly.std[p.sku] ?? 0) * (dR0 > 0 && Math.abs(p.demandUnits - dR0) > 1e-9 * dR0 ? p.demandUnits / dR0 : 1);
     // Frozen period: CHƯA MÔ HÌNH (theo yêu cầu người dùng) → luôn dùng frozen R0, đổi ô này không đổi số nào
     const protectionWeeks = dec.productionIntervalDays / ROUND.daysPerWeek + data.supplyChain.frozenPeriodWeeks;
     const sigmaProtection = sigmaWeek * Math.sqrt(protectionWeeks);
@@ -147,10 +152,9 @@ export function productRisk(inputs: Inputs, data: Round0Data, production: SkuPro
     const z = sigmaProtection > 0 ? ssUnits / sigmaProtection : 10;
     const cycles = ROUND.days / dec.productionIntervalDays;
     const shortRate = p.demandUnits > 0 ? (cycles * sigmaProtection * G(z)) / (p.demandUnits * ROUND.weeks) : 0;
-    const buyers = data.sales.customerProduct.filter((r) => r.sku === p.sku).map((r) => r.customer);
-    const contracts = data.sales.contracts.filter((c) => buyers.includes(c.customer));
-    const targetServiceLevel = contracts.length ? Math.max(...contracts.map((c) => c.serviceLevel)) : 0.95;
-    const reqShelf = contracts.length ? Math.max(...contracts.map((c) => c.shelfLife)) : null;
+    // SL hứa & shelf life: cao nhất trong các khách mua SKU, theo ô Sales (R0 = tab 6)
+    const targetServiceLevel = requiredServiceLevel(data, inputs, p.sku) ?? 0.95;
+    const reqShelf = requiredShelfLife(data, inputs, p.sku);
     out[p.sku] = {
       sku: p.sku, sigmaWeek, protectionWeeks, sigmaProtection, ssUnits, z, shortRate, targetServiceLevel,
       recommendedSsWeeks: p.demandUnits > 0 ? (zOf(targetServiceLevel) * sigmaProtection) / p.demandUnits : 0,
@@ -282,7 +286,7 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
   // Tỷ lệ thiếu hàng TB R0 (1 − SL pieces, 6 SKU tab 7) — quy độ dốc capacity "tại R0" ra hệ số bão hòa
   const shortageR0 = data.supplyChain.productStock.reduce((s, p) => s + (1 - p.slPieces), 0) / Math.max(1, data.supplyChain.productStock.length);
   const ageSigma = obsoleteAgeSigma(data);
-  const ageA = allowedAge(data);
+  const ageA = allowedAge(data); // tuổi cho phép R0 (dùng cho hiệu chỉnh σ)
   const products = ops.production.map((p) => {
     const st = data.supplyChain.productStock.find((x) => x.sku === p.sku)!;
     const r = prisk[p.sku], b = pbase[p.sku];
@@ -309,18 +313,22 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
     const P = p.intervalDays / ROUND.daysPerWeek, Sss = inputs.sc.products[p.sku].safetyStockWeeks;
     const dec0 = data.supplyChain.products.find((x) => x.sku === p.sku);
     let obsEst: number | null = st.obsolete ?? null;
-    if (obsEst !== null && sg0 !== null && sg0 !== undefined && ageA !== null && dec0) {
+    // Tuổi cho phép kịch bản = hạn dùng × (1 − shelf life cao nhất của khách mua SKU, ô Sales)
+    const ageNew = r.allowedAgeWeeks;
+    if (obsEst !== null && sg0 !== null && sg0 !== undefined && ageA !== null && ageNew !== null && dec0) {
       const sg = sg0 * COEFFS.obsoleteAgeSpreadScale.value;
-      const fNew = overAgeShare(Sss, P, ageA, sg), fR0 = overAgeShare(dec0.safetyStockWeeks, dec0.productionIntervalDays / ROUND.daysPerWeek, ageA, sg);
+      const fNew = overAgeShare(Sss, P, ageNew, sg), fR0 = overAgeShare(dec0.safetyStockWeeks, dec0.productionIntervalDays / ROUND.daysPerWeek, ageA, sg);
       obsEst = fR0 > 1e-12 ? Math.min(1, st.obsolete * (fNew / fR0)) : st.obsolete + fNew;
-      if (Math.abs(Sss - dec0.safetyStockWeeks) < 1e-12 && Math.abs(P - dec0.productionIntervalDays / ROUND.daysPerWeek) < 1e-12) obsEst = st.obsolete;
+      if (Math.abs(Sss - dec0.safetyStockWeeks) < 1e-12 && Math.abs(P - dec0.productionIntervalDays / ROUND.daysPerWeek) < 1e-12 && Math.abs(ageNew - ageA) < 1e-12) obsEst = st.obsolete;
     }
-    const kObs = st.obsolete ? (obsEst ?? st.obsolete) / st.obsolete : 1;
+    // Giá trị obsolete/tuần ∝ tỷ lệ hủy × lượng (promotion đổi lượng; không đổi gì → đúng số tab 7)
+    const kVol = ratio(p.demandUnits, pb?.demandUnits);
+    const kObs = (st.obsolete ? (obsEst ?? st.obsolete) / st.obsolete : 1) * kVol;
     const batches = ROUND.days / p.intervalDays;
     return {
       sku: p.sku,
       sheet: {
-        demandPerWeek: keep(st.demandPerWeek ?? p.demandUnits),
+        demandPerWeek: st.demandPerWeek === null || st.demandPerWeek === undefined ? keep(p.demandUnits) : cell(st.demandPerWeek, ratio(p.demandUnits, pb?.demandUnits)), // promotion (ô Sales)
         slPieces: { r0: st.slPieces, value: slEst, basis: Math.abs(slEst - st.slPieces) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
         slOrderLines: { r0: st.slOrderLines, value: slOlEst, basis: Math.abs(slOlEst - st.slOrderLines) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
         stockWeeks: cell(st.stockWeeks, kFg),
