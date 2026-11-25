@@ -27,23 +27,25 @@
 | C2 + V1 | Obsolete & Costs of scrap theo tuổi tồn (hiệu chỉnh R0, cảnh báo đỏ); plan adherence tách phần thiếu NL / capacity, số chính B (0,5) + thận trọng min(B, C) | `src/model/supplyChain.ts`, `finance.ts`, `ui/conservative.ts`, `ASSUMPTIONS.md` mục 18 |
 | M3 Sales mục 1 | Đọc khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) → dropdown; ô trade unit (→ giờ soạn hàng kho TP), order deadline (chỉ cảnh báo), CI game khách (→ contracted sales); hệ số CI trong COEFFS (= 0); rules Firestore | `src/model/sales.ts`, `src/ui/SalesTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 19 |
 | M3 Sales 4 mục cuối | Shelf life (→ tuổi tồn → obsolete/scrap), promotion (→ nhu cầu → sản xuất/tồn/SL/doanh thu) + horizon (cảnh báo), SL hứa + SL type (→ mốc penalty), payment term khách (→ AR → Investment); 6 hệ số CI = 0; ghi chú "giá tăng/giảm"; rules | `src/model/sales.ts`, `supplyChain.ts`, `finance.ts`, `src/ui/SalesTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 20 |
+| M4 Finance | Mọi dòng P&L có nhãn nguồn + lý do (tab Finance); Distribution costs theo pallet giao (neo tab 2, €22,09/pallet R0 — không dùng luật €31); Energy/Water/Other/Interest/Contracted suppliers/Outbound orders/Fixed giữ R0 (người dùng chốt); test đẳng thức P&L/ROI ở 6 kịch bản | `src/model/finance.ts`, `src/ui/OtherTabs.tsx`, `tests/finance-m4.test.ts`, `ASSUMPTIONS.md` mục 21 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 350 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 369 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
 - `tests/sales.test.ts` — M3 Sales: **bắt buộc** giảm safety stock TP 3 → 1 làm ROI (và Operating profit) xấu đi; frozen period không đổi số.
 - `tests/purchasing.test.ts` — M3 Purchasing: hướng tác động, ô số game, cảnh báo, đồng bộ.
+- `tests/finance-m4.test.ts` — M4: mọi dòng P&L có nguồn; dòng giữ R0 không đổi; đẳng thức P&L/ROI ở 6 kịch bản; Distribution costs.
 - `tests/sales-terms.test.ts` — M3 Sales 4 mục cuối: mỗi ô 1+ test đúng hướng, baseline = sheet, giới hạn = khoảng sheet = rules.
 - `tests/sales-contract.test.ts` — M3 Sales mục 1: lựa chọn đọc từ sheet, hướng trade unit → giờ kho TP, deadline chưa mô hình, CI game → contracted, đồng bộ & rules.
 - `tests/fixes-review.test.ts` — các chỗ sửa sau phiên tự kiểm tra (câu ROI khi lỗ, cảnh báo lot size, mẻ tối thiểu máy trộn, số game in, định dạng ±0).
 
 ## 2. Việc tiếp theo (CHỜ người dùng ra lệnh — không tự làm)
 
-1. ~~M3 Sales~~ — **đã đủ ô hợp đồng** (PR Sales cuối, chờ merge). Chờ người dùng ra lệnh mốc tiếp theo.
-2. **M4 — Finance đầy đủ** (payment terms → AR/AP, các dòng còn giữ R0).
-3. **M5 — Kịch bản có tên + so sánh + "Copy link kịch bản" + Xuất/Nhập JSON** (snapshot nhóm đã có một phần).
+**Lộ trình đã xong: M0, M1, M1.5, M2, M3, M4.** **M5 (kịch bản có tên ở chế độ một mình, Copy link, Xuất/Nhập JSON): người dùng quyết định KHÔNG làm (25/11).** Chế độ nhóm vẫn có snapshot có tên + so sánh.
+
+Chỉ còn việc phụ thuộc dữ liệu người dùng (mục 3) và ý tưởng chờ quyết định (mục 7).
 
 ## 3. Đang chờ dữ liệu từ người dùng
 
@@ -79,6 +81,8 @@ Test: 350 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
+- 25/11/2026 — M4 Finance (người dùng chọn: overhead/Interest giữ R0; Distribution theo pallet neo R0); M5 bỏ. 369/369. Rules M3 Sales cuối đã Publish, người dùng thử chạy được. Không đổi rules ở M4.
+
 - 25/11/2026 — M3 Sales 4 mục cuối (gộp 1 PR theo yêu cầu): shelf life, promotion + horizon, SL hứa + SL type, payment term khách; 6 hệ số CI = 0; 350/350 + rules 59/59. Rules mục 1 đã Publish (22:16, khớp repo). Cần người dùng: Publish rules mới, merge PR.
 
 ## 7. Ý tưởng phát sinh (CHƯA làm — chỉ ghi lại, chờ người dùng quyết)
@@ -90,6 +94,8 @@ Test: 350 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.
 - AR theo realized revenue: nếu game tính AR theo contracted / theo "start payment term" thì Payment terms khác — kiểm chứng khi có số AR/AP tách riêng.
 - Promotion: số dòng đơn giữ R0 (dòng to hơn) — nếu game thêm dòng đơn thì giờ soạn hàng cao hơn.
 - Hàng obsolete bị hủy chưa kéo theo sản xuất bù (đã ghi từ C2).
+- Energy / Water theo sản lượng (người dùng chọn giữ R0 ở M4) — xem lại nếu Info Center hoặc vòng trial cho số.
+- Distribution costs theo cỡ chuyến (bảng Distributor tab 6: small / medium / large) và theo trade unit — chưa mô hình.
 
 - 25/11/2026 — Dữ liệu mới (tab 6 khối LỰA CHỌN HỢP ĐỒNG SALES, tab 1 C29) + M3 Sales mục 1 (session_018GSfKVc6kuoV5G75kcCjSs, nhánh `claude/modest-curie-joo7me`): trade unit → giờ soạn hàng kho TP, order deadline chỉ cảnh báo, CI game khách → contracted; hệ số CI trong COEFFS = 0; 312/312 + rules 49/49. Người dùng chốt giữ hệ số CI = 0 + thêm ghi chú cạnh ô trên web (313/313). Cần người dùng: Publish rules, merge PR #7.
 

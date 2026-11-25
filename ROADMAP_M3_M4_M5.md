@@ -68,7 +68,9 @@
 
 ---
 
-## M4 — Finance đầy đủ
+## M4 — Finance đầy đủ ✅ ĐÃ XONG (25/11/2026 — ASSUMPTIONS.md mục 21)
+
+> Người dùng chốt: Energy/Water/Other/Interest giữ R0 (sheet không có luật); Distribution costs theo pallet, neo R0. Payment terms đã làm ở M3. Phần "Hiện trạng / Còn phải làm" dưới đây là ghi chú lúc lập kế hoạch.
 
 ### Hiện trạng
 - `src/model/finance.ts`: P&L R0, thay dòng Ops (M1), Stock + lãi tồn kho (M2), Machines. Các dòng khác giữ R0 (nhãn "số R0"). Phân rã ROI đã có (`buildBreakdown`).
@@ -82,7 +84,7 @@
 
 ---
 
-## M5 — Kịch bản & chia sẻ
+## M5 — Kịch bản & chia sẻ ❌ NGƯỜI DÙNG BỎ (25/11/2026) — không làm
 
 - Nhóm đã có: snapshot có tên + bảng so sánh (tab Nhóm), kịch bản riêng.
 - Còn thiếu theo CLAUDE.md mục 8: **"Copy link kịch bản"** (mã hóa `Inputs` vào URL hash, base64 nén — dùng `CompressionStream` hoặc LZ đơn giản, không thêm CDN), **Xuất/Nhập JSON**, so sánh nhiều kịch bản ở chế độ một mình (lưu localStorage).

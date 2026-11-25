@@ -1,8 +1,40 @@
-// Finance: P&L R0; thay các dòng Ops (M1), Stock / Interest on components & products (M2), mua NL / Inbound orders /
-// Inbound order lines / Payment terms (M3 Purchasing), Penalty service level (M3 Sales) bằng số model; các dòng khác GIỮ SỐ R0. ROI = Operating profit / Investment.
+// Finance (M4): P&L R0 → kịch bản. Dòng Ops (M1), Stock / Interest on components & products / Costs of scrap (M2, C2), mua NL /
+// Inbound orders / Payment terms (M3 Purchasing), Contracted sales / Penalty / Payment terms AR (M3 Sales), Distribution costs (M4)
+// bằng số model. GIỮ SỐ R0 (người dùng chốt, có lý do trong LINE_BASIS): Energy, Water, Other, Interest, Contracted suppliers,
+// Outbound order lines/orders, Fixed. ROI = Operating profit / Investment.
 import type { Round0Data } from '../data/types';
 import { COEFFS } from './assumptions';
-import type { FinanceResults, FinanceRow, OpsResults, PurchasingResults, RoiNode, SalesResults, ScResults } from './types';
+import type { FinanceBasis, FinanceResults, FinanceRow, OpsResults, PurchasingResults, RoiNode, SalesResults, ScResults } from './types';
+
+/**
+ * M4: nguồn của từng dòng P&L (hiện trên tab Finance; test kiểm mọi dòng của tab 2 đều có nguồn).
+ * r0 = giữ đúng số Round 0 vì sheet/luật không cho cách tính hoặc không có ô quyết định nào làm đổi dòng đó (người dùng chốt 25/11).
+ */
+export const LINE_BASIS: { re: RegExp; basis: FinanceBasis; why: string }[] = [
+  { re: /^Contracted sales/i, basis: 'estimate', why: 'R0 (tab 2) × (lượng × giá sau promotion ÷ R0) × (CI ÷ CI R0) — CI game nhập tay hoặc hệ số COEFFS (= 0)' },
+  { re: /^Penalty service level/i, basis: 'estimate', why: 'Penalty R0 từng khách × (mức thiếu SL mới ÷ R0) — game không công bố công thức' },
+  { re: /^Bottling line fixed|^Mixer fixed|^Permanent employees \(bottling\)|^Pallet locations|^Inbound permanent|^Outbound permanent/i, basis: 'rule', why: 'Định mức luật (€/năm × 0,5 round) × quyết định Ops' },
+  { re: /^(SMED|Increase speed|Solve breakdowns training)/i, basis: 'rule', why: 'Phí theo luật (€/năm × 0,5, training €400/người — số người là giả định)' },
+  { re: /^Flexible manpower \(bottling\)|^Mixer variable|^Overflow|tank yard|^Inbound flexible|^Outbound flexible/i, basis: 'model', why: 'Định mức luật × giờ/pallet mô hình, neo R0 (hiệu chỉnh R0)' },
+  { re: /^Interest on (components|products)$/i, basis: 'model', why: 'R0 × (giá trị tồn NL/TP mô hình ÷ baseline)' },
+  { re: /^Stock$/i, basis: 'model', why: 'Giá trị tồn R0 (tab 7) × (tồn mô hình ÷ baseline)' },
+  { re: /^Machines$/i, basis: 'rule', why: 'Giá máy trộn + dây chuyền đang chọn (tab 5)' },
+  { re: /^Payment terms$/i, basis: 'estimate', why: 'R0 365.589 + Δ phải thu khách (revenue/tuần × payment term) − Δ phải trả NCC (purchase value/tuần × payment term) — game không công bố cách tính' },
+  { re: /^Costs of scrap$/i, basis: 'estimate', why: 'R0 × (giá trị obsolete/tuần mới ÷ R0) — obsolete theo tuổi tồn (C2)' },
+  { re: /^Inbound order(s| lines)$/i, basis: 'estimate', why: 'R0 × (số chuyến giao NL mới ÷ baseline)' },
+  { re: /^Distribution costs$/i, basis: 'estimate', why: 'R0 (tab 2) × (Σ phí phân phối khách tab 6 × pallet giao mới ÷ baseline) — theo €/pallet thực tế R0 (≈ €22,09), KHÔNG theo luật €31' },
+  { re: /^Energy$|^Water$|^Other$/i, basis: 'r0', why: 'Sheet và luật không cho cách tính → giữ số R0 (người dùng chốt 25/11). Đổi sản lượng / số ca KHÔNG làm đổi dòng này' },
+  { re: /^Interest$/i, basis: 'r0', why: 'Sheet không ghi Interest tính trên khoản nào → giữ số R0 (người dùng chốt 25/11)' },
+  { re: /^Contracted suppliers$/i, basis: 'r0', why: 'Luôn 5 NCC (1 NCC/nguyên liệu) → không đổi theo quyết định' },
+  { re: /^Outbound order(s| lines)$/i, basis: 'r0', why: 'Số dòng đơn / đơn hàng khách giữ R0 trong mô hình (không ô quyết định nào làm đổi)' },
+  { re: /^Fixed$/i, basis: 'r0', why: 'Tài sản cố định (nhà xưởng…), không có ô quyết định' },
+];
+const mua = { basis: 'model' as FinanceBasis, why: 'Giá cơ bản × CI × lượng mua (đã kiểm chứng R0, lệch ≤ €1) + phí vận chuyển (ước lượng)' };
+export function lineBasis(group: string, label: string): { basis: FinanceBasis; why: string } | null {
+  if (/mua NL/i.test(group)) return mua;
+  const hit = LINE_BASIS.find((x) => x.re.test(label));
+  return hit ? { basis: hit.basis, why: hit.why } : null;
+}
 
 /** Dòng P&L trong tab 2_Finance ↔ id chi phí trong model Ops */
 const OPS_LINE_MAP: { re: RegExp; ids: string[] }[] = [
@@ -64,11 +96,19 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
       const cu = sales.customers.find((x) => l.label.normalize('NFC').endsWith(x.customer.normalize('NFC')));
       if (cu) { value = /^Penalty/i.test(l.label) ? cu.penalty : cu.contracted; modeled = true; }
     }
-    rows.push({ id: `r${i++}`, group: l.group, label, r0: l.value, value, modeled });
+    // M4: Distribution costs = R0 (tab 2) × (Σ phí khách tab 6 mới ÷ R0) — tab 6 cộng 192.114,41, tab 2 ghi 192.114 → neo tab 2
+    if (sales && /^Distribution costs$/i.test(l.label) && sales.distributionR0 > 0) {
+      const k = sales.distribution / sales.distributionR0;
+      value = Math.abs(k - 1) < 1e-12 ? l.value : l.value * k;
+      modeled = true;
+    }
+    const lb = lineBasis(l.group, l.label);
+    rows.push({ id: `r${i++}`, group: l.group, label, r0: l.value, value, modeled, basis: lb?.basis, why: lb?.why });
     // Dòng mới (chi phí Ops không có trong P&L R0) chèn ngay sau Mixer variable costs
     if (/^Mixer variable/i.test(l.label)) {
       for (const c of ops.costs.filter((c) => c.group === 'production' && !OPS_LINE_MAP.some((m) => m.ids.includes(c.id)))) {
-        rows.push({ id: c.id, group: l.group, label: `${c.label} (dòng mới)`, r0: 0, value: c.value, modeled: true, isNew: true });
+        const lbn = lineBasis(l.group, c.label);
+        rows.push({ id: c.id, group: l.group, label: `${c.label} (dòng mới)`, r0: 0, value: c.value, modeled: true, isNew: true, basis: lbn?.basis ?? 'rule', why: lbn?.why });
         used.add(c.id);
       }
     }

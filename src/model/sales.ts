@@ -289,6 +289,8 @@ export function simulateSales(data: Round0Data, sc: ScResults, inputs?: Inputs):
   });
   const avgRate = rates.length ? rates.reduce((a, b) => a + b, 0) / rates.length : 0;
 
+  // M4: phí phân phối ∝ pallet giao/tuần (promotion đổi lượng); neo số tab 6 từng khách (≈ €22,09/pallet R0, khác luật €31 — xem ASSUMPTIONS mục 21)
+  const pick = customerPicking(data, inputs), pick0 = customerPicking(data);
   const customers: SalesCustomerResult[] = pre.map(({ k, r, t, t0, steps, ciBasis, ci, ciStale, contractedR0, contracted, penaltyR0Scaled, penaltyR0, shortfallR0, demandR0, demand }) => {
     const rows = data.sales.customerProduct.filter((x) => x.customer === k.customer);
     const w = rows.reduce((s, x) => s + x.demandPerWeek, 0);
@@ -316,11 +318,14 @@ export function simulateSales(data: Round0Data, sc: ScResults, inputs?: Inputs):
     const outOfRange = capped || (typeChanged && shortfall > 0) || (shortfallR0 > 0 ? shortfall > OUT_OF_RANGE_FACTOR * shortfallR0 : shortfall > 0);
     const arR0 = (revenueR0 / ROUND.weeks) * t0.paymentTermWeeks;
     const ar = Math.abs(revenue - revenueR0) < 1e-9 && t.paymentTermWeeks === t0.paymentTermWeeks ? arR0 : (revenue / ROUND.weeks) * t.paymentTermWeeks;
+    const distributionR0 = r.distributionCost;
+    const pN = pick.find((x) => x.customer === k.customer)?.palletsPerWeek ?? 0, pB = pick0.find((x) => x.customer === k.customer)?.palletsPerWeek ?? 0;
+    const distribution = pB > 0 && Math.abs(pN - pB) > 1e-9 * pB ? distributionR0 * (pN / pB) : distributionR0;
     return {
       customer: k.customer, contractIndex: ci, contractIndexR0: k.contractIndex, ciBasis, ciStale, ciSteps: steps, terms: t, termsR0: t0,
       tradeUnit: t.tradeUnit, tradeUnitR0: t0.tradeUnit, orderDeadline: t.orderDeadline, orderDeadlineR0: t0.orderDeadline,
       serviceLevelType: t.serviceLevelType, promised: t.serviceLevel,
-      demandR0, demand, slMeasured, slMeasuredR0, slOrdersR0: r.slOrders, slOrders, arR0, ar,
+      demandR0, demand, slMeasured, slMeasuredR0, slOrdersR0: r.slOrders, slOrders, arR0, ar, distributionR0, distribution,
       slOrderLinesR0: r.slOrderLines, slOrderLines, slPiecesR0: r.slPieces, slPieces, shortfallR0, shortfall,
       contractedR0, contracted, penaltyR0, penalty, revenueR0, revenue, capped, outOfRange,
       attainedCiR0: r.attainedContractIndex, attainedCi: r.attainedContractIndex * (revenueR0 !== 0 ? revenue / revenueR0 : 1),
@@ -340,5 +345,7 @@ export function simulateSales(data: Round0Data, sc: ScResults, inputs?: Inputs):
     })(),
     adherenceSlope: adherenceSlSlope(data),
     arDelta: customers.reduce((s, c) => s + (c.ar - c.arR0), 0),
+    distributionR0: customers.reduce((s, c) => s + c.distributionR0, 0),
+    distribution: customers.reduce((s, c) => s + c.distribution, 0),
   };
 }

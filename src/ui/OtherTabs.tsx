@@ -1,6 +1,7 @@
 // Các tab chưa có quyết định trong M1: hiển thị dữ liệu Round 0 thô (M0) + P&L + giả định.
 import type { Round0Data } from '../data/types';
-import type { Results, RoiNode } from '../model/types';
+import type { FinanceBasis, FinanceRow, Results, RoiNode } from '../model/types';
+import { ROUND, FG_NORMS } from '../model/rules';
 import { dataChecks } from '../model/dataChecks';
 import { ASSUMPTIONS, COEFFS, EDITABLE_EST, EST, type Coeff } from '../model/assumptions';
 import { getCalibration } from '../model/simulate';
@@ -12,7 +13,7 @@ import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
 
 const STATUS_BADGE: Record<RoiNode['status'], [string, string, string]> = {
   modeled: ['mô hình', 'badge-model', 'Tính từ quyết định trong app'],
-  r0: ['số R0', 'badge-r0', 'Giữ nguyên số Round 0 — chưa mô hình hóa (M2–M4)'],
+  r0: ['số R0', 'badge-r0', 'Giữ nguyên số Round 0 — sheet/luật không cho cách tính (xem bảng "Các dòng giữ số Round 0")'],
   mixed: ['một phần', 'badge-calibrated', 'Có dòng tính từ model, có dòng giữ số R0'],
   missing: ['thiếu dữ liệu', 'badge-estimate', 'File Excel không có số này'],
 };
@@ -67,6 +68,7 @@ export function FinanceTab({ data, res, baseRes, roiR0 }: { data: Round0Data; re
   return (
     <div class="single">
       <RoiBreakdownCard res={res} baseRes={baseRes} roiR0={roiR0} />
+      <FinanceM4Card data={data} res={res} />
       <Card title="Nguồn số R0: Operating profit & Indirect cost">
         <ul class="r0-sources">
           <li>Operating profit — {r0TwoSources(data, 'operatingProfit')}</li>
@@ -75,7 +77,7 @@ export function FinanceTab({ data, res, baseRes, roiR0 }: { data: Round0Data; re
         <p class="muted">{R0_SOURCE_NOTE}</p>
       </Card>
       <Card title="P&L Round 0 → kịch bản">
-        <p class="muted">Dòng có nhãn <b>mô hình</b> tính từ quyết định Ops (M1), Supply Chain (M2: Stock, Interest), Purchasing (M3: mua NL, Inbound orders, Payment terms) và Sales (M3: Penalty service level — ước lượng theo SL dự kiến); dòng <Badge basis="r0" /> giữ nguyên số Round 0 (contracted sales, overhead, phân phối… — M3 hợp đồng Sales / M4). Cột "R0 thật" của dòng TỔNG là tổng dòng sheet; dòng nhỏ bên dưới là số game in. Dòng đổi so với baseline được tô vàng.</p>
+        <p class="muted">Mỗi dòng có nhãn nguồn (rê chuột để xem cách tính): <b>luật</b> = định mức Info Center × quyết định; <b>mô hình</b> = tính từ quyết định, neo R0; <b>ước lượng</b> = game không công bố công thức; <b>số R0</b> = giữ nguyên Round 0 (lý do ở bảng dưới). Cột "R0 thật" của dòng TỔNG là tổng dòng sheet; dòng nhỏ bên dưới là số game in. Dòng đổi so với baseline được tô vàng.</p>
         <div class="tbl-wrap">
           <table class="pnl">
             <thead><tr><th>Nhóm</th><th>Dòng</th><th>R0 thật</th><th>Baseline mô hình</th><th>Kịch bản</th><th>Δ vs baseline</th></tr></thead>
@@ -87,7 +89,7 @@ export function FinanceTab({ data, res, baseRes, roiR0 }: { data: Round0Data; re
                 return (
                   <tr class={`${r.isTotal ? 'total' : ''} ${changed ? 'changed' : ''}`}>
                     <td>{r.group}</td>
-                    <td>{r.label} {!r.isTotal && (r.modeled ? <span class="badge badge-model">mô hình</span> : <Badge basis="r0" />)}</td>
+                    <td>{r.label} {!r.isTotal && <LineBadge r={r} />}</td>
                     <td>{r.r0 === null ? '' : eur(r.r0)}{r.isTotal && gameOf(r.label) !== undefined && <div class="m-r0" title={R0_SOURCE_NOTE}>game in: {gameOf(r.label) === null ? 'thiếu dữ liệu' : eur(gameOf(r.label)!)}</div>}</td>
                     <td>{eur(bv)}</td>
                     <td>{eur(r.value)}</td>
@@ -101,6 +103,40 @@ export function FinanceTab({ data, res, baseRes, roiR0 }: { data: Round0Data; re
         </div>
       </Card>
     </div>
+  );
+}
+
+const BASIS_BADGE: Record<FinanceBasis, [string, string]> = {
+  rule: ['luật', 'badge-model'],
+  model: ['mô hình', 'badge-model'],
+  estimate: ['ước lượng', 'badge-estimate'],
+  r0: ['số R0', 'badge-r0'],
+};
+function LineBadge({ r }: { r: FinanceRow }) {
+  if (!r.basis) return r.modeled ? <span class="badge badge-model">mô hình</span> : <Badge basis="r0" />;
+  const [t, cls] = BASIS_BADGE[r.basis];
+  return <span class={`badge ${cls}`} title={r.why}>{t}</span>;
+}
+
+/** M4: dòng giữ số R0 + lý do; Distribution costs: hai nguồn (luật €31/pallet, R0 thực tế). */
+export function FinanceM4Card({ data, res }: { data: Round0Data; res: Results }) {
+  const kept = res.finance.rows.filter((r) => !r.isTotal && r.basis === 'r0');
+  const pallets = data.sales.customerResults.reduce((s, c) => s + c.palletsPerWeek, 0);
+  const dist2 = data.finance.lines.find((l) => /^Distribution costs$/i.test(l.label))?.value ?? null;
+  const dist6 = data.sales.customerResults.reduce((s, c) => s + c.distributionCost, 0);
+  return (
+    <Card title="Các dòng giữ số Round 0 (M4) và phí phân phối">
+      <Table head={['Dòng', 'Số R0 (tab 2)', 'Vì sao giữ R0']} rows={kept.map((r) => [r.label, eur(r.r0 ?? 0), r.why ?? ''])} />
+      <p class="muted small-text">Chi phí giữ R0: {eur(kept.filter((r) => !/^Investment/i.test(r.group)).reduce((s, r) => s + (r.r0 ?? 0), 0))} (Indirect cost) · Investment giữ R0: {eur(kept.filter((r) => /^Investment/i.test(r.group)).reduce((s, r) => s + (r.r0 ?? 0), 0))} — không đổi theo bất kỳ quyết định nào trong app.</p>
+      <h4>Distribution costs — hai nguồn</h4>
+      <Table head={['Nguồn', 'Giá trị', 'Ghi chú']} rows={[
+        ['Tab 2 (P&L) — app neo số này', dist2 === null ? 'thiếu dữ liệu' : eur(dist2), 'Kịch bản = số này × (phí khách tab 6 × pallet mới ÷ baseline)'],
+        ['Tab 6 (Σ 3 khách)', num(dist6, 2) + ' €', 'Lệch tab 2 do làm tròn'],
+        ['Luật Info Center', `€${num(FG_NORMS.distributionPerPallet)}/pallet`, 'KHÔNG dùng: R0 thực tế thấp hơn'],
+        ['R0 suy ra', dist2 === null || pallets <= 0 ? 'thiếu dữ liệu' : `€${num(dist2 / (pallets * ROUND.weeks), 2)}/pallet`, `Tab 2 ÷ (${num(pallets, 1)} pallet/tuần tab 6 × ${ROUND.weeks} tuần) — có thể do giá theo cỡ chuyến (Distributor tab 6)`],
+        ['Kịch bản', eur(res.finance.rows.find((r) => /^Distribution costs$/i.test(r.label))?.value ?? 0), 'Ước lượng'],
+      ]} />
+    </Card>
   );
 }
 

@@ -320,3 +320,20 @@ describe('Sales 4 mục cuối: baseline = đúng từng ô Excel', () => {
     for (const p of r.sc.products) expect(p.sheet.demandPerWeek.value).toBe(d.supplyChain.productStock.find((x) => x.sku === p.sku)!.demandPerWeek);
   });
 });
+
+describe('M4 Finance: baseline = đúng từng ô tab 2 / tab 6', () => {
+  const r = simulate(baselineInputs(d), d);
+  const fin = rowsOf('2_Finance');
+  const v2 = (label: string) => fin.find((x) => String(x?.[1] ?? '').trim().normalize('NFC') === label.normalize('NFC'))![2] as number;
+  it('mọi dòng P&L (không kể dòng mới) = đúng ô tab 2', () => {
+    for (const x of r.finance.rows.filter((y) => !y.isTotal && !y.isNew)) expect(x.value, x.label).toBe(v2(x.label));
+  });
+  it('Distribution costs = ô tab 2; phí phân phối từng khách = cột "Distribution cost" tab 6', () => {
+    expect(r.finance.rows.find((x) => x.label === 'Distribution costs')!.value).toBe(v2('Distribution costs'));
+    const rows6 = rowsOf('6_Sales');
+    const h = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Khách hàng' && (x ?? []).some((c) => /Attained contract index/.test(String(c ?? ''))));
+    const H = rows6[h].map((x) => String(x ?? '').normalize('NFC').trim());
+    const i = uniqueCol(H, /Distribution cost/);
+    for (const c of r.sales.customers) expect(c.distribution).toBe(rows6.slice(h + 1).find((y) => String(y?.[0] ?? '').trim() === c.customer)![i]);
+  });
+});
