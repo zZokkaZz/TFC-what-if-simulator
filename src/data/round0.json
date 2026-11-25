@@ -1,7 +1,7 @@
 {
  "meta": {
   "source": "data/TFC_Round0.xlsx",
-  "generatedAt": "2026-11-25T13:57:57.473Z",
+  "generatedAt": "2026-11-25T14:52:23.782Z",
   "sheets": [
    "0_README",
    "1_Vấn đề R0",
@@ -13506,7 +13506,7 @@
   },
   {
    "label": "Availability Vitamin C",
-   "value": 0,
+   "value": 0.843,
    "source": "7_Supply Chain"
   }
  ],
