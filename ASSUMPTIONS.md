@@ -323,7 +323,8 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 ### PM — giờ bảo trì và plan adherence (kiểm tra 25/11)
 
 - Giờ bảo trì **có** trừ vào công suất: giờ tải = run + changeover + breakdown + giờ bảo trì → overtime, chi phí thời vụ. Lời giờ ròng gần bằng nhau: Minimal 2,25 giờ/tuần (giảm hỏng 3,24 − bảo trì 1), Extensive 2,41 giờ/tuần (5,41 − 3); overtime 7,90 so với 7,79 giờ/tuần.
-- Plan adherence = 1 − k × (breakdown + `maintenanceDisruptionWeight` × giờ bảo trì + overtime + thuê ngoài) ÷ (giờ ca + overtime), k hiệu chỉnh R0 (R0 không có PM). Mặc định hệ số = **0**: giờ bảo trì là việc có kế hoạch, không tính như hỏng đột xuất → Extensive có adherence cao hơn Minimal 1,7 điểm (89,4% so với 87,6% phần capacity) → penalty ít hơn ~€39k → ROI hơn ~1 điểm. Đặt hệ số = 1 nếu coi mọi giờ mất như nhau: hai mức gần bằng nhau (có test). Chờ dữ liệu trial.
+- Plan adherence = 1 − k × (breakdown + `maintenanceDisruptionWeight` × giờ bảo trì + overtime + thuê ngoài) ÷ (giờ ca + overtime), k hiệu chỉnh R0 (R0 không có PM). Mặc định hệ số = **0**: giờ bảo trì là việc có kế hoạch, không tính như hỏng đột xuất → Extensive có adherence cao hơn Minimal 1,7 điểm (89,4% so với 87,6% phần capacity) → penalty ít hơn ~€39k → ROI hơn ~1 điểm. Đặt hệ số = 1 nếu coi mọi giờ mất như nhau: hai mức gần bằng nhau (có test).
+- **Người dùng chọn giữ hệ số = 0 (25/11):** bảo trì có lịch trước nên không làm trễ kế hoạch sản xuất như hỏng đột xuất; giờ bảo trì chỉ làm giảm công suất (đã tính qua giờ tải → overtime). Vẫn "chưa xác minh" — xem lại khi có plan adherence của vòng trial có bật PM.
 
 ### Bảng kịch bản trước / sau (ROI; trước = main b59c6a4; sau = phân tán tuổi tồn × 2, PM hệ số 0)
 

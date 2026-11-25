@@ -72,7 +72,7 @@ Test: 278 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
-- 25/11/2026 — PR #6 bổ sung: `obsoleteAgeSpreadScale` = 2 (người dùng chọn); kiểm tra PM → hệ số `maintenanceDisruptionWeight` (mặc định 0, chờ người dùng quyết); bảng kịch bản thêm tổ hợp Training; ghi "chưa mô hình: sản xuất bù hàng hủy" trên web.
+- 25/11/2026 — PR #6 bổ sung: `obsoleteAgeSpreadScale` = 2 (người dùng chọn); kiểm tra PM → hệ số `maintenanceDisruptionWeight` = 0 (người dùng chọn: bảo trì có lịch trước, không làm trễ kế hoạch như hỏng đột xuất); bảng kịch bản thêm tổ hợp Training; ghi "chưa mô hình: sản xuất bù hàng hủy" trên web.
 - 25/11/2026 — C2 + V1 (nhánh `claude/c2-v1`): obsolete/scrap theo tuổi tồn, V1 B chính + thận trọng; 270/270. Cần người dùng xem độ dốc obsolete (SS TP 5 → ~92%) và hệ số `obsoleteAgeSpreadScale`.
 
 - 25/11/2026 — Gom hệ số ước lượng chưa xác minh vào `COEFFS` (`src/model/assumptions.ts`): mốc ngoài vùng R0, mũ penalty, độ dốc capacity V1 phương án B/C. Có dữ liệu trial → sửa ở đó, chạy `npm run verify`.
