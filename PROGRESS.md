@@ -36,7 +36,10 @@ Test: 148 test (`npm test`), trong đó quan trọng nhất:
 ## 3. Đang chờ dữ liệu từ người dùng
 
 - **Bản sheet có tiêu đề song ngữ** (bạn Thư sửa trên Google Sheet) — CHƯA upload vào repo. Khi upload: `npm run data`; nếu script báo không nhận ra cột → sửa regex trong `build-data.ts` (nhận cả tên cũ và mới), KHÔNG đoán cột.
-- **Số dashboard còn thiếu** (app đang ghi "thiếu"): R-2 của Purchasing (rejection, raw material costs, delivery reliability), Sales (gross margin tổng, obsolete, SL outbound order lines); nhận xét game của Purchasing/Operations/Sales. Gợi ý người dùng thêm bảng "DASHBOARD" mỗi tab như tab 7 dòng 48–53.
+- **Dashboard KPI có 2 loại "thiếu" — đừng nhầm:**
+  - Nhãn **"chưa mô hình"** (số đứng yên = R0): Purchasing (rejection, raw material costs, delivery reliability), Sales (obsolete, SL outbound), điểm phòng Purchasing/Sales → **M3 sẽ nối** vào mô hình (trong `src/model/kpi.ts` đổi `scenarioBasis` + công thức kịch bản). Rejection/reliability NCC mới chỉ có số cam kết → "ước lượng" trừ khi đội nhập số game.
+  - **"R-2: thiếu"** (dấu ? đỏ): số lịch sử game KHÔNG có trong sheet → M3/M4 KHÔNG tạo ra được, **cấm tự điền**; chỉ người dùng bổ sung vào sheet (số có trong game: tab dashboard từng phòng, rê chuột điểm Round -2).
+- **Số dashboard còn thiếu trong sheet** (app đang ghi "thiếu"): R-2 của Purchasing (rejection, raw material costs, delivery reliability), Sales (gross margin tổng, obsolete, SL outbound order lines); nhận xét game của Purchasing/Operations/Sales. Gợi ý người dùng thêm bảng "DASHBOARD" mỗi tab như tab 7 dòng 48–53.
 - **Lỗi trong sheet (người dùng sửa):** tab 1 ô "Availability Vitamin C" = 0 vì công thức trỏ `'7_Supply Chain'!H29` (phải là I29 = 84,3%). App không đọc ô này.
 
 ## 4. Quyết định đã chốt (không tự đổi)
@@ -58,5 +61,7 @@ Test: 148 test (`npm test`), trong đó quan trọng nhất:
 - Giữ và gửi mã đội cho đồng đội qua kênh riêng.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
+
+- 25/11/2026 — Ghi rõ 2 loại "thiếu" trên dashboard (chưa mô hình → M3; R-2 thiếu → chỉ sheet bổ sung).
 
 - 25/11/2026 — Phiên đầu (session_01S6eySWv8rcftxr28S1gPYY): M0, M1, M1.5, M2, neo số đề bài, dashboard KPI, bảng nguyên văn, luật "không bịa số", bộ tài liệu bàn giao.

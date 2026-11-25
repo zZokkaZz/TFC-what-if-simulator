@@ -11,7 +11,7 @@
 2. **Không chế công thức game.** Công thức ⚠️ → làm dạng "tỷ lệ so với R0" + badge "ước lượng" + ghi `ASSUMPTIONS.md`; hoặc **cho người dùng nhập số game hiển thị** (vd contract index sau đàm phán).
 3. Ô quyết định đúng tên/đơn vị như game (cột "Lựa chọn khi đàm phán" tab 4; hợp đồng tab 6). Thêm giới hạn vào `src/sync/limits.ts` **và** `firestore.rules` (hiện `validPurchasing` chỉ có `suppliers`, `validSales` là map ≤ 50 trường → phải mở rộng + chạy `scripts/test-rules.mjs` + nhắc người dùng Publish rules).
 4. Nối vào cảnh báo liên phòng ban (`src/model/warnings.ts`): mỗi cảnh báo ghi phòng gây ra → phòng bị ảnh hưởng + dòng ROI đổi bao nhiêu.
-5. Cập nhật Dashboard KPI (`src/model/kpi.ts`): KPI Purchasing/Sales hiện "chưa mô hình" → nối vào mô hình mới.
+5. Cập nhật Dashboard KPI (`src/model/kpi.ts`): KPI Purchasing/Sales hiện "chưa mô hình" → nối vào mô hình mới (đổi `scenarioBasis`, tính `scenario` neo vào R0; thêm test trong `tests/kpi.test.ts`). **Ô "R-2: thiếu" giữ nguyên null** — chỉ hết khi người dùng thêm bảng DASHBOARD (KPI | Round -2 | Round -1 | Round 0 | Nhận xét của game) vào tab 4/5/6 và upload; khi đó thêm đọc bảng đó trong `build-data.ts` (giống `dashTable` của tab 7) và lấy R-2 từ đó.
 6. Thêm `Inputs.purchasing` / `Inputs.sales` cần mở rộng `baselineInputs` (`src/model/baseline.ts`), `makeSanitizer` (`src/sync/sanitize.ts`), `trace.ts` (nhãn "← do Purchasing đổi …").
 7. Sau mỗi mốc: `npm run verify`, mở thử 2 tab (`?mock=1`), cập nhật `PROGRESS.md`, `ASSUMPTIONS.md`, commit, push nhánh riêng.
 
