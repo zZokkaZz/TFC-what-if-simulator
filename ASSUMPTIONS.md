@@ -1,6 +1,6 @@
 # ASSUMPTIONS — Giả định & hiệu chỉnh của TFC Simulator
 
-Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing** (Sales chưa làm). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
+Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu** (ô hợp đồng Sales chưa làm). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
 
 Nhãn trên giao diện:
 - **ước lượng**: giả định không có trong luật game.
@@ -229,3 +229,39 @@ KPI giống dashboard game: Purchasing (rejection, raw material costs, delivery 
 - NCC mới không certification / free capacity < 10% → hay giao trễ (luật) — nên nhập reliability thực tế.
 
 **Firestore rules:** thêm `validTerms` cho `terms` (5 nguyên liệu × 9 trường). Firestore chỉ cho **1.000 biểu thức mỗi request**: bản viết đầy đủ (`is number`, hàm phụ) làm ghi hợp lệ đủ 5 nguyên liệu bị chặn oan → viết tối giản, dựa vào việc so sánh khác kiểu là lỗi = bị chặn. `scripts/test-rules.mjs`: 40/40 trên emulator, gồm ca tốn biểu thức nhất (5 nguyên liệu, điền đủ ô số game). **Người dùng cần Publish lại rules.**
+
+## 16. M3 — Sales, phần service level → penalty → doanh thu (25/11/2026)
+
+Theo yêu cầu người dùng: nối service level ước tính (availability NL + plan adherence + safety stock TP) vào realized revenue và 3 dòng Penalty service level. **Ô quyết định hợp đồng Sales (SL hứa, shelf life, deadline, trade unit, promotion) CHƯA làm**; contracted sales giữ R0.
+
+**Không đổi gì → mọi số = đúng sheet** (test đọc thẳng file): 3 dòng penalty và contracted (tab 2), realized revenue (tab 2), revenue / SL order lines / SL pieces / attained CI từng khách (tab 6), SL outbound 92,0% (tab 1), SL TP từng SKU (tab 7), ROI −7,68%.
+
+**Đã kiểm chứng bằng số R0:**
+- Revenue khách (tab 6) = contracted + penalty (tab 2) — **khớp tuyệt đối** cả 3 khách.
+- Penalty ≈ contracted × (1 − attained CI ÷ CI): lệch 0,05% (F&G), 0,09% (LAND), 0,77% (Dominick's) — do attained CI làm tròn 3 chữ số.
+- Dashboard "Service level outbound order lines" 92,0% = TB gia quyền order lines/tuần của SL order lines 3 khách (91,99%).
+
+**Ước lượng (game không công bố công thức penalty):**
+
+| Giả định | Đang dùng | Cơ sở |
+|---|---|---|
+| SL TP từng SKU | SL R0 − (tỷ lệ thiếu hàng mới − baseline) + **0,974 × (plan adherence mới − baseline)** | Tỷ lệ thiếu hàng: công thức chuẩn mục 11 (safety stock TP, interval). Độ dốc 0,974: hồi quy SL pieces theo plan adherence của 6 SKU R0 (tab 7), R² = 0,95. Plan adherence đã gồm availability NL và capacity dây chuyền. **Giới hạn:** độ dốc lấy từ chênh lệch GIỮA các SKU (chủ yếu do thiếu Vitamin C), áp cho thay đổi theo kịch bản — có thể quá mạnh khi adherence đổi vì capacity (vd thêm ca) |
+| SL order lines | SKU: R0 + cùng thay đổi như SL pieces. Khách: R0 + TB (gia quyền nhu cầu khách × SKU, tab 6) thay đổi SL các SKU khách mua | Không có quan hệ pieces ↔ order lines |
+| Penalty | Penalty R0 của khách × (mức thiếu mới ÷ mức thiếu R0); mức thiếu = max(0, SL hứa − SL order lines). Đạt/vượt SL hứa → 0 | R0: penalty/điểm thiếu = 5,12% / 2,53% / 1,88% contracted → **không có một công thức chung** cho 3 khách; neo từng khách, tuyến tính theo mức thiếu. (Khách R0 không thiếu mà kịch bản thiếu → dùng tỷ lệ TB 3 khách.) |
+| Thưởng khi vượt SL hứa | **Chưa tính** | Luật: "vượt thì được thưởng nhỏ" — không có độ lớn |
+| Attained CI kịch bản | Attained CI R0 × (revenue mới ÷ revenue R0) | Giữ đúng ô tab 6 ở baseline |
+| Contracted sales, phí phân phối, obsolete | Giữ R0 | Nhu cầu, giá, hợp đồng chưa mô hình |
+
+**Frozen period: CHƯA MÔ HÌNH** (theo yêu cầu): đổi ô không đổi số nào — gợi ý SS TP, SL dự kiến, doanh thu, giờ dây chuyền đều dùng frozen R0 (3 tuần). Bản M2 cho frozen vào σ bảo vệ của TP (gợi ý SS, SL dự kiến) — đã bỏ.
+
+**Độ lớn đáng chú ý (để người dùng biết, KHÔNG chỉnh hệ số cho "đẹp"):**
+
+| Kịch bản | ROI | Ghi chú |
+|---|---|---|
+| Safety stock TP 3 → 1 tuần | −7,68% → −23,33% | Penalty +€611.442 (SL order lines F&G 91,2% → 84,7%) |
+| Safety stock TP 3 → 2 tuần | → −10,32% | |
+| Thêm ca 2 → 3 | → −0,44% | Adherence +9 điểm → SL vượt 95% cả 3 khách → penalty = 0. Có thể quá lạc quan (xem giới hạn độ dốc) |
+| SMED | → −4,09% | |
+| Production interval 10 → 5 | → −26,47% | Changeover ×2 → adherence ↓ + thiếu hàng ↑ |
+| Production interval 10 → 15 | → −3,93% | |
+| Vitamin C → NCC SYI | → −6,80% | |

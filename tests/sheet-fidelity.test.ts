@@ -157,3 +157,50 @@ describe('M3 Purchasing: baseline (không đổi gì) = đúng từng ô tab 4 /
     expect(d.palletsPerFtl).toBe(Number(txt.match(/(\d+)\s*pallet\s*=\s*1\s*xe tải/i)![1]));
   });
 });
+
+describe('M3 Sales: baseline (không đổi gì) = đúng tab 2 / tab 6 / tab 1 / tab 7', () => {
+  const r = simulate(baselineInputs(d), d);
+  const fin = rowsOf('2_Finance');
+  const v2 = (label: string) => fin.find((x) => String(x?.[1] ?? '').trim().normalize('NFC') === label.normalize('NFC'))![2] as number;
+  const rows6 = rowsOf('6_Sales');
+  const h6 = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Khách hàng' && /Attained contract index/.test(String(x?.[1] ?? '')));
+  const H6 = rows6[h6].map((x) => String(x ?? '').trim());
+  const c6 = (re: RegExp) => H6.findIndex((x) => re.test(x));
+  it.each(r.sales.customers.map((x) => [x.customer, x] as const))('%s: penalty, contracted (tab 2); revenue, SL order lines, SL pieces, attained CI (tab 6)', (_c, x) => {
+    const row = rows6.slice(h6 + 1).find((y) => String(y?.[0] ?? '').trim() === x.customer)!;
+    expect(x.penalty).toBe(v2(`Penalty service level – ${x.customer}`));
+    expect(x.contracted).toBe(v2(`Contracted sales – ${x.customer}`));
+    expect(x.revenue).toBe(row[c6(/^Revenue/)]);
+    expect(x.slOrderLines).toBe(row[c6(/^SL order lines$/)]);
+    expect(x.slPieces).toBe(row[c6(/^SL pieces$/)]);
+    expect(x.attainedCi).toBe(row[c6(/^Attained contract index$/)]);
+  });
+  it('P&L: 3 dòng penalty và Realized revenue = đúng tab 2', () => {
+    for (const row of r.finance.rows.filter((x) => /^Penalty service level/.test(x.label))) expect(row.value).toBe(v2(row.label));
+    expect(r.finance.realizedRevenue).toBe(v2('Realized revenue'));
+    expect(r.sales.realizedRevenue).toBe(v2('Realized revenue'));
+  });
+  it('Service level outbound order lines = KPI nhanh tab 1; SL TP từng SKU = tab 7', () => {
+    const rows1 = rowsOf('1_Vấn đề R0');
+    const hq = rows1.findIndex((x) => (x ?? []).some((c) => String(c ?? '').trim() === 'Chỉ số') && (x ?? []).some((c) => String(c ?? '').trim() === 'Giá trị'));
+    const iL = rows1[hq].findIndex((c) => String(c ?? '').trim() === 'Chỉ số'), iV = rows1[hq].findIndex((c) => String(c ?? '').trim() === 'Giá trị');
+    const q = rows1.slice(hq + 1).find((x) => /^Service level outbound/.test(String(x?.[iL] ?? '')))!;
+    expect(r.sales.slOutbound).toBe(q[iV]);
+    for (const p of r.sc.products) {
+      const st = d.supplyChain.productStock.find((x) => x.sku === p.sku)!;
+      expect(p.slPiecesEst).toBe(st.slPieces);
+      expect(p.sheet.slOrderLines.value).toBe(st.slOrderLines);
+    }
+  });
+  it('kiểm chứng R0: contracted + penalty (tab 2) = revenue tab 6 (đúng tuyệt đối); contracted × (1 − attained CI ÷ CI) ≈ penalty (< 1%)', () => {
+    const hk = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Khách hàng' && /Contract index/.test(H6.join('|')) && String(x?.[4] ?? '').trim() === 'Contract index');
+    for (const k of d.sales.contracts) {
+      const row = rows6.slice(h6 + 1).find((y) => String(y?.[0] ?? '').trim() === k.customer)!;
+      const con = v2(`Contracted sales – ${k.customer}`), pen = v2(`Penalty service level – ${k.customer}`);
+      expect(con + pen, k.customer).toBe(row[c6(/^Revenue/)]);
+      const ci = hk >= 0 ? (rows6.slice(hk + 1).find((y) => String(y?.[0] ?? '').trim() === k.customer)![4] as number) : k.contractIndex;
+      const idPen = -con * (1 - (row[c6(/^Attained contract index$/)] as number) / ci);
+      expect(Math.abs(idPen / pen - 1), k.customer).toBeLessThan(0.01);
+    }
+  });
+});

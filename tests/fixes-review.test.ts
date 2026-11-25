@@ -41,7 +41,8 @@ describe('1. Investment → ROI theo dấu Operating profit', () => {
     const { i, r } = run((x) => allProd(x, { safetyStockWeeks: 2 }));
     expect(r.finance.investment).toBeLessThan(b.finance.investment);
     const w = crossWarnings(d, base, i, r, b).find((x) => x.id === 'stock-fin')!;
-    expect(w.detail).toMatch(/đang âm \(−€302\.580, lỗ\)/);
+    // Số OP thay đổi theo mô hình (M3 Sales trừ penalty) → so với số mô hình, định dạng "−€…" (không phải "€-…")
+    expect(w.detail).toContain(`đang âm (−€${Math.round(-r.finance.operatingProfit).toLocaleString('vi-VN')}, lỗ)`);
     expect(w.detail).not.toMatch(/€-/);
     expect(w.detail).toMatch(/làm ROI xấu đi/);
     expect(w.detail).not.toMatch(/Investment giảm → ROI tăng/);

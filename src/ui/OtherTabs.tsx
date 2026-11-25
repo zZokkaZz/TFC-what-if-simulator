@@ -8,28 +8,7 @@ import { Badge, Card, Table } from './components';
 import { eur, num, pct, signed } from './format';
 import { R0_SOURCE_NOTE, r0TwoSources } from './r0Sources';
 
-const Pending = ({ m }: { m: string }) => <p class="pending">Quyết định của phòng này sẽ sửa được ở <b>{m}</b>. Hiện hiển thị dữ liệu Round 0 thô từ file Excel.</p>;
 
-export function SalesTab({ data }: { data: Round0Data }) {
-  const s = data.sales;
-  return (
-    <div class="single">
-      <Pending m="M3" />
-      <Card title="Hợp đồng khách hàng">
-        <Table head={['Khách hàng', 'Contract index', 'SL type', 'SL hứa', 'Shelf life', 'Order deadline', 'Trade unit', 'Payment term', 'Promotion', 'SKU']}
-          rows={s.contracts.map((c) => [c.customer, num(c.contractIndex, 4), c.serviceLevelType, pct(c.serviceLevel, 0), pct(c.shelfLife, 0), c.orderDeadline, c.tradeUnit, `${c.paymentTermWeeks} tuần`, `${c.promotionalPressure} / ${c.promotionHorizon}`, c.skus])} />
-      </Card>
-      <Card title="Kết quả theo khách hàng R0">
-        <Table head={['Khách hàng', 'Attained CI', 'SL pieces', 'SL order lines', 'Revenue', 'Order lines/tuần', 'Pallet/tuần', 'Shelf life đạt', 'Distribution']}
-          rows={s.customerResults.map((c) => [c.customer, num(c.attainedContractIndex, 3), pct(c.slPieces), pct(c.slOrderLines), eur(c.revenue), num(c.orderLinesPerWeek, 1), num(c.palletsPerWeek, 1), pct(c.attainedShelfLife), eur(c.distributionCost)])} />
-      </Card>
-      <Card title="Kết quả theo sản phẩm R0">
-        <Table head={['SKU', 'Nhu cầu/tuần', 'Giá bán TB', 'GM/đv', 'SL pieces', 'SL order lines', 'Obsolete', 'Obsolete/tuần']}
-          rows={s.productResults.map((p) => [p.sku, num(p.demandPerWeek), `€${num(p.avgPrice, 3)}`, `€${num(p.gmPerUnit, 3)}`, pct(p.slPieces), pct(p.slOrderLines), pct(p.obsolete), eur(p.obsoletePerWeekEur)])} />
-      </Card>
-    </div>
-  );
-}
 
 const STATUS_BADGE: Record<RoiNode['status'], [string, string, string]> = {
   modeled: ['mô hình', 'badge-model', 'Tính từ quyết định trong app'],
@@ -75,7 +54,7 @@ export function RoiBreakdownCard({ res, baseRes, roiR0 }: { res: Results; baseRe
           </tbody>
         </table>
       </div>
-      <p class="muted">Chi phí ghi dấu âm trong cây (COGS, operating expense) để cộng thẳng ra Operating profit. Nhãn <b>số R0</b> = chưa phụ thuộc quyết định nào trong app (Sales/Purchasing/payment terms/overhead sẽ mô hình ở M3–M4; tồn kho đã nối SC ở M2); <b>thiếu dữ liệu</b> = file không có số tách riêng.</p>
+      <p class="muted">Chi phí ghi dấu âm trong cây (COGS, operating expense) để cộng thẳng ra Operating profit. Nhãn <b>số R0</b> = chưa phụ thuộc quyết định nào trong app (contracted sales, overhead, phí phân phối, AR… sẽ mô hình ở M3 Sales (hợp đồng) / M4; đã nối: Ops, tồn kho SC, Purchasing, penalty service level); <b>thiếu dữ liệu</b> = file không có số tách riêng.</p>
     </Card>
   );
 }
@@ -96,7 +75,7 @@ export function FinanceTab({ data, res, baseRes, roiR0 }: { data: Round0Data; re
         <p class="muted">{R0_SOURCE_NOTE}</p>
       </Card>
       <Card title="P&L Round 0 → kịch bản">
-        <p class="muted">Dòng có nhãn <b>mô hình</b> tính từ quyết định Ops (M1) và Supply Chain (M2: Stock, Interest on components / products); dòng <Badge basis="r0" /> giữ nguyên số Round 0 (Sales, Purchasing, payment terms, overhead… sẽ mô hình ở M3–M4). Cột "R0 thật" của dòng TỔNG là tổng dòng sheet; dòng nhỏ bên dưới là số game in. Dòng đổi so với baseline được tô vàng.</p>
+        <p class="muted">Dòng có nhãn <b>mô hình</b> tính từ quyết định Ops (M1), Supply Chain (M2: Stock, Interest), Purchasing (M3: mua NL, Inbound orders, Payment terms) và Sales (M3: Penalty service level — ước lượng theo SL dự kiến); dòng <Badge basis="r0" /> giữ nguyên số Round 0 (contracted sales, overhead, phân phối… — M3 hợp đồng Sales / M4). Cột "R0 thật" của dòng TỔNG là tổng dòng sheet; dòng nhỏ bên dưới là số game in. Dòng đổi so với baseline được tô vàng.</p>
         <div class="tbl-wrap">
           <table class="pnl">
             <thead><tr><th>Nhóm</th><th>Dòng</th><th>R0 thật</th><th>Baseline mô hình</th><th>Kịch bản</th><th>Δ vs baseline</th></tr></thead>

@@ -139,7 +139,8 @@ export function productRisk(inputs: Inputs, data: Round0Data, production: SkuPro
   for (const p of production) {
     const dec = inputs.sc.products[p.sku];
     const sigmaWeek = data.weekly.std[p.sku] ?? 0;
-    const protectionWeeks = dec.productionIntervalDays / ROUND.daysPerWeek + inputs.sc.frozenPeriodWeeks;
+    // Frozen period: CHƯA MÔ HÌNH (theo yêu cầu người dùng) → luôn dùng frozen R0, đổi ô này không đổi số nào
+    const protectionWeeks = dec.productionIntervalDays / ROUND.daysPerWeek + data.supplyChain.frozenPeriodWeeks;
     const sigmaProtection = sigmaWeek * Math.sqrt(protectionWeeks);
     const ssUnits = dec.safetyStockWeeks * p.demandUnits;
     const z = sigmaProtection > 0 ? ssUnits / sigmaProtection : 10;
@@ -162,9 +163,27 @@ export function productRisk(inputs: Inputs, data: Round0Data, production: SkuPro
 // ======================= Kết quả Supply Chain (M2) =======================
 
 /**
+ * Độ dốc service level (pieces) theo plan adherence — hồi quy trên 6 SKU R0 (tab 7): ≈ 0,97, R² ≈ 0,95.
+ * ƯỚC LƯỢNG: dùng quan hệ cắt ngang giữa các SKU của R0 cho thay đổi theo thời gian (game không công bố).
+ */
+export function adherenceSlSlope(data: Round0Data): { slope: number; r2: number } {
+  const st = data.supplyChain.productStock.filter((p) => p.planAdherence !== null && p.slPieces !== null);
+  const xs = st.map((p) => p.planAdherence as number), ys = st.map((p) => p.slPieces as number);
+  const n = xs.length;
+  if (n < 3) return { slope: 0, r2: 0 };
+  const mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n;
+  const sxx = xs.reduce((s, x) => s + (x - mx) ** 2, 0);
+  if (sxx <= 0) return { slope: 0, r2: 0 };
+  const slope = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0) / sxx;
+  const ssRes = ys.reduce((s, y, i) => s + (y - (my + slope * (xs[i] - mx))) ** 2, 0);
+  const ssTot = ys.reduce((s, y) => s + (y - my) ** 2, 0);
+  return { slope, r2: ssTot > 0 ? 1 - ssRes / ssTot : 0 };
+}
+
+/**
  * Tổng hợp kết quả SC từ model Ops (dòng NL, tồn TB, availability) + rủi ro TP.
  * Giá trị tồn = giá trị tồn R0 từng NL/SKU (tab 7) × (tồn TB mô hình ÷ tồn TB baseline) → baseline = đúng €321.425.
- * Service level TP dự kiến: dạng cộng thêm so với SL pieces R0 (ước lượng); CHƯA đưa vào doanh thu (M3).
+ * Service level TP dự kiến: dạng cộng thêm so với SL pieces R0 (ước lượng); đưa vào penalty/doanh thu ở sales.ts (M3).
  */
 export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsResults, baseOps: OpsResults | null): ScResults {
   const prisk = productRisk(inputs, data, ops.production);
@@ -216,20 +235,25 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
       stockoutDaysR0: data.dailyStats.stockoutDays[c] ?? null,
     };
   });
+  const slSlope = adherenceSlSlope(data).slope;
   const products = ops.production.map((p) => {
     const st = data.supplyChain.productStock.find((x) => x.sku === p.sku)!;
     const r = prisk[p.sku], b = pbase[p.sku];
     const theoryWeeks = (inputs.sc.products[p.sku].safetyStockWeeks + p.intervalDays / ROUND.daysPerWeek / 2);
     const pb = baseOps?.production.find((x) => x.sku === p.sku);
     const kFg = ops.scLink.fgStockRatio[p.sku];
-    const slEst = Math.min(1, Math.max(0, st.slPieces - (r.shortRate - b.shortRate)));
+    // SL TP dự kiến (ước lượng) = SL R0 − Δ thiếu hàng (safety stock TP, interval) + độ dốc R0 × Δ plan adherence
+    // (plan adherence đã gồm availability NL & capacity dây chuyền). Baseline = đúng số sheet.
+    const dAdh = pb ? p.adherence - pb.adherence : 0;
+    const slEst = Math.min(1, Math.max(0, st.slPieces - (r.shortRate - b.shortRate) + slSlope * dAdh));
+    const slOlEst = Math.min(1, Math.max(0, st.slOrderLines + (slEst - st.slPieces)));
     const batches = ROUND.days / p.intervalDays;
     return {
       sku: p.sku,
       sheet: {
         demandPerWeek: keep(st.demandPerWeek ?? p.demandUnits),
         slPieces: { r0: st.slPieces, value: slEst, basis: Math.abs(slEst - st.slPieces) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
-        slOrderLines: keep(st.slOrderLines),
+        slOrderLines: { r0: st.slOrderLines, value: slOlEst, basis: Math.abs(slOlEst - st.slOrderLines) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
         stockWeeks: cell(st.stockWeeks, kFg),
         stockValue: cell(st.stockValue, kFg),
         economicWeeks: keep(st.economicWeeks),
@@ -251,7 +275,7 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
       stockValue: st.stockValue * ops.scLink.fgStockRatio[p.sku],
       stockValueR0: st.stockValue,
       slPiecesR0: st.slPieces,
-      slPiecesEst: Math.min(1, Math.max(0, st.slPieces - (r.shortRate - b.shortRate))),
+      slPiecesEst: slEst,
       targetServiceLevel: r.targetServiceLevel,
       recommendedSsWeeks: r.recommendedSsWeeks,
       maxAgeWeeks: r.maxAgeWeeks,

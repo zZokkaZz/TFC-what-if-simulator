@@ -1,7 +1,7 @@
 // Finance: P&L R0; thay các dòng Ops (M1), Stock / Interest on components & products (M2), mua NL / Inbound orders /
-// Inbound order lines / Payment terms (M3 Purchasing) bằng số model; các dòng khác GIỮ SỐ R0 (modeled=false) cho tới M3 Sales–M4. ROI = Operating profit / Investment.
+// Inbound order lines / Payment terms (M3 Purchasing), Penalty service level (M3 Sales) bằng số model; các dòng khác GIỮ SỐ R0. ROI = Operating profit / Investment.
 import type { Round0Data } from '../data/types';
-import type { FinanceResults, FinanceRow, OpsResults, PurchasingResults, RoiNode, ScResults } from './types';
+import type { FinanceResults, FinanceRow, OpsResults, PurchasingResults, RoiNode, SalesResults, ScResults } from './types';
 
 /** Dòng P&L trong tab 2_Finance ↔ id chi phí trong model Ops */
 const OPS_LINE_MAP: { re: RegExp; ids: string[] }[] = [
@@ -21,7 +21,7 @@ const OPS_LINE_MAP: { re: RegExp; ids: string[] }[] = [
   { re: /^Outbound flexible/i, ids: ['outFlex'] },
 ];
 
-export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResults, pur?: PurchasingResults): FinanceResults {
+export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResults, pur?: PurchasingResults, sales?: SalesResults): FinanceResults {
   const cost = (id: string) => ops.costs.find((c) => c.id === id)?.value ?? 0;
   const used = new Set<string>();
   const rows: FinanceRow[] = [];
@@ -51,6 +51,11 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
     if (pur && /^Inbound order lines$/i.test(l.label)) { value = pur.inboundOrderLines; modeled = true; }
     if (pur && /^Inbound orders$/i.test(l.label)) { value = pur.inboundOrders; modeled = true; }
     if (pur && /^Payment terms$/i.test(l.label)) { value = l.value + pur.paymentTermsDelta; modeled = true; }
+    // M3 Sales: penalty service level từng khách (ước lượng theo mức thiếu SL); contracted sales giữ R0
+    if (sales && /^Penalty service level/i.test(l.label)) {
+      const cu = sales.customers.find((x) => l.label.normalize('NFC').endsWith(x.customer.normalize('NFC')));
+      if (cu) { value = cu.penalty; modeled = true; }
+    }
     rows.push({ id: `r${i++}`, group: l.group, label, r0: l.value, value, modeled });
     // Dòng mới (chi phí Ops không có trong P&L R0) chèn ngay sau Mixer variable costs
     if (/^Mixer variable/i.test(l.label)) {
@@ -72,7 +77,7 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
   const investment = sum((r) => /^Investment/i.test(r.group));
 
   const totals: FinanceRow[] = [
-    { id: 't-rev', group: 'TỔNG', label: 'Realized revenue', r0: data.finance.totals.realizedRevenue, value: realizedRevenue, modeled: false, isTotal: true },
+    { id: 't-rev', group: 'TỔNG', label: 'Realized revenue', r0: data.finance.totals.realizedRevenue, value: realizedRevenue, modeled: !!sales, isTotal: true },
     { id: 't-pur', group: 'TỔNG', label: 'Purchase value', r0: data.finance.totals.purchaseValue, value: purchase, modeled: !!pur, isTotal: true },
     { id: 't-prod', group: 'TỔNG', label: 'Production costs', r0: data.finance.totals.productionCosts, value: production, modeled: true, isTotal: true },
     { id: 't-cogs', group: 'TỔNG', label: 'Cost of goods sold (COGS)', r0: data.finance.totals.cogs, value: cogs, modeled: true, isTotal: true },

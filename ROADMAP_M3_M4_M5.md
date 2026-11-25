@@ -44,7 +44,7 @@
 
 ---
 
-## M3 — Sales
+## M3 — Sales (phần service level → penalty → doanh thu ✅ 25/11/2026 — ASSUMPTIONS.md mục 16; ô hợp đồng: CHƯA)
 
 ### Dữ liệu có trong sheet (tab 6, tab 2, tab 10)
 - `sales.contracts`: 3 khách (cửa hàng, thị phần, value for money, CI, SL type, SL hứa, shelf life, order deadline, trade unit, payment term, promotion pressure/horizon, SKU mua).
