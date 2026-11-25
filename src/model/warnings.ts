@@ -236,7 +236,7 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
     out.push({
       id: 'sc-sl', severity: 'critical', from: slFrom, to: ['Sales', 'Finance'],
       title: `Service level TP dự kiến giảm ở ${slDrop.length} SKU → penalty tăng €${n0(-row(PEN))}`,
-      detail: `${slLine(slDrop)}. Theo khách (order lines): ${custLine}. ${slNote}`,
+      detail: `${slLine(slDrop)}. Theo khách (order lines): ${custLine}. ${slNote}${res.sales.customers.some((c) => c.outOfRange) ? ` ⚠ NGOÀI VÙNG DỮ LIỆU R0 (${res.sales.customers.filter((c) => c.outOfRange).map((c) => c.customer + (c.capped ? ' — penalty đã chặn, doanh thu 0' : '')).join('; ')}): chỉ đọc chiều hướng.` : ''}`,
       roi: [imp('Penalty service level (3 khách)', PEN), notModeled('Contracted sales', 'giữ R0 — nhu cầu, giá chưa mô hình')],
     });
   }

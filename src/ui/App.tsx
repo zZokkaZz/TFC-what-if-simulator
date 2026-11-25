@@ -36,11 +36,11 @@ const TABS = [
   { id: 'info', label: 'Giả định & R0' },
 ] as const;
 
-function Kpi({ label, value, delta, cls, sub, subTitle }: { label: string; value: string; delta?: string; cls?: string; sub?: string; subTitle?: string }) {
+function Kpi({ label, value, delta, cls, sub, subTitle, title }: { label: string; value: string; delta?: string; cls?: string; sub?: string; subTitle?: string; title?: string }) {
   return (
     <div class="kpi">
       <div class="kpi-l">{label}</div>
-      <div class="kpi-v">{value}{delta && <span class={`delta ${cls}`}>{delta}</span>}</div>
+      <div class="kpi-v">{value}{delta && <span class={`delta ${cls}`} title={title}>{delta}</span>}</div>
       {sub && <div class="kpi-s" title={subTitle}>{sub}</div>}
     </div>
   );
@@ -99,6 +99,8 @@ export function App() {
   const f = res.finance, fb = baseRes.finance;
   const dRoi = f.roi - fb.roi, dOp = f.operatingProfit - fb.operatingProfit, dInv = f.investment - fb.investment;
   const cls = (x: number, upGood = true) => (Math.abs(x) < 1e-9 ? 'neutral' : (x > 0) === upGood ? 'good' : 'bad');
+  // Investment: tốt/xấu theo TÁC ĐỘNG LÊN ROI (giữ OP kịch bản): đang lỗ thì Investment tăng làm ROI tốt lên
+  const invRoiEffect = f.investment > 0 && fb.investment > 0 ? f.operatingProfit / f.investment - f.operatingProfit / fb.investment : 0;
   const canReset = team ? (isLocal ? changed.length > 0 : team.state.role !== 'viewer' && changedPaths(BASE, inputs).some((p) => p.startsWith(`${team.state.role}.`))) : changed.length > 0;
 
   if (gateOpen) {
@@ -112,9 +114,9 @@ export function App() {
           <b>TFC What-if</b>
           <span>Ops + SC + Purchasing + Sales (SL) · {team ? `nhóm${useMockBackend() ? ' (giả lập)' : ''}` : 'một mình'}</span>
         </div>
-        <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}`} />
+        <Kpi label="ROI" value={pct(f.roi, 2)} delta={Math.abs(dRoi) > 1e-9 ? signed(dRoi, 'pt', 2) : undefined} cls={cls(dRoi)} sub={`R0 đề bài ${pct(data.finance.totals.roi, 2)}${res.sales.customers.some((c) => c.outOfRange) ? ' · ⚠ ngoài vùng dữ liệu R0' : ''}`} subTitle={res.sales.customers.some((c) => c.outOfRange) ? 'Service level của ít nhất 1 khách rơi xa R0 (mức thiếu > 2 × R0): penalty/doanh thu là ngoại suy — xem tab Sales' : undefined} />
         <Kpi label="Operating profit" value={eur(f.operatingProfit)} delta={Math.abs(dOp) > 0.5 ? signed(dOp, 'eur') : undefined} cls={cls(dOp)} sub={r0TwoSources(data, 'operatingProfit')} subTitle={R0_SOURCE_NOTE} />
-        <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={cls(dInv, false)} />
+        <Kpi label="Investment" value={eur(f.investment)} delta={Math.abs(dInv) > 0.5 ? signed(dInv, 'eur') : undefined} cls={Math.abs(dInv) < 0.5 ? 'neutral' : cls(invRoiEffect)} title={f.operatingProfit < 0 ? 'Đang lỗ: Investment tăng làm ROI tốt lên, giảm làm ROI xấu đi (màu theo tác động lên ROI)' : 'Màu theo tác động lên ROI'} />
         <div class="top-actions">
           {team && (
             <>

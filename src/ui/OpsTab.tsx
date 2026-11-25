@@ -171,7 +171,7 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
 
         <Card title="Tank yard (PulpStore, thuê ngoài)">
           <Grid>
-            <Metric label="Tank trung bình / đỉnh" value={`${num(R.tankYard.avgTanks, 1)} / ${R.tankYard.peakTanks}`} r0={`${data.ops.results.tankYard.usage ?? '—'} (dùng) / ${data.ops.results.tankYard.capacity ?? '—'} (sức chứa)`} causes={c('tank')} />
+            <Metric label="Tank trung bình / đỉnh" value={`${num(R.tankYard.avgTanks, 1)} / ${R.tankYard.peakTanks}`} r0={`dùng ${data.ops.results.tankYard.usage ?? 'thiếu dữ liệu'} (tab 10, app neo theo số này) · ${data.ops.results.tankYard.usageNoteTab5 !== null ? num(data.ops.results.tankYard.usageNoteTab5, 2) : 'thiếu dữ liệu'} (tab 5, ghi chú) · sức chứa ${data.ops.results.tankYard.capacity ?? '—'}`} causes={c('tank')} hint="Hai tab lệch: tab 10 Usage = 6 (làm tròn), ghi chú tab 5 = 5,85. App neo tank TB theo tab 10." />
             <Metric label="Chi phí tank yard" value={eur(R.tankYard.cost)} raw={R.tankYard.cost} base={B.tankYard.cost} deltaKind="eur" good="down" r0={eur(finR0(data, /tank yard/i))} basis="estimate" causes={c('tank')} hint="€25/tank/ngày (130 ngày làm việc) + €10/tank nhận + €100/tank giao cho sản xuất" />
           </Grid>
         </Card>

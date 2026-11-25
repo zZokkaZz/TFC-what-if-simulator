@@ -249,6 +249,10 @@ export interface SalesCustomerResult {
   penalty: number; // âm
   revenueR0: number;
   revenue: number;
+  /** Penalty đã bị chặn ở −contracted (doanh thu khách = 0) */
+  capped: boolean;
+  /** Mức thiếu SL > 2 × mức thiếu R0 (hoặc bị chặn): ngoại suy xa điểm R0 duy nhất → số kém tin cậy */
+  outOfRange: boolean;
   attainedCiR0: number;
   attainedCi: number; // = attained CI R0 × (revenue ÷ revenue R0)
 }

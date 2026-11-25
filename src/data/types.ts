@@ -142,7 +142,7 @@ export interface OpsDecisionsR0 {
 
 export interface OpsResultsR0 {
   rm: { capacity: number; usage: number; utilization: number; overflow: number; orderLinesPerWeek: number; palletsPerWeek: number; hoursPerWeek: number; flexFte: number };
-  tankYard: { tankDaysPerWeek: number; capacity: number | null; usage: number | null; tanksPerWeek: number | null };
+  tankYard: { tankDaysPerWeek: number; capacity: number | null; usage: number | null; tanksPerWeek: number | null; /** usage TB trong ghi chú tab 5 (5,85); null = thiếu */ usageNoteTab5: number | null };
   fg: { capacity: number; usage: number; utilization: number; overflow: number; orderLinesPerWeek: number; palletsPerWeek: number; hoursPerWeek: number; flexFte: number };
   line: { name: string; run: number; changeover: number; breakdown: number; unused: number; overtime: number; planAdherence: number; startupLossEur: number; outsourcedH: number };
   mixer: { name: string; cleaningShare: number; avgLotL: number };

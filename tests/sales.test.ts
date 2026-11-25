@@ -99,3 +99,35 @@ describe('Frozen period: CHƯA MÔ HÌNH — đổi không đổi số nào', ()
     }
   });
 });
+
+describe('C1: penalty bị chặn — doanh thu từng khách không âm; cờ "ngoài vùng dữ liệu R0"', () => {
+  it('baseline: không khách nào ngoài vùng, không bị chặn', () => {
+    for (const c of b.sales.customers) { expect(c.outOfRange).toBe(false); expect(c.capped).toBe(false); }
+  });
+  it('2 → 1 ca (SL rơi ~30 điểm): doanh thu mỗi khách ≥ 0, attained CI ≥ 0, khách vượt trần bị chặn đúng ở −contracted', () => {
+    const { r } = run((x) => { x.ops.shifts = 1; });
+    expect(r.sales.realizedRevenue).toBeGreaterThanOrEqual(0);
+    for (const c of r.sales.customers) {
+      expect(c.revenue).toBeGreaterThanOrEqual(0);
+      expect(c.attainedCi).toBeGreaterThanOrEqual(0);
+      expect(c.penalty).toBeGreaterThanOrEqual(-c.contracted);
+      expect(c.outOfRange).toBe(true);
+      if (c.capped) expect(c.revenue).toBe(0);
+    }
+    expect(r.sales.customers.some((c) => c.capped)).toBe(true); // F&G: ngoại suy tuyến tính vượt contracted
+    expect(r.finance.realizedRevenue).toBeCloseTo(r.sales.realizedRevenue, 6);
+  });
+  it('safety stock TP 3 → 2 (mức thiếu < 2 × R0): trong vùng; 3 → 1: ngoài vùng ở F&G', () => {
+    const r2 = run((x) => allProd(x, { safetyStockWeeks: 2 })).r;
+    expect(r2.sales.customers.every((c) => !c.outOfRange)).toBe(true);
+    const r1 = run((x) => allProd(x, { safetyStockWeeks: 1 })).r;
+    const fg = r1.sales.customers.find((c) => c.customer === 'Food & Groceries')!;
+    expect(fg.shortfall).toBeGreaterThan(2 * fg.shortfallR0);
+    expect(fg.outOfRange).toBe(true);
+    expect(fg.capped).toBe(false);
+  });
+  it('cảnh báo service level ghi "NGOÀI VÙNG DỮ LIỆU R0" khi có khách ngoài vùng', () => {
+    const { i, r } = run((x) => { x.ops.shifts = 1; });
+    expect(crossWarnings(d, base, i, r, b).find((w) => w.id === 'sc-sl')!.detail).toMatch(/NGOÀI VÙNG DỮ LIỆU R0/);
+  });
+});

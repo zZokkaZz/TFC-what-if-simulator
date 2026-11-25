@@ -12,7 +12,7 @@ Tab "Giả định & R0" trong app cho phép chỉnh các giả định ước l
 
 ## 0. Ghi chú dữ liệu
 
-- File gốc tên `TFC Round Trial.xlsx`, đã `git mv` thành `data/TFC_Round0.xlsx`.
+- File gốc tên `TFC Round Trial.xlsx`, đã `git mv` thành `data/TFC_Round0.xlsx`. Bản upload 25/11 (tối) đã copy đè vào `data/` và xóa ở thư mục gốc (mục 17).
 - Tab luật có tên `Luật for ops and others phòng b`, không phải `8_Luật game`, vì Excel giới hạn tên tab 31 ký tự.
 - Cột "Start-up loss/mẻ (€)" ở tab 7 thực ra là **tổng cả round** của từng SKU: cộng 6 SKU ra 8.434.
 - Tuần 0 / ngày 0 (tab 12 / tab 11) trùng tuần 1 / ngày 1, nên bị bỏ.
@@ -265,3 +265,15 @@ Theo yêu cầu người dùng: nối service level ước tính (availability N
 | Production interval 10 → 5 | → −26,47% | Changeover ×2 → adherence ↓ + thiếu hàng ↑ |
 | Production interval 10 → 15 | → −3,93% | |
 | Vitamin C → NCC SYI | → −6,80% | |
+
+## 17. Sửa sau rà soát 4 phòng (25/11/2026)
+
+- **Dữ liệu mới** (`TFC Round Trial.xlsx` upload lên `main`, đã copy vào `data/TFC_Round0.xlsx`, xóa bản ở thư mục gốc). So từng ô với bản trước: chỉ 2 tab đổi.
+  - 5_Operations D29: ghi chú tank yard thêm "usage TB 5,85 tank…".
+  - 6_Sales: thêm cột Carbon footprint, Revenue/tuần, MAPE theo SKU, €/tuần & GM theo khách × SKU, bảng Distributor (dòng 51–53), ghi chú Webshop; distribution cost và nhu cầu khách × SKU có số lẻ (tổng 192.114,41 / 307.782,22); G9 "Revenue (€, 26 tuần)", J16 "Assignable Contribution Rate".
+  - ROI R0 vẫn −7,68%; mọi số đã hiển thị không đổi.
+- **Đọc theo tiêu đề không còn "khớp cột đầu tiên"**: `build-data.ts` dừng với lỗi nếu một mẫu tiêu đề khớp nhiều cột. Đã sửa 3 mẫu mơ hồ: "Vận chuyển" (tab 4, lẫn "Vận chuyển chọn được"), "Revenue" (tab 6, lẫn "Revenue/tuần (€)"), "Nhu cầu/tuần" (khách × SKU, lẫn "Nhu cầu/tuần (€)").
+- **Penalty có trần**: penalty khách ≤ contracted → doanh thu khách ≥ 0. Trước đây 2 → 1 ca cho doanh thu F&G −€880.333, attained CI −0,684.
+- **"Ngoài vùng dữ liệu R0"** (quy ước hiển thị, không phải luật game): mức thiếu SL > **2 ×** mức thiếu R0 của khách, hoặc R0 không thiếu mà kịch bản thiếu, hoặc penalty bị chặn. Penalty là ngoại suy tuyến tính từ 1 điểm R0 duy nhất mỗi khách → chỉ nên đọc chiều hướng. Hiện ở tab Sales, cảnh báo service level và dưới ROI trên thanh trên.
+- **Tank yard hai nguồn**: tab 10 Usage = 6 (app neo tank TB theo số này), ghi chú tab 5 = 5,85. App hiện cả hai (luật 4).
+- **Màu Investment trên thanh trên** theo tác động lên ROI (đang lỗ: Investment tăng → ROI tốt lên → xanh).

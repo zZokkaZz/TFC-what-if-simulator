@@ -67,8 +67,12 @@ export function customerPicking(data: Round0Data): CustomerPicking[] {
  *    Neo TỪNG KHÁCH vì R0 cho thấy tỷ lệ penalty/điểm thiếu khác nhau (5,1% / 2,5% / 1,9% contracted) → không có
  *    một công thức chung. Đạt hoặc vượt SL hứa → penalty 0; "thưởng nhỏ khi vượt" (luật) CHƯA tính.
  *  - Contracted sales giữ R0 (nhu cầu và giá hợp đồng chưa mô hình).
+ *  - Chặn penalty ≤ contracted (doanh thu khách ≥ 0). Mức thiếu > 2 × mức thiếu R0 hoặc bị chặn → cờ "ngoài vùng dữ liệu R0".
  *  - Attained CI kịch bản = attained CI R0 (tab 6) × (revenue mới ÷ revenue R0) → baseline = đúng ô tab 6.
  */
+/** Mức thiếu SL quá bao nhiêu lần mức thiếu R0 thì coi là ngoài vùng dữ liệu R0 (quy ước hiển thị, không phải luật game). */
+export const OUT_OF_RANGE_FACTOR = 2;
+
 export function simulateSales(data: Round0Data, sc: ScResults): SalesResults {
   const fin = (label: string) => data.finance.lines.find((l) => l.label.normalize('NFC') === label.normalize('NFC'))?.value ?? null;
   const dSl = Object.fromEntries(sc.products.map((p) => [p.sku, p.slPiecesEst - p.slPiecesR0])) as Record<SkuKey, number>;
@@ -94,12 +98,18 @@ export function simulateSales(data: Round0Data, sc: ScResults): SalesResults {
     const penaltyRaw = Math.abs(shortfall - shortfallR0) < 1e-12 ? penaltyR0
       : shortfallR0 > 0 ? penaltyR0 * (shortfall / shortfallR0)
       : -contracted * avgRate * shortfall;
-    const penalty = penaltyRaw === 0 ? 0 : penaltyRaw; // tránh -0
+    // Chặn: penalty không vượt contracted → doanh thu khách ≥ 0 (không có dữ liệu R0 cho vùng này)
+    const capped = penaltyRaw < -contracted;
+    const penaltyCapped = capped ? -contracted : penaltyRaw;
+    const penalty = penaltyCapped === 0 ? 0 : penaltyCapped; // tránh -0
     const revenue = contracted + penalty;
+    // "Ngoài vùng dữ liệu R0": mức thiếu > OUT_OF_RANGE_FACTOR × mức thiếu R0 (ngoại suy tuyến tính quá xa điểm R0 duy nhất),
+    // hoặc R0 không thiếu mà kịch bản thiếu, hoặc đã phải chặn
+    const outOfRange = capped || (shortfallR0 > 0 ? shortfall > OUT_OF_RANGE_FACTOR * shortfallR0 : shortfall > 0);
     return {
       customer: k.customer, contractIndex: k.contractIndex, serviceLevelType: k.serviceLevelType, promised: k.serviceLevel,
       slOrderLinesR0: r.slOrderLines, slOrderLines, slPiecesR0: r.slPieces, slPieces, shortfallR0, shortfall,
-      contracted, penaltyR0, penalty, revenueR0: contracted + penaltyR0, revenue,
+      contracted, penaltyR0, penalty, revenueR0: contracted + penaltyR0, revenue, capped, outOfRange,
       attainedCiR0: r.attainedContractIndex, attainedCi: r.attainedContractIndex * (contracted + penaltyR0 !== 0 ? revenue / (contracted + penaltyR0) : 1),
     };
   });
