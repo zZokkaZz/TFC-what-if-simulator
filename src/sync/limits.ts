@@ -33,6 +33,15 @@ export const PUR_TEXT = ['transport', 'tradeUnit', 'quality', 'deliveryWindow'] 
 export const PUR_TEXT_MAX = 20;
 export const PUR_COMPONENTS = ['Pack', 'PET', 'Orange', 'Mango', 'Vitamin C'] as const;
 
+/** Sales — ô hợp đồng từng khách. Tên khách = tab 6 (test kiểm tra khớp dữ liệu và firestore.rules).
+ *  Lựa chọn hợp lệ của trade unit / order deadline đọc từ sheet; ở đây (và rules) chỉ chặn độ dài chuỗi. */
+export const SALES_CUSTOMERS = ['Food & Groceries', 'LAND Market', "Dominick's"] as const;
+export const SALES_LIMITS = {
+  ciGame: { min: 0.5, max: 2, label: 'Contract index khách (game hiển thị)' } as NumLimit,
+};
+export const SALES_TEXT = ['tradeUnit', 'orderDeadline'] as const;
+export const SALES_TEXT_MAX = 20;
+
 export interface Issue { path: string; label: string; value: string; message: string }
 
 const fmt = (v: unknown) => (typeof v === 'number' ? v.toLocaleString('vi-VN') : JSON.stringify(v));
@@ -75,6 +84,12 @@ export function validateDept(dept: Dept, data: unknown): Issue[] {
       for (const k of ['ciGame', 'reliabilityActual', 'rejectionActual'] as const) {
         if (t?.[k] !== null) add(`purchasing.terms.${c}.${k}`, `${PUR_LIMITS[k].label} (${c})`, t?.[k], checkNumber(t?.[k], PUR_LIMITS[k]));
       }
+    }
+  } else if (dept === 'sales') {
+    for (const [c, t] of Object.entries((d.customers ?? {}) as Record<string, Record<string, unknown>>)) {
+      if (!(SALES_CUSTOMERS as readonly string[]).includes(c)) { add(`sales.customers.${c}`, `Khách ${c}`, c, 'khách hàng không hợp lệ'); continue; }
+      for (const k of SALES_TEXT) if (typeof t?.[k] !== 'string' || (t[k] as string).length > SALES_TEXT_MAX) add(`sales.customers.${c}.${k}`, `${k} (${c})`, t?.[k], 'giá trị không hợp lệ');
+      if (t?.ciGame !== null) add(`sales.customers.${c}.ciGame`, `${SALES_LIMITS.ciGame.label} (${c})`, t?.ciGame, checkNumber(t?.ciGame, SALES_LIMITS.ciGame));
     }
   }
   return out;

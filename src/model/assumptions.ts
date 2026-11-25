@@ -85,6 +85,24 @@ export const COEFFS = {
     usedIn: 'src/model/ops.ts (plan adherence)',
     verifyWith: 'Plan adherence vòng trial có bật PM Minimal hoặc Extensive (so với R0 None).',
   },
+  salesCiPerStepTradeUnit: {
+    value: 0,
+    label: 'Sales — contract index khách đổi theo mỗi bậc trade unit nhỏ hơn (Pallet → Pallet layer → Box)',
+    unit: '× CI R0 mỗi bậc',
+    source: 'Info Center (tab 6 F61): trade unit nhỏ → contract index cao — chỉ cho HƯỚNG, không cho độ lớn; game không công bố công thức (tab 6 B70). R0 chỉ có 1 tổ hợp mỗi khách, CI 3 khách khác nhau còn do value for money, thị phần, SKU → không tách được phần do trade unit. Đặt 0 = KHÔNG tự cộng CI khi đổi trade unit (chỉ có chi phí soạn hàng); doanh thu chỉ đổi khi đội nhập "CI game hiển thị".',
+    status: 'chưa xác minh',
+    usedIn: 'src/model/sales.ts (contract index ước lượng khi chưa nhập CI game)',
+    verifyWith: 'CI game hiển thị sau đàm phán khi chỉ đổi trade unit của 1 khách (vòng trial): hệ số = CI mới ÷ CI R0 − 1 trên mỗi bậc.',
+  },
+  salesCiPerStepOrderDeadline: {
+    value: 0,
+    label: 'Sales — contract index khách đổi theo mỗi bậc order deadline muộn hơn (12.00 → 14.00 → 17.00 → 20.00)',
+    unit: '× CI R0 mỗi bậc',
+    source: 'Info Center (tab 6 F60): deadline muộn → contract index cao — chỉ cho HƯỚNG, không cho độ lớn; game không công bố công thức (tab 6 B70). Đặt 0 = KHÔNG tự cộng CI khi đổi deadline; doanh thu chỉ đổi khi đội nhập "CI game hiển thị".',
+    status: 'chưa xác minh',
+    usedIn: 'src/model/sales.ts (contract index ước lượng khi chưa nhập CI game)',
+    verifyWith: 'CI game hiển thị sau đàm phán khi chỉ đổi order deadline của 1 khách (vòng trial).',
+  },
 } satisfies Record<string, Coeff>;
 
 export type CoeffId = keyof typeof COEFFS;
@@ -164,7 +182,10 @@ export const ASSUMPTIONS: Assumption[] = [
   { id: 'mixerHours', label: 'Giờ máy trộn sẵn có', value: 'Bằng giờ dây chuyền (giờ ca + overtime)', why: 'Không có số ca riêng cho máy trộn trong dữ liệu.' },
   { id: 'lineChange', label: 'Chi phí đổi máy trộn/dây chuyền', value: 'Chưa tính (0 €); chỉ đổi phí năm, đầu tư, thông số', why: 'Dữ liệu không có chi phí chuyển đổi.' },
   { id: 'availability', label: 'Availability nguyên liệu (cho plan adherence)', value: 'R0 (Vitamin C 84,3%…) ± thay đổi theo safety stock/lot size (M2) và NCC: lead time, reliability (M3 Purchasing)', why: 'Dạng cộng thêm so với R0 nên baseline = đúng số game; độ lớn là ước lượng (ASSUMPTIONS.md mục 11, 15).' },
-  { id: 'demand', label: 'Nhu cầu, order lines', value: 'Giữ số R0', why: 'Chưa có ô quyết định hợp đồng Sales (nhu cầu, promotion).' },
+  { id: 'demand', label: 'Nhu cầu, order lines', value: 'Giữ số R0', why: 'Chưa có ô promotion / SKU khách (Sales). Đổi trade unit không đổi số dòng đơn.' },
+  { id: 'salesTradeUnit', label: 'Trade unit khách → giờ soạn hàng kho TP', value: 'Định mức luật (10 phút/dòng + 6 phút/pallet hoặc layer + 3 phút/thùng); phần lẻ mỗi dòng soạn theo đơn vị mới; neo R0 qua replay tab 11', why: 'Luật cho định mức; cách game chia phần lẻ chưa rõ (giả định "soạn hàng" ở trên). Trade unit là "mức đặt tối thiểu và bội số" — ảnh hưởng cỡ đơn/phí phân phối CHƯA mô hình.' },
+  { id: 'salesDeadline', label: 'Order deadline khách', value: 'CHƯA MÔ HÌNH vào số: chỉ cảnh báo (và CI theo COEFFS, đang = 0)', why: 'Info Center: "quá muộn → kho TP không kịp xử lý dòng đơn, ảnh hưởng giao hàng" — không có độ lớn, không có mốc giờ.' },
+  { id: 'salesCi', label: 'Contract index khách khi đổi điều khoản', value: 'Nhập "CI game hiển thị"; bỏ trống → CI R0 × (1 + hệ số × số bậc), hệ số trong COEFFS (đang 0). Contracted sales = R0 × CI ÷ CI R0; penalty co giãn cùng tỷ lệ', why: 'Game không công bố công thức CI (tab 6 B70).' },
   { id: 'obsolete', label: 'Obsolete & Costs of scrap (C2)', value: 'Theo tuổi tồn: tuổi lúc xuất ≈ Đều[SS, SS + chu kỳ] + phân tán σ (hiệu chỉnh R0 × 2); vượt hạn dùng × (1 − shelf life khách đòi) thì hủy; scrap = €40.203 × tỷ lệ giá trị obsolete', why: 'Game không công bố công thức (ASSUMPTIONS.md mục 18).' },
   { id: 'obsoleteRework', label: 'CHƯA MÔ HÌNH: sản xuất bù hàng hủy', value: 'Hàng obsolete bị hủy KHÔNG kéo theo sản xuất bù (không thêm giờ dây chuyền, máy trộn, nguyên liệu) và KHÔNG làm giảm hàng bán / service level; giờ hủy hàng kho TP vẫn theo obsolete R0', why: 'Luật: "hàng hết hạn → hủy + sản xuất lại" nhưng không có độ lớn. Hệ quả: khi obsolete tăng (interval dài, safety stock TP cao) ROI vẫn còn lạc quan hơn thực tế.' },
   { id: 'daily', label: 'Dao động theo ngày', value: 'Replay 130 ngày tab 11 (tồn tuần × nhu cầu dự báo ≈ TB tuần này + tuần sau), co giãn biên độ theo cỡ lô mới', why: 'Nhịp dao động giữ theo lịch R0 khi đổi interval/lot size; proxy dự báo là ước lượng.' },

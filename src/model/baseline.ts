@@ -1,6 +1,7 @@
 import type { ComponentKey, Round0Data, SkuKey } from '../data/types';
 import type { Inputs } from './types';
 import { defaultTerms } from './purchasing';
+import { baselineSalesTerms } from './sales';
 
 /** Bộ quyết định Round 0 (baseline) đọc từ dữ liệu. */
 export function baselineInputs(data: Round0Data): Inputs {
@@ -30,6 +31,6 @@ export function baselineInputs(data: Round0Data): Inputs {
       suppliers: Object.fromEntries(data.purchasing.contracts.map((c) => [c.component, c.supplier])) as Record<ComponentKey, string>,
       terms: Object.fromEntries(data.purchasing.contracts.map((c) => [c.component, defaultTerms(data, c.component, c.supplier)])) as Inputs['purchasing']['terms'],
     },
-    sales: {},
+    sales: { customers: baselineSalesTerms(data) },
   };
 }

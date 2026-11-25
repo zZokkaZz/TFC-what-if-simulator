@@ -1,6 +1,6 @@
 # ASSUMPTIONS — Giả định & hiệu chỉnh của TFC Simulator
 
-Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu** (ô hợp đồng Sales chưa làm). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
+Phiên bản: **M1 (Ops) + M1.5 (đồng bộ nhóm) + M2 (Supply Chain) + M3 Purchasing + M3 Sales phần service level → penalty → doanh thu + M3 Sales mục 1 (trade unit, order deadline, CI game khách)** (ô SL hứa, shelf life, payment term khách, promotion chưa làm). Mọi số R0 lấy từ `data/TFC_Round0.xlsx` qua `npm run data`.
 
 Nhãn trên giao diện:
 - **ước lượng**: giả định không có trong luật game.
@@ -288,6 +288,8 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 | `penaltyShortfallExponent` — penalty theo mức thiếu | 1 (tuyến tính) | chưa xác minh | `src/model/sales.ts` |
 | `capacitySlopeB` — V1 phương án B | 0,5 | chưa xác minh | chưa dùng (chờ chọn) |
 | `capacitySlopeC` — V1 phương án C | 0,25 | chưa xác minh | chưa dùng (chờ chọn) |
+| `salesCiPerStepTradeUnit` — CI khách mỗi bậc trade unit nhỏ hơn | 0 | chưa xác minh | `src/model/sales.ts` (mục 19) |
+| `salesCiPerStepOrderDeadline` — CI khách mỗi bậc deadline muộn hơn | 0 | chưa xác minh | `src/model/sales.ts` (mục 19) |
 
 **Khi có dữ liệu vòng trial:** sửa `value` (và `status`, `source`) trong `COEFFS` → `npm run verify`. Test đọc giá trị từ `COEFFS`, không gõ lại số; baseline R0 không phụ thuộc các hệ số này (đã thử đổi mốc 2 → 3 và mũ 1 → 1,3: 240/240 vẫn xanh). `tests/coeffs.test.ts` còn kiểm tra mục `usedIn` khớp thực tế: hệ số ghi "chưa dùng" mà có file đọc (hoặc ngược lại) thì test đỏ.
 
@@ -344,3 +346,41 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 | Interval 10 → 15 | −3,93% | −7,81% | −8,37% | 80,3% | −€280.370 | €86.071 |
 | Interval 10 → 20 | −3,68% | −9,37% | −10,17% | 81,0% | −€264.369 | €123.807 |
 | SS TP 3 → 5 | −8,60% | −12,70% | −12,70% | 78,7% | −€306.284 | €207.410 |
+
+## 19. M3 Sales mục 1 — trade unit, order deadline, CI game khách (25/11/2026)
+
+**Dữ liệu mới** (`TFC Round Trial.xlsx` trên `main` → `data/TFC_Round0.xlsx`, xóa bản ở gốc). So từng ô với bản trước: tab 1 C29 sửa 0 → 0,843 (lỗi đã ghi trong PROGRESS, app không đọc ô này); tab 6 thêm khối **"LỰA CHỌN HỢP ĐỒNG SALES"** (dòng 55–72). Không ô nào khác đổi; ROI R0 vẫn −7,68%.
+
+**Đọc khối lựa chọn** (`build-data.ts`, theo tiêu đề "Ô quyết định" / "Lựa chọn…" / "Tác động…" / "R0 <khách>"): 10 ô → `sales.options` (lựa chọn tách theo "|", khoảng "75 – 100" → min/max, R0 từng khách, câu tác động Info Center), ghi chú dưới khối → `sales.optionNotes`, bảng nguyên văn `sales-options`. Ô lạ hoặc cột "R0 <khách>" không khớp bảng hợp đồng → build-data dừng với lỗi. Dropdown trên app đọc từ đây, không gõ cứng.
+
+**Hai bảng cùng tab 6 ghi giờ khác kiểu** (luật 4): bảng hợp đồng `20:00`, khối lựa chọn `20.00`. App so theo nghĩa (phút trong ngày) và dùng chuỗi của khối lựa chọn cho ô nhập. Bảng "Đối chiếu giá trị R0" ở cuối tab Sales: khớp cả 27 ô (SL/shelf life 95 = 0,95; payment term; trade unit; promotion…), giá trị R0 nằm trong lựa chọn/khoảng (test `tests/sales-contract.test.ts`).
+
+**Không đổi gì → đúng sheet** (`tests/sheet-fidelity.test.ts` đọc thẳng file): lựa chọn & R0 của khối; ô baseline = chuỗi R0 của khối; contract index 3 khách = tab 6; 3 dòng Contracted sales = tab 2; giờ kho TP = tab 5; ROI = tab 2.
+
+| Ô | Đi vào số nào | Loại |
+|---|---|---|
+| Trade unit khách | Giờ soạn hàng kho TP (`customerPicking` đọc ô Sales): 10 phút/dòng + 6 phút/pallet hoặc layer + 3 phút/thùng (luật); phần lẻ TB nửa pallet/dòng soạn theo đơn vị mới (giả định mục 6) → giờ kho TP, đỉnh, thời vụ (neo R0 qua replay tab 11) | Định mức luật + giả định cũ |
+| Order deadline | **CHƯA MÔ HÌNH vào số**: chỉ cảnh báo kèm câu Info Center lấy từ sheet. Luật: "quá muộn → không kịp xử lý dòng đơn" — không có độ lớn, không có mốc | — |
+| CI game hiển thị (mỗi khách) | Contracted sales = R0 (tab 2) × CI ÷ CI R0; penalty R0 co giãn cùng tỷ lệ rồi theo mức thiếu SL | Ước lượng (nhu cầu giữ R0) |
+| CI khi đổi điều khoản mà **bỏ trống** CI game | CI R0 × (1 + `salesCiPerStepTradeUnit` × bậc trade unit + `salesCiPerStepOrderDeadline` × bậc deadline). Bậc: Pallet → layer → Box = +1/bậc; deadline muộn hơn 1 mốc = +1 | COEFFS, **= 0**, chưa xác minh |
+
+**Vì sao hệ số CI = 0:** Info Center chỉ cho hướng (trade unit nhỏ / deadline muộn → CI cao), game không công bố công thức (tab 6 B70). R0 có 1 tổ hợp/khách, CI 3 khách còn khác nhau do value for money, thị phần, SKU → không tách được. Đặt 0 = app KHÔNG tự cộng doanh thu khi đổi trade unit/deadline: chỉ thấy chi phí soạn hàng, cộng cảnh báo "Chưa nhập CI game". Hệ quả: nếu không nhập CI game thì đổi sang đơn vị nhỏ luôn trông xấu hơn thực tế. Có CI game (đàm phán thử) → nhập ô, hoặc sửa hệ số trong `COEFFS`.
+
+**Người dùng chốt (25/11): giữ 2 hệ số = 0.** Trên web, dưới ô trade unit / order deadline của mỗi khách (khi CI game trống) luôn có câu: *"Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng."* (tô vàng khi đã đổi điều khoản; ẩn khi đã nhập CI game).
+
+**Chưa mô hình:** trade unit là "mức đặt tối thiểu và bội số" → cỡ đơn, phí phân phối (giữ R0); số dòng đơn/tuần giữ R0.
+
+**Độ lớn** (CI chưa nhập, hệ số 0):
+
+| Kịch bản | Soạn hàng (giờ/tuần) | Giờ kho TP | Outbound flexible | ROI |
+|---|---|---|---|---|
+| R0 | 38,9 | 100,0 | €3.725 | −7,68% |
+| F&G → Box | 47,6 | 108,9 | €6.111 | −7,74% |
+| F&G → Pallet | 37,5 | 98,6 | €3.489 | −7,68% |
+| LAND → Box | 47,5 | 108,8 | €6.059 | −7,74% |
+| Dominick's → Box | 44,5 | 105,7 | €5.058 | −7,72% |
+| Dominick's → Pallet layer | 39,7 | 100,8 | €3.866 | −7,69% |
+| Cả 3 khách → Box | 61,9 | 123,4 | €13.265 | −7,92% |
+| F&G nhập CI game 1,05 (R0 1,0085) | 38,9 | 100,0 | €3.725 | −6,60% |
+
+**Đồng bộ:** `inputs.sales = { customers: { [khách]: { tradeUnit, orderDeadline, ciGame } } }`. Sanitize bỏ nhánh "sales rỗng" (bản lưu cũ `{}` → baseline). `firestore.rules`: `validSales` / `validCustMap` / `validCust` viết tối giản (chỉ chặn độ dài chuỗi ≤ 20, CI 0,5–2, khách & trường lạ, khóa phẳng cũ). `scripts/test-rules.mjs` 49/49 trên emulator. **Người dùng cần Publish lại rules** — chưa Publish thì phần Sales không lưu được lên bản chung (app báo lỗi rõ).

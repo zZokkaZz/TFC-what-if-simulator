@@ -81,8 +81,22 @@ service cloud.firestore {
         && (!('Mango' in m) || validTerms(m['Mango']))
         && (!('Vitamin C' in m) || validTerms(m['Vitamin C']));
     }
+    // Sales: điều khoản hợp đồng từng khách (giới hạn khớp src/sync/limits.ts SALES_LIMITS, SALES_TEXT_MAX).
+    // Viết tối giản như validTerms (giới hạn 1.000 biểu thức/request). Lựa chọn hợp lệ đọc từ sheet → rules chỉ chặn độ dài.
+    function validCust(c) {
+      return c.keys().hasOnly(['tradeUnit', 'orderDeadline', 'ciGame'])
+        && c.tradeUnit.size() <= 20 && c.orderDeadline.size() <= 20
+        && (c.ciGame == null || (c.ciGame >= 0.5 && c.ciGame <= 2));
+    }
+    function validCustMap(m) {
+      return m.keys().hasOnly(['Food & Groceries', 'LAND Market', "Dominick's"])
+        && (!('Food & Groceries' in m) || validCust(m['Food & Groceries']))
+        && (!('LAND Market' in m) || validCust(m['LAND Market']))
+        && (!("Dominick's" in m) || validCust(m["Dominick's"]));
+    }
     function validSales(d) {
-      return d.size() <= 50;
+      return d.keys().hasOnly(['customers'])
+        && (!('customers' in d) || validCustMap(d.customers));
     }
     function validDeptData(dept, d) {
       return d is map && (

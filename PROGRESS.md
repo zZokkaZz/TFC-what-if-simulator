@@ -25,19 +25,21 @@
 | M3 Sales (SL) | Service level TP ← safety stock TP, interval, plan adherence (gồm availability NL, capacity); SL khách → penalty service level (neo từng khách, ước lượng) → realized revenue; KPI SL outbound; frozen period = chưa mô hình | `src/model/sales.ts`, `src/model/supplyChain.ts`, `src/ui/SalesTab.tsx`, `ASSUMPTIONS.md` mục 16 |
 | Sửa sau rà soát | Dữ liệu mới (tab 5 D29, tab 6 cột mới); tiêu đề mơ hồ → lỗi; penalty có trần + cờ "ngoài vùng dữ liệu R0"; màu Investment theo ROI; tank yard 2 nguồn; bảng nguyên văn tab 6 | `scripts/build-data.ts`, `src/model/sales.ts`, `ASSUMPTIONS.md` mục 17 |
 | C2 + V1 | Obsolete & Costs of scrap theo tuổi tồn (hiệu chỉnh R0, cảnh báo đỏ); plan adherence tách phần thiếu NL / capacity, số chính B (0,5) + thận trọng min(B, C) | `src/model/supplyChain.ts`, `finance.ts`, `ui/conservative.ts`, `ASSUMPTIONS.md` mục 18 |
+| M3 Sales mục 1 | Đọc khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) → dropdown; ô trade unit (→ giờ soạn hàng kho TP), order deadline (chỉ cảnh báo), CI game khách (→ contracted sales); hệ số CI trong COEFFS (= 0); rules Firestore | `src/model/sales.ts`, `src/ui/SalesTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 19 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 278 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 313 test (`npm test`) + 49 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
 - `tests/sales.test.ts` — M3 Sales: **bắt buộc** giảm safety stock TP 3 → 1 làm ROI (và Operating profit) xấu đi; frozen period không đổi số.
 - `tests/purchasing.test.ts` — M3 Purchasing: hướng tác động, ô số game, cảnh báo, đồng bộ.
+- `tests/sales-contract.test.ts` — M3 Sales mục 1: lựa chọn đọc từ sheet, hướng trade unit → giờ kho TP, deadline chưa mô hình, CI game → contracted, đồng bộ & rules.
 - `tests/fixes-review.test.ts` — các chỗ sửa sau phiên tự kiểm tra (câu ROI khi lỗ, cảnh báo lot size, mẻ tối thiểu máy trộn, số game in, định dạng ±0).
 
 ## 2. Việc tiếp theo (CHỜ người dùng ra lệnh — không tự làm)
 
-1. **M3 — Sales, phần ô hợp đồng** (SL hứa, shelf life, order deadline, trade unit, payment term khách, promotion → contract index, giờ soạn hàng, nhu cầu). Phần service level → penalty → doanh thu đã xong. Người dùng muốn làm **từng mục một**, hỏi trước khi bắt đầu. Các câu hỏi trước M3 (penalty, CI sau đàm phán, round khác, payment terms) người dùng sẽ trả lời sau.
+1. **M3 — Sales, các ô hợp đồng còn lại**, từng mục một (hỏi trước): mục 2 shelf life (→ `allowedAge` trong `supplyChain.ts`, hiện lấy max 3 khách R0), mục 3 promotion (bảng tab 6 dòng 63: None 0 / Light 0,5–1 / Middle 1,5–2 / Heavy 4–5,5%, VfM ×2, slowmover ×2), mục 4 SL hứa, mục 5 payment term khách (→ Payment terms, neo 365.589). Mục 1 (trade unit, order deadline, CI game) đã xong — PR chờ merge. Lựa chọn dropdown đọc từ `data.sales.options`. Các câu hỏi trước M3 (penalty, CI sau đàm phán, round khác, payment terms) người dùng sẽ trả lời sau.
 2. **M4 — Finance đầy đủ** (payment terms → AR/AP, các dòng còn giữ R0).
 3. **M5 — Kịch bản có tên + so sánh + "Copy link kịch bản" + Xuất/Nhập JSON** (snapshot nhóm đã có một phần).
 
@@ -48,7 +50,8 @@ Test: 278 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
   - Nhãn **"chưa mô hình"** (số đứng yên = R0): Sales obsolete. (SL outbound, điểm phòng Sales đã nối ở M3 Sales — ước lượng.) (Purchasing đã nối ở M3 Purchasing: rejection/reliability "ước lượng", raw material costs "mô hình".) (trong `src/model/kpi.ts` đổi `scenarioBasis` + công thức kịch bản). Rejection/reliability NCC mới chỉ có số cam kết → "ước lượng" trừ khi đội nhập số game.
   - **"R-2: thiếu"** (dấu ? đỏ): số lịch sử game KHÔNG có trong sheet → M3/M4 KHÔNG tạo ra được, **cấm tự điền**; chỉ người dùng bổ sung vào sheet (số có trong game: tab dashboard từng phòng, rê chuột điểm Round -2).
 - **Số dashboard còn thiếu trong sheet** (app đang ghi "thiếu"): R-2 của Purchasing (rejection, raw material costs, delivery reliability), Sales (gross margin tổng, obsolete, SL outbound order lines); nhận xét game của Purchasing/Operations/Sales. Gợi ý người dùng thêm bảng "DASHBOARD" mỗi tab như tab 7 dòng 48–53.
-- **Lỗi trong sheet (người dùng sửa):** tab 1 ô "Availability Vitamin C" = 0 vì công thức trỏ `'7_Supply Chain'!H29` (phải là I29 = 84,3%). App không đọc ô này.
+- ~~Lỗi tab 1 ô "Availability Vitamin C" = 0~~ — đã sửa trong bản upload 25/11 (C29 = 0,843).
+- Tab 6 B69 (khối lựa chọn, ghi chú "Kiểm chứng") viết "F&G và LAND 2,9–3,7% nằm trong 3,0–4,0%": 2,9% thực ra hơi dưới 3,0% — app chỉ hiện nguyên văn, không dùng ô này.
 
 ## 4. Quyết định đã chốt (không tự đổi)
 
@@ -63,6 +66,8 @@ Test: 278 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 
 ## 5. Việc người dùng phải làm tay (Claude không làm được)
 
+- **M3 Sales mục 1 đổi `firestore.rules` (validSales) → Publish lại rules.** Chưa Publish thì phần Sales (trade unit, deadline, CI game) không lưu lên bản chung.
+- Hệ số CI Sales (`COEFFS.salesCiPerStepTradeUnit`, `salesCiPerStepOrderDeadline`) **người dùng chốt giữ = 0**; web ghi rõ "Chưa tính phần giá tăng (CI)…" cạnh ô. Có CI game thì nhập ô "CI game hiển thị".
 - **M3 Purchasing đổi `firestore.rules` → Publish lại rules** trong Firebase Console (Firestore → Rules). Chưa Publish thì ghi phần Purchasing có `terms` sẽ bị chặn (báo lỗi rõ trên app).
 
 - Upload file .xlsx mới khi sửa Google Sheet.
@@ -71,6 +76,8 @@ Test: 278 test (`npm test`) + 40 test rules trên emulator (`scripts/test-rules.
 - Giữ và gửi mã đội cho đồng đội qua kênh riêng.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
+
+- 25/11/2026 — Dữ liệu mới (tab 6 khối LỰA CHỌN HỢP ĐỒNG SALES, tab 1 C29) + M3 Sales mục 1 (session_018GSfKVc6kuoV5G75kcCjSs, nhánh `claude/modest-curie-joo7me`): trade unit → giờ soạn hàng kho TP, order deadline chỉ cảnh báo, CI game khách → contracted; hệ số CI trong COEFFS = 0; 312/312 + rules 49/49. Người dùng chốt giữ hệ số CI = 0 + thêm ghi chú cạnh ô trên web (313/313). Cần người dùng: Publish rules, merge PR #7.
 
 - 25/11/2026 — PR #6 bổ sung: `obsoleteAgeSpreadScale` = 2 (người dùng chọn); kiểm tra PM → hệ số `maintenanceDisruptionWeight` = 0 (người dùng chọn: bảo trì có lịch trước, không làm trễ kế hoạch như hỏng đột xuất); bảng kịch bản thêm tổ hợp Training; ghi "chưa mô hình: sản xuất bù hàng hủy" trên web.
 - 25/11/2026 — C2 + V1 (nhánh `claude/c2-v1`): obsolete/scrap theo tuổi tồn, V1 B chính + thận trọng; 270/270. Cần người dùng xem độ dốc obsolete (SS TP 5 → ~92%) và hệ số `obsoleteAgeSpreadScale`.

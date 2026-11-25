@@ -44,7 +44,9 @@
 
 ---
 
-## M3 — Sales (phần service level → penalty → doanh thu ✅ 25/11/2026 — ASSUMPTIONS.md mục 16; ô hợp đồng: CHƯA)
+## M3 — Sales (phần service level → penalty → doanh thu ✅ 25/11/2026 — ASSUMPTIONS.md mục 16; mục 1 trade unit / order deadline / CI game ✅ — mục 19; shelf life, promotion, SL hứa, payment term: CHƯA)
+
+> Lựa chọn của mọi ô hợp đồng đã có trong sheet (tab 6 dòng 55–72) → `data.sales.options`. Dùng đó cho dropdown, không gõ cứng.
 
 ### Dữ liệu có trong sheet (tab 6, tab 2, tab 10)
 - `sales.contracts`: 3 khách (cửa hàng, thị phần, value for money, CI, SL type, SL hứa, shelf life, order deadline, trade unit, payment term, promotion pressure/horizon, SKU mua).

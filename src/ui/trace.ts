@@ -33,6 +33,9 @@ const LABELS: [RegExp, Dept, string][] = [
   [/^purchasing\.terms\..*\.ciGame$/, 'Purchasing', 'CI game'],
   [/^purchasing\.terms\..*\.reliabilityActual$/, 'Purchasing', 'reliability thực tế'],
   [/^purchasing\.terms\..*\.rejectionActual$/, 'Purchasing', 'rejection thực tế'],
+  [/^sales\.customers\..*\.tradeUnit$/, 'Sales', 'trade unit khách'],
+  [/^sales\.customers\..*\.orderDeadline$/, 'Sales', 'order deadline'],
+  [/^sales\.customers\..*\.ciGame$/, 'Sales', 'CI game khách'],
 ];
 
 const INTERVAL = /^sc\.products\..*\.productionIntervalDays$/;
@@ -44,6 +47,8 @@ const LINE_ALL = [...BREAKDOWN, /^ops\.smed$/, /^ops\.shifts$/];
 const RM_STOCK = [/^ops\.rmPalletLocations$/, /^sc\.components\./, PUR, /^ops\.mixer$/];
 const RM_HOURS = [...RM_STOCK, /^ops\.rmInspection\./, /^ops\.intakeDays$/, INTERVAL];
 const FG_STOCK = [/^ops\.fgPalletLocations$/, /^sc\.products\./, /^ops\.mixer$/];
+const SALES_TU = /^sales\.customers\..*\.tradeUnit$/;
+const SALES_CI = /^sales\.customers\..*\.(tradeUnit|orderDeadline|ciGame)$/;
 
 export const DRIVERS: Record<string, RegExp[]> = {
   run: LINE_BASE,
@@ -60,14 +65,16 @@ export const DRIVERS: Record<string, RegExp[]> = {
   rmHours: RM_HOURS,
   rmFlex: [...RM_HOURS, /^ops\.rmFte$/],
   fgStock: FG_STOCK,
-  fgHours: [...FG_STOCK, INTERVAL],
-  fgFlex: [...FG_STOCK, INTERVAL, /^ops\.fgFte$/],
+  fgHours: [...FG_STOCK, INTERVAL, SALES_TU],
+  fgFlex: [...FG_STOCK, INTERVAL, /^ops\.fgFte$/, SALES_TU],
   tank: [/^sc\.components\.(Orange|Mango|Vitamin C)/, /^purchasing\.(suppliers|terms)\.(Orange|Mango|Vitamin C)/, INTERVAL],
   // M3 Purchasing
   purchase: [PUR, /^sc\.components\./, /^ops\.mixer$/, INTERVAL],
   trips: [/^sc\.components\..*\.lotSizeWeeks$/, PUR, /^ops\.mixer$/, INTERVAL],
   // M3 Sales: SL dự kiến ← safety stock TP, interval (SC) + plan adherence (Ops, NL, NCC); frozen period chưa mô hình
-  sales: [/^sc\.(components|products)\./, ...LINE_ALL, /^ops\.intakeDays$/, PUR],
+  sales: [/^sc\.(components|products)\./, ...LINE_ALL, /^ops\.intakeDays$/, PUR, SALES_CI],
+  // Sales mục 1: contract index khách ← điều khoản hợp đồng (ước lượng) hoặc CI game
+  salesCi: [SALES_CI],
   payterm: [/^purchasing\.terms\..*\.paymentTermWeeks$/, PUR, /^sc\.components\./],
 };
 

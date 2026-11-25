@@ -58,10 +58,10 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
       value = Math.abs(k - 1) < 1e-12 ? l.value : l.value * Math.pow(k, COEFFS.scrapObsoleteElasticity.value);
       modeled = true;
     }
-    // M3 Sales: penalty service level từng khách (ước lượng theo mức thiếu SL); contracted sales giữ R0
-    if (sales && /^Penalty service level/i.test(l.label)) {
+    // M3 Sales: penalty service level từng khách (ước lượng theo mức thiếu SL); contracted sales = R0 × CI ÷ CI R0
+    if (sales && /^(Penalty service level|Contracted sales)/i.test(l.label)) {
       const cu = sales.customers.find((x) => l.label.normalize('NFC').endsWith(x.customer.normalize('NFC')));
-      if (cu) { value = cu.penalty; modeled = true; }
+      if (cu) { value = /^Penalty/i.test(l.label) ? cu.penalty : cu.contracted; modeled = true; }
     }
     rows.push({ id: `r${i++}`, group: l.group, label, r0: l.value, value, modeled });
     // Dòng mới (chi phí Ops không có trong P&L R0) chèn ngay sau Mixer variable costs

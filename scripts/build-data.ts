@@ -16,7 +16,7 @@ import { resolve } from 'node:path';
 import { parseVN } from './lib/parse';
 import type {
   Round0Data, SkuKey, ComponentKey, Product, Component, SupplierTerms, SupplierResult, Mixer, BottlingLine,
-  OpsDecisionsR0, OpsResultsR0, FinanceLine, DailyRow, Quality,
+  OpsDecisionsR0, OpsResultsR0, FinanceLine, DailyRow, Quality, SalesOption, SalesOptionKey,
 } from '../src/data/types';
 
 // SheetJS bản CJS có sẵn readFile (bản ESM thì không)
@@ -535,6 +535,48 @@ const salesNotes = salesRows
   .filter((r) => r && /order management|webshop/i.test(String(r[0] ?? '')))
   .map((r) => String(r[1] ?? ''));
 
+// Khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6, thêm 25/11): lựa chọn của từng ô hợp đồng (form Negotiate trong game),
+// giá trị R0 từng khách, tác động (Info Center). Đọc theo tiêu đề; KHÔNG gõ cứng lựa chọn trong code.
+const OPTION_HEADERS = [/^Ô quyết định$/, /^Lựa chọn/, /^Tác động/];
+const SALES_OPTION_KEYS: [RegExp, SalesOptionKey][] = [
+  [/^Service level type/i, 'serviceLevelType'],
+  [/^Service level \(%\)/i, 'serviceLevel'],
+  [/^Shelf life/i, 'shelfLife'],
+  [/^Order deadline/i, 'orderDeadline'],
+  [/^Trade unit/i, 'tradeUnit'],
+  [/^Payment term/i, 'paymentTermWeeks'],
+  [/^Promotional pressure/i, 'promotionalPressure'],
+  [/^Promotion horizon/i, 'promotionHorizon'],
+  [/^Shortage rule/i, 'shortageRule'],
+  [/^SKU/i, 'skus'],
+];
+const hasOptionBlock = salesRows.some((r) => OPTION_HEADERS.every((re) => (r ?? []).some((c) => re.test(String(c ?? '').normalize('NFC').trim()))));
+const salesOptions: SalesOption[] = !hasOptionBlock ? [] : (() => {
+  const t = table(salesRows, 'Lựa chọn hợp đồng Sales', OPTION_HEADERS);
+  const r0Cols = t.headers.map((h, i) => ({ h, i })).filter((x) => /^R0 /.test(x.h)).map((x) => ({ customer: x.h.replace(/^R0\s+/, '').trim(), i: x.i }));
+  for (const c of r0Cols) if (!customerContracts.some((k) => k.customer === c.customer)) fail(`Bảng "Lựa chọn hợp đồng Sales": cột "R0 ${c.customer}" không khớp khách nào trong bảng hợp đồng (${customerContracts.map((k) => k.customer).join(', ')})`);
+  for (const k of customerContracts) if (!r0Cols.some((c) => c.customer === k.customer)) fail(`Bảng "Lựa chọn hợp đồng Sales": thiếu cột "R0 ${k.customer}"`);
+  return t.rows.map((r) => {
+    const field = t.str(r, /^Ô quyết định$/);
+    const key = SALES_OPTION_KEYS.find(([re]) => re.test(field))?.[1] ?? fail(`Bảng "Lựa chọn hợp đồng Sales": không nhận ra ô "${field}" — thêm mẫu vào SALES_OPTION_KEYS`);
+    const choicesText = t.str(r, /^Lựa chọn/);
+    const range = choicesText.match(/^\s*([\d.,]+)\s*[–-]\s*([\d.,]+)\s*$/);
+    const lo = range ? parseVN(range[1]) : null, hi = range ? parseVN(range[2]) : null;
+    return {
+      key, field, choicesText,
+      choices: choicesText.includes('|') ? choicesText.split('|').map((x) => x.trim()).filter(Boolean) : null,
+      range: lo !== null && hi !== null ? { min: lo, max: hi } : null,
+      r0: Object.fromEntries(r0Cols.map((c) => { const v = r[c.i]; return [c.customer, v === null || v === undefined || v === '' ? null : typeof v === 'number' ? v : String(v).trim()]; })),
+      impact: t.str(r, /^Tác động/),
+    };
+  });
+})();
+// Ghi chú ngay dưới khối lựa chọn (tab 6 còn dòng "Nguồn" khác ở phía trên → chỉ lấy từ dòng tiêu đề khối trở xuống)
+const optionStart = salesRows.findIndex((r) => OPTION_HEADERS.every((re) => (r ?? []).some((c) => re.test(String(c ?? '').normalize('NFC').trim()))));
+const salesOptionNotes = (optionStart < 0 ? [] : salesRows.slice(optionStart))
+  .filter((r) => r && /^(Kiểm chứng|Chưa có công thức|Tên gọi|Nguồn)$/.test(String(r[0] ?? '').normalize('NFC').trim()) && r[1])
+  .map((r) => ({ label: String(r[0]).normalize('NFC').trim(), text: String(r[1]).trim() }));
+
 // ================= 7_Supply Chain =================
 const scRows = sheet('7_Supply Chain', /^7_/);
 const tSCc = table(scRows, 'Quyết định NL', [/^Component$/, /^Safety stock/, /^Lot size/]);
@@ -724,6 +766,7 @@ captureRaw('sales-cust', '6_Sales', salesRows, 'Kết quả theo khách hàng Ro
 captureRaw('sales-prod', '6_Sales', salesRows, 'Kết quả theo sản phẩm Round 0', [/^SKU$/, /Giá bán TB/, /Gross margin\/đv/]);
 captureRaw('sales-cp', '6_Sales', salesRows, 'Khách hàng × sản phẩm Round 0', [/^Khách hàng$/, /^SKU$/, /khuyến mãi/]);
 captureRaw('sales-dist', '6_Sales', salesRows, 'Nhà phân phối (Distributor) Round 0', [/^Distributor$/, /^Distribution costs/]);
+captureRaw('sales-options', '6_Sales', salesRows, 'Lựa chọn hợp đồng Sales (form Negotiate & Info Center)', [/^Ô quyết định$/, /^Lựa chọn/, /^Tác động/]);
 captureRaw('pur-contracts', '4_Purchasing', purRows, 'Hợp đồng hiện tại', [/^Component$/, /^Nhà cung cấp$/, /^Contract index$/, /^Delivery window$/]);
 captureRaw('pur-results', '4_Purchasing', purRows, 'Kết quả thực tế Round 0 (NCC)', [/^Nhà cung cấp$/, /^Reliability thực tế$/, /^Purchase value/]);
 captureRaw('pur-market', '4_Purchasing', purRows, 'Thị trường nhà cung cấp (trước đàm phán)', [/^Component$/, /^Nhà cung cấp$/, /^Đang dùng$/, /^Contract index$/]);
@@ -771,7 +814,7 @@ const out: Round0Data = {
   components,
   purchasing: { contracts, results: supplierResults, market, specs: supplierSpecs, negotiation: negotiationOptions, contractTransportChoice },
   ops: { decisions: opsDecisions, results: opsResults, mixers, lines, norms },
-  sales: { contracts: customerContracts, customerResults, productResults, customerProduct, notes: salesNotes },
+  sales: { contracts: customerContracts, customerResults, productResults, customerProduct, notes: salesNotes, options: salesOptions, optionNotes: salesOptionNotes },
   supplyChain: { components: scComponents, products: scProducts, frozenPeriodWeeks: frozen, componentStock, productStock, totalStockValue, dashboard: dashTable },
   history,
   rawTables,

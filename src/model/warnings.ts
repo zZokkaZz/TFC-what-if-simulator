@@ -279,6 +279,39 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
       roi: [notModeled('Service level / penalty', 'frozen period chưa mô hình'), notModeled('Flexible manpower (bottling)', 'frozen period chưa mô hình')],
     });
   }
+  // --- Sales mục 1: trade unit / order deadline khách → kho TP (Ops), contract index (Finance) ---
+  const optImpact = (key: 'tradeUnit' | 'orderDeadline') => data.sales.options.find((x) => x.key === key)?.impact ?? '';
+  const ciNote = (cu: Results['sales']['customers'][number]) => cu.ciBasis === 'game'
+    ? `Contract index dùng số game đội nhập: ${cu.contractIndexR0.toLocaleString('vi-VN', { maximumFractionDigits: 4 })} → ${cu.contractIndex.toLocaleString('vi-VN', { maximumFractionDigits: 4 })}.`
+    : `Chưa nhập CI game: contract index ước lượng ${cu.contractIndex.toLocaleString('vi-VN', { maximumFractionDigits: 4 })} (= R0 × (1 + hệ số × bậc), hệ số trong COEFFS, chưa xác minh) — game không công bố công thức, bấm Calculate trong game rồi nhập "CI game hiển thị".`;
+  for (const cu of res.sales.customers) {
+    const name = cu.customer;
+    if (cu.tradeUnit !== cu.tradeUnitR0) {
+      const dPick = o.fg.hoursBreakdown.picking - ob.fg.hoursBreakdown.picking;
+      out.push({
+        id: `sales-tu-${name}`, severity: dPick > 0 || cu.ciStale ? 'warn' : 'info', from: 'Sales', to: ['Ops', 'Finance'],
+        title: `Trade unit ${name}: ${cu.tradeUnitR0} → ${cu.tradeUnit}`,
+        detail: `Giờ soạn hàng kho TP ${dPick >= 0 ? '+' : '−'}${n1(Math.abs(dPick))} giờ/tuần (định mức luật: 10 phút/dòng đơn + 6 phút/pallet hoặc layer + 3 phút/thùng). Giờ công kho TP ${n1(ob.fg.hoursPerWeek)} → ${n1(o.fg.hoursPerWeek)} giờ/tuần, đỉnh ${n1(ob.fg.peakDayHours)} → ${n1(o.fg.peakDayHours)} giờ/ngày, ${o.fg.daysAboveFixed} ngày vượt giờ cố định. ${dPick > 0 ? 'Ops cân nhắc thêm FTE kho TP. ' : ''}${ciNote(cu)} Info Center: ${optImpact('tradeUnit')} Chưa mô hình: cỡ đơn / phí phân phối theo trade unit.`,
+        roi: [imp('Outbound flexible manpower', /^Outbound flexible/), imp(`Contracted sales – ${name}`, new RegExp(`^Contracted sales – ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)), notModeled('Distribution costs', 'cỡ đơn theo trade unit chưa mô hình')],
+      });
+    }
+    if (cu.orderDeadline !== cu.orderDeadlineR0) {
+      out.push({
+        id: `sales-dl-${name}`, severity: cu.ciSteps.orderDeadline > 0 || cu.ciStale ? 'warn' : 'info', from: 'Sales', to: ['Ops', 'Finance'],
+        title: `Order deadline ${name}: ${cu.orderDeadlineR0} → ${cu.orderDeadline}`,
+        detail: `Info Center: ${optImpact('orderDeadline')} CHƯA MÔ HÌNH vào số: giờ công kho TP và service level KHÔNG đổi theo deadline (luật không cho độ lớn, không cho mốc "quá muộn"). Ops xem giờ kho TP hiện tại: đỉnh ${n1(o.fg.peakDayHours)} giờ/ngày, ${o.fg.daysAboveFixed} ngày vượt giờ cố định. ${ciNote(cu)}`,
+        roi: [imp(`Contracted sales – ${name}`, new RegExp(`^Contracted sales – ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)), notModeled('Outbound flexible manpower / service level', 'order deadline chưa mô hình')],
+      });
+    }
+    if (cu.ciBasis === 'game' && cu.tradeUnit === cu.tradeUnitR0 && cu.orderDeadline === cu.orderDeadlineR0 && Math.abs(cu.contractIndex - cu.contractIndexR0) > 1e-9) {
+      out.push({
+        id: `sales-ci-${name}`, severity: 'info', from: 'Sales', to: ['Finance'],
+        title: `Contract index ${name} (số game): ${cu.contractIndexR0.toLocaleString('vi-VN', { maximumFractionDigits: 4 })} → ${cu.contractIndex.toLocaleString('vi-VN', { maximumFractionDigits: 4 })}`,
+        detail: 'Contracted sales = R0 × CI ÷ CI R0 (ước lượng: nhu cầu giữ R0); penalty service level co giãn cùng tỷ lệ.',
+        roi: [imp(`Contracted sales – ${name}`, new RegExp(`^Contracted sales – ${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)), imp('Penalty service level (3 khách)', PEN)],
+      });
+    }
+  }
   // --- Tồn kho → Finance ---
   const dStock = res.sc.stockValue.total - baseRes.sc.stockValue.total;
   if (Math.abs(dStock) > 500) {
