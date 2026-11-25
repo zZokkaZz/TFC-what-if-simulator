@@ -15,6 +15,9 @@ import { RawTable } from './RawTable';
 import { CONSERVATIVE_NOTE, capacityChanged } from './conservative';
 import { COEFFS } from '../model/assumptions';
 
+/** Ghi chú cạnh ô trade unit / order deadline khi chưa nhập CI game (người dùng chốt: hệ số CI trong COEFFS giữ = 0). */
+export const CI_MISSING_NOTE = 'Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng.';
+
 interface Props {
   data: Round0Data;
   inputs: Inputs;
@@ -69,6 +72,7 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
                 <SelectField label="Trade unit" value={t.tradeUnit} disabled={dis} changed={t.tradeUnit !== tb.tradeUnit} options={opts(optTU?.choices, t.tradeUnit, tb.tradeUnit)} onChange={(v) => setCust(k.customer, { tradeUnit: v })} hint="→ giờ soạn hàng kho TP (Ops)" />
                 <SelectField label="Order deadline" value={t.orderDeadline} disabled={dis} changed={t.orderDeadline !== tb.orderDeadline} options={opts(optDL?.choices, t.orderDeadline, tb.orderDeadline)} onChange={(v) => setCust(k.customer, { orderDeadline: v })} hint="Chưa mô hình vào số — chỉ cảnh báo" />
               </div>
+              {t.ciGame === null && <p class={`${t.tradeUnit !== tb.tradeUnit || t.orderDeadline !== tb.orderDeadline ? 'warn-text' : 'muted'} small-text`}>{CI_MISSING_NOTE}</p>}
               <div class="pur-grid pur-game">
                 <OptNumberField label="CI game hiển thị" value={t.ciGame} limit={SALES_LIMITS.ciGame} disabled={dis} changed={t.ciGame !== tb.ciGame}
                   placeholder={`trống = ${num(cu.ciBasis === 'game' ? k.contractIndex : cu.contractIndex, 4)}`} hint={`Trống: CI R0 ${num(k.contractIndex, 4)}${cu.ciStale ? ' × hệ số ước lượng' : ''}`}

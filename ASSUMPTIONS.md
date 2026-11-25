@@ -366,6 +366,8 @@ Tất cả nằm trong `src/model/assumptions.ts` → `COEFFS`. Mỗi hệ số 
 
 **Vì sao hệ số CI = 0:** Info Center chỉ cho hướng (trade unit nhỏ / deadline muộn → CI cao), game không công bố công thức (tab 6 B70). R0 có 1 tổ hợp/khách, CI 3 khách còn khác nhau do value for money, thị phần, SKU → không tách được. Đặt 0 = app KHÔNG tự cộng doanh thu khi đổi trade unit/deadline: chỉ thấy chi phí soạn hàng, cộng cảnh báo "Chưa nhập CI game". Hệ quả: nếu không nhập CI game thì đổi sang đơn vị nhỏ luôn trông xấu hơn thực tế. Có CI game (đàm phán thử) → nhập ô, hoặc sửa hệ số trong `COEFFS`.
 
+**Người dùng chốt (25/11): giữ 2 hệ số = 0.** Trên web, dưới ô trade unit / order deadline của mỗi khách (khi CI game trống) luôn có câu: *"Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng."* (tô vàng khi đã đổi điều khoản; ẩn khi đã nhập CI game).
+
 **Chưa mô hình:** trade unit là "mức đặt tối thiểu và bội số" → cỡ đơn, phí phân phối (giữ R0); số dòng đơn/tuần giữ R0.
 
 **Độ lớn** (CI chưa nhập, hệ số 0):

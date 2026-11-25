@@ -203,3 +203,13 @@ describe('Đồng bộ nhóm: Sales sửa trade unit → máy Ops thấy và gi�
     expect(ops.getState().log[0].summary).toMatch(/Sales đổi trade unit khách \(LAND Market\)/);
   });
 });
+
+describe('Ghi chú "chưa tính phần giá tăng (CI)" cạnh ô trade unit / order deadline', () => {
+  it('đúng câu người dùng chốt; hiện khi CI game trống; 2 hệ số CI giữ = 0', () => {
+    const src = readFileSync(new URL('../src/ui/SalesTab.tsx', import.meta.url), 'utf8');
+    expect(src).toContain("'Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng.'");
+    expect(src).toMatch(/t\.ciGame === null && <p[^>]*>\{CI_MISSING_NOTE\}/);
+    expect(COEFFS.salesCiPerStepTradeUnit.value).toBe(0);
+    expect(COEFFS.salesCiPerStepOrderDeadline.value).toBe(0);
+  });
+});

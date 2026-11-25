@@ -28,7 +28,7 @@
 | M3 Sales mục 1 | Đọc khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) → dropdown; ô trade unit (→ giờ soạn hàng kho TP), order deadline (chỉ cảnh báo), CI game khách (→ contracted sales); hệ số CI trong COEFFS (= 0); rules Firestore | `src/model/sales.ts`, `src/ui/SalesTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 19 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 312 test (`npm test`) + 49 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 313 test (`npm test`) + 49 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
@@ -67,7 +67,7 @@ Test: 312 test (`npm test`) + 49 test rules trên emulator (`scripts/test-rules.
 ## 5. Việc người dùng phải làm tay (Claude không làm được)
 
 - **M3 Sales mục 1 đổi `firestore.rules` (validSales) → Publish lại rules.** Chưa Publish thì phần Sales (trade unit, deadline, CI game) không lưu lên bản chung.
-- **Xem hệ số CI Sales** (`COEFFS.salesCiPerStepTradeUnit`, `salesCiPerStepOrderDeadline`, đang = 0): có CI game sau đàm phán thử thì nhập ô "CI game hiển thị" hoặc báo để sửa hệ số.
+- Hệ số CI Sales (`COEFFS.salesCiPerStepTradeUnit`, `salesCiPerStepOrderDeadline`) **người dùng chốt giữ = 0**; web ghi rõ "Chưa tính phần giá tăng (CI)…" cạnh ô. Có CI game thì nhập ô "CI game hiển thị".
 - **M3 Purchasing đổi `firestore.rules` → Publish lại rules** trong Firebase Console (Firestore → Rules). Chưa Publish thì ghi phần Purchasing có `terms` sẽ bị chặn (báo lỗi rõ trên app).
 
 - Upload file .xlsx mới khi sửa Google Sheet.
@@ -77,7 +77,7 @@ Test: 312 test (`npm test`) + 49 test rules trên emulator (`scripts/test-rules.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
-- 25/11/2026 — Dữ liệu mới (tab 6 khối LỰA CHỌN HỢP ĐỒNG SALES, tab 1 C29) + M3 Sales mục 1 (session_018GSfKVc6kuoV5G75kcCjSs, nhánh `claude/modest-curie-joo7me`): trade unit → giờ soạn hàng kho TP, order deadline chỉ cảnh báo, CI game khách → contracted; hệ số CI trong COEFFS = 0; 312/312 + rules 49/49. Cần người dùng: Publish rules, xem hệ số CI = 0, merge PR.
+- 25/11/2026 — Dữ liệu mới (tab 6 khối LỰA CHỌN HỢP ĐỒNG SALES, tab 1 C29) + M3 Sales mục 1 (session_018GSfKVc6kuoV5G75kcCjSs, nhánh `claude/modest-curie-joo7me`): trade unit → giờ soạn hàng kho TP, order deadline chỉ cảnh báo, CI game khách → contracted; hệ số CI trong COEFFS = 0; 312/312 + rules 49/49. Người dùng chốt giữ hệ số CI = 0 + thêm ghi chú cạnh ô trên web (313/313). Cần người dùng: Publish rules, merge PR #7.
 
 - 25/11/2026 — PR #6 bổ sung: `obsoleteAgeSpreadScale` = 2 (người dùng chọn); kiểm tra PM → hệ số `maintenanceDisruptionWeight` = 0 (người dùng chọn: bảo trì có lịch trước, không làm trễ kế hoạch như hỏng đột xuất); bảng kịch bản thêm tổ hợp Training; ghi "chưa mô hình: sản xuất bù hàng hủy" trên web.
 - 25/11/2026 — C2 + V1 (nhánh `claude/c2-v1`): obsolete/scrap theo tuổi tồn, V1 B chính + thận trọng; 270/270. Cần người dùng xem độ dốc obsolete (SS TP 5 → ~92%) và hệ số `obsoleteAgeSpreadScale`.
