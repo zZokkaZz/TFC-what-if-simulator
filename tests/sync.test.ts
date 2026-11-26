@@ -224,3 +224,48 @@ describe('Báo lỗi rõ ràng', () => {
     }
   });
 });
+
+describe('Sửa lỗi 26/11: F5 trên chính máy vừa ghi vẫn thấy quyết định đã lưu', () => {
+  const mkC = async (cid: string, role: Role = 'purchasing') => {
+    const c = new SyncController(new MockBackend(hub, `uid-${cid}`), base, { team: TEAM, role, clientId: cid, sanitize, debounceMs: 500 });
+    await c.start();
+    return c;
+  };
+  const withVitC = (c: SyncController, s: string) => ({ ...c.current().purchasing, suppliers: { ...c.current().purchasing.suppliers, 'Vitamin C': s } });
+
+  it('ghi xong rồi mở lại (cùng clientId, màn hình bắt đầu từ R0) → hiện đúng bản đã lưu', async () => {
+    const a = await mkC('may-A');
+    a.editShared('purchasing', withVitC(a, 'SYI'));
+    await vi.advanceTimersByTimeAsync(600);
+    expect(hub.read(TEAM).decisions.purchasing?.data).toMatchObject({ suppliers: { 'Vitamin C': 'SYI' } });
+    a.stop();
+    const reload = await mkC('may-A');
+    await vi.advanceTimersByTimeAsync(10);
+    expect(reload.current().purchasing.suppliers['Vitamin C']).toBe('SYI');
+    // sửa tiếp sau F5 không làm mất quyết định cũ (ghi đè dựa trên bản đã lưu, không phải R0)
+    reload.editShared('purchasing', { ...reload.current().purchasing, terms: { ...reload.current().purchasing.terms, PET: { ...reload.current().purchasing.terms.PET, paymentTermWeeks: 6 } } });
+    await vi.advanceTimersByTimeAsync(600);
+    const saved = hub.read(TEAM).decisions.purchasing!;
+    expect(saved.data).toMatchObject({ suppliers: { 'Vitamin C': 'SYI' }, terms: { PET: { paymentTermWeeks: 6 } } });
+    expect(saved.rev).toBeGreaterThan(1);
+  });
+
+  it('hai tab cùng trình duyệt (cùng clientId) thấy thay đổi của nhau', async () => {
+    const t1 = await mkC('may-A'), t2 = await mkC('may-A');
+    t1.editShared('purchasing', withVitC(t1, 'SYI'));
+    await vi.advanceTimersByTimeAsync(600);
+    expect(t2.current().purchasing.suppliers['Vitamin C']).toBe('SYI');
+  });
+
+  it('tiếng vọng của lần ghi trong phiên không kéo màn hình lùi về khi đang sửa tiếp', async () => {
+    const a = await mkC('may-A');
+    a.editShared('purchasing', withVitC(a, 'SYI'));
+    await vi.advanceTimersByTimeAsync(600);
+    a.editShared('purchasing', withVitC(a, 'AIL Vitamins'));
+    await vi.advanceTimersByTimeAsync(100); // chưa ghi
+    expect(a.current().purchasing.suppliers['Vitamin C']).toBe('AIL Vitamins');
+    await vi.advanceTimersByTimeAsync(600);
+    expect(a.current().purchasing.suppliers['Vitamin C']).toBe('AIL Vitamins');
+    expect(hub.read(TEAM).decisions.purchasing?.data).toMatchObject({ suppliers: { 'Vitamin C': 'AIL Vitamins' } });
+  });
+});
