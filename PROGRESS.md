@@ -28,9 +28,10 @@
 | M3 Sales mục 1 | Đọc khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) → dropdown; ô trade unit (→ giờ soạn hàng kho TP), order deadline (chỉ cảnh báo), CI game khách (→ contracted sales); hệ số CI trong COEFFS (= 0); rules Firestore | `src/model/sales.ts`, `src/ui/SalesTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 19 |
 | M3 Sales 4 mục cuối | Shelf life (→ tuổi tồn → obsolete/scrap), promotion (→ nhu cầu → sản xuất/tồn/SL/doanh thu) + horizon (cảnh báo), SL hứa + SL type (→ mốc penalty), payment term khách (→ AR → Investment); 6 hệ số CI = 0; ghi chú "giá tăng/giảm"; rules | `src/model/sales.ts`, `supplyChain.ts`, `finance.ts`, `src/ui/SalesTab.tsx`, `firestore.rules`, `ASSUMPTIONS.md` mục 20 |
 | M4 Finance | Mọi dòng P&L có nhãn nguồn + lý do (tab Finance); Distribution costs theo pallet giao (neo tab 2, €22,09/pallet R0 — không dùng luật €31); Energy/Water/Other/Interest/Contracted suppliers/Outbound orders/Fixed giữ R0 (người dùng chốt); test đẳng thức P&L/ROI ở 6 kịch bản | `src/model/finance.ts`, `src/ui/OtherTabs.tsx`, `tests/finance-m4.test.ts`, `ASSUMPTIONS.md` mục 21 |
+| Sửa review 26/11 | Availability NL neo lai (hết trần 89%, không nổ khi xấu đi); số tuần tồn ÷ nhu cầu mới; cỡ đơn ≥ 1 trade unit + bội số khi đổi; phải trả theo start payment term; sửa chữ cũ; nhãn P&L khớp ops.ts | `src/model/ops.ts`, `supplyChain.ts`, `purchasing.ts`, `kpi.ts`, `tests/review-fixes.test.ts`, `ASSUMPTIONS.md` mục 22 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 369 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 386 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
@@ -81,11 +82,20 @@ Chỉ còn việc phụ thuộc dữ liệu người dùng (mục 3) và ý tư�
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
+- 26/11/2026 — Sửa 6 mục review (Gemini). Mục 1: công thức tỷ lệ người dùng giao làm Orange 32% khi đổi Cabana → người dùng chọn neo lai. 386/386. Không đổi rules.
+
 - 25/11/2026 — M4 Finance (người dùng chọn: overhead/Interest giữ R0; Distribution theo pallet neo R0); M5 bỏ. 369/369. Rules M3 Sales cuối đã Publish, người dùng thử chạy được. Không đổi rules ở M4.
 
 - 25/11/2026 — M3 Sales 4 mục cuối (gộp 1 PR theo yêu cầu): shelf life, promotion + horizon, SL hứa + SL type, payment term khách; 6 hệ số CI = 0; 350/350 + rules 59/59. Rules mục 1 đã Publish (22:16, khớp repo). Cần người dùng: Publish rules mới, merge PR.
 
 ## 7. Ý tưởng phát sinh (CHƯA làm — chỉ ghi lại, chờ người dùng quyết)
+
+**Chờ dữ liệu vòng trial (review 26/11 — người dùng dặn KHÔNG làm lúc này):**
+- ROI "thận trọng" chưa tính lại AR theo doanh thu thận trọng (lệch ~0,02 điểm ROI).
+- Máy trộn quá tải (utilization > 100%) chưa làm giảm sản lượng / plan adherence.
+- Sản xuất bù hàng obsolete bị hủy.
+- Không đổi hệ số COEFFS / EST cho tới khi có số trial.
+- Hạn dùng nguyên liệu (tab 3) chưa mô hình: trade unit lớn (vd Vitamin C sang Tank → đơn 30.000 L ≈ 163 tuần nhu cầu) làm tồn rất lớn và availability gần 100% mà không có hàng NL hết hạn.
 
 - Shortage rule (Proportional / FCFS / Customer priority) và bật/tắt SKU cho từng khách (tab 6 dòng 65–66) chưa có ô.
 - Promotion làm nhu cầu biến động hơn (σ) và promotion horizon → safety stock TP: luật chỉ cho hướng, chưa có độ lớn.

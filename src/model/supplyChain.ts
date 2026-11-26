@@ -31,6 +31,24 @@ export function storageOf(data: Round0Data, c: ComponentKey, tradeUnit: string, 
   return { kind: 'pallet', locations: drums / est.drumsPerPallet, containers: drums };
 }
 
+/** Số đơn vị NL trong 1 trade unit (Pallet, Pallet layer, FTL = palletsPerFtl × pallet, Tank, IBC, Drum); null = không rõ. */
+export function tradeUnitSize(data: Round0Data, c: ComponentKey, tradeUnit: string): number | null {
+  const comp = data.components.find((x) => x.key === c);
+  if (!comp) return null;
+  const t = tradeUnit.toLowerCase();
+  if (comp.liquidUnits) {
+    if (t.includes('tank')) return comp.liquidUnits.tank;
+    if (t.includes('ibc')) return comp.liquidUnits.ibc;
+    if (t.includes('drum')) return comp.liquidUnits.drum;
+    return null;
+  }
+  if (!comp.unitsPerPallet) return null;
+  if (t.includes('ftl')) return data.palletsPerFtl ? data.palletsPerFtl * comp.unitsPerPallet : null;
+  if (t.includes('layer')) return comp.unitsPerLayer ?? null;
+  if (t.includes('pallet')) return comp.unitsPerPallet;
+  return null;
+}
+
 export function componentFlows(inputs: Inputs, data: Round0Data, cal: Calibration, production: SkuProduction[], est: Est): ComponentFlow[] {
   return COMPONENTS.map((c) => {
     const sup = activeSupplier(inputs, data, c);
@@ -41,8 +59,13 @@ export function componentFlows(inputs: Inputs, data: Round0Data, cal: Calibratio
     }, 0);
     const purchased = usage / (1 - sup.rejection);
     const { safetyStockWeeks, lotSizeWeeks } = inputs.sc.components[c];
-    // Không làm tròn theo trade unit: cỡ đơn R0 (vd PET 951.612 cái) không phải bội số pallet/drum.
-    const order = lotSizeWeeks * purchased * cal.orderRatio[c];
+    // Cỡ đơn theo lot size (hiệu chỉnh R0). Trade unit: mỗi lần nhận ≥ 1 đơn vị (FTL 30 pallet, Tank, IBC, Drum, Pallet, layer);
+    // đổi trade unit khác R0 → làm tròn lên bội số. Giữ trade unit R0 → không làm tròn (cỡ đơn R0, vd Orange 172.581 L, không phải bội số tank).
+    const lotOrder = lotSizeWeeks * purchased * cal.orderRatio[c];
+    const unit = tradeUnitSize(data, c, sup.tradeUnit);
+    const tuR0 = data.purchasing.contracts.find((x) => x.component === c)?.tradeUnit ?? sup.tradeUnit;
+    let order = unit ? Math.max(lotOrder, unit) : lotOrder;
+    if (unit && sup.tradeUnit.trim().toLowerCase() !== tuR0.trim().toLowerCase()) order = Math.ceil(order / unit - 1e-9) * unit;
     // Tồn TB lý thuyết = safety stock + ½ lô (phần dùng được). ops.ts quy về mức R0 thực tế (tab 11).
     const avgStock = safetyStockWeeks * usage + (order * (1 - sup.rejection)) / 2;
     const st = storageOf(data, c, sup.tradeUnit, avgStock, est);
@@ -331,7 +354,7 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
         demandPerWeek: st.demandPerWeek === null || st.demandPerWeek === undefined ? keep(p.demandUnits) : cell(st.demandPerWeek, ratio(p.demandUnits, pb?.demandUnits)), // promotion (ô Sales)
         slPieces: { r0: st.slPieces, value: slEst, basis: Math.abs(slEst - st.slPieces) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
         slOrderLines: { r0: st.slOrderLines, value: slOlEst, basis: Math.abs(slOlEst - st.slOrderLines) < 1e-9 ? 'sheet' : 'model' } as SheetCell,
-        stockWeeks: cell(st.stockWeeks, kFg),
+        stockWeeks: cell(st.stockWeeks, kFg / kVol), // số tuần = tồn ÷ nhu cầu/tuần mới (promotion đổi nhu cầu)
         stockValue: cell(st.stockValue, kFg),
         economicWeeks: keep(st.economicWeeks),
         floatingStock: keep(st.floatingStockValue),
@@ -347,7 +370,7 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
       intervalDays: p.intervalDays,
       safetyStockWeeks: inputs.sc.products[p.sku].safetyStockWeeks,
       batchesPerRound: ROUND.days / p.intervalDays,
-      avgStockWeeks: st.stockWeeks * ops.scLink.fgStockRatio[p.sku],
+      avgStockWeeks: st.stockWeeks * ops.scLink.fgStockRatio[p.sku] / kVol,
       theoryStockWeeks: theoryWeeks,
       stockValue: st.stockValue * ops.scLink.fgStockRatio[p.sku],
       stockValueR0: st.stockValue,

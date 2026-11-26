@@ -86,7 +86,7 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
               {(() => {
                 const up = CI_STEP_KEYS.some((x) => cu.ciSteps[x] > 0), down = CI_STEP_KEYS.some((x) => cu.ciSteps[x] < 0);
                 return <>
-                  {t.ciGame === null && (up || !down) && <p class={`${up ? 'warn-text' : 'muted'} small-text`}>{CI_MISSING_NOTE}</p>}
+                  {t.ciGame === null && up && <p class="warn-text small-text">{CI_MISSING_NOTE}</p>}
                   {t.ciGame === null && down && <p class="warn-text small-text">{CI_DOWN_NOTE}</p>}
                 </>;
               })()}

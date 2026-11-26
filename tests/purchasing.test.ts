@@ -4,7 +4,7 @@ import data from '../src/data/round0.json';
 import type { ComponentKey, Round0Data } from '../src/data/types';
 import type { Inputs, PurchasingTerms } from '../src/model/types';
 import { baselineInputs, simulate } from '../src/model/simulate';
-import { activeSupplier, avgReliabilityGap, defaultTerms } from '../src/model/purchasing';
+import { activeSupplier, avgReliabilityGap, defaultTerms, effectivePayWeeks } from '../src/model/purchasing';
 import { crossWarnings } from '../src/model/warnings';
 import { makeSanitizer } from '../src/sync/sanitize';
 import { describePath } from '../src/ui/trace';
@@ -122,17 +122,28 @@ describe('Phí vận chuyển & phí đơn hàng theo lot size / trade unit (ư�
     expect(r.purchasing.inboundOrders).toBeGreaterThan(b.purchasing.inboundOrders);
     expect(r.purchasing.inboundOrderLines).toBeGreaterThan(b.purchasing.inboundOrderLines);
   });
-  it('Pack FTL: ~30 pallet/chuyến (lot 3,3 tuần) → 1 xe €500 rẻ hơn 30 pallet lẻ; ~36 pallet/chuyến (lot 4) → 2 xe, đắt hơn', () => {
-    const at = (lot: number, tu: string) => pick(run((i) => { i.sc.components.Pack.lotSizeWeeks = lot; terms(i, 'Pack', { tradeUnit: tu }); }).r, 'Pack').transportCost;
+  it('Pack FTL: ~30 pallet/chuyến (lot 3,3 tuần) → 1 xe rẻ hơn 30 pallet lẻ; lot 4 (~36 pallet) → làm tròn lên 2 xe đầy (bội số FTL): ít chuyến hơn, kho NL đầy hơn', () => {
+    const sim = (lot: number, tu: string) => run((i) => { i.sc.components.Pack.lotSizeWeeks = lot; terms(i, 'Pack', { tradeUnit: tu }); }).r;
+    const at = (lot: number, tu: string) => pick(sim(lot, tu), 'Pack').transportCost;
     expect(at(3.3, 'FTL')).toBeLessThan(at(3.3, 'Pallet'));
-    expect(at(4, 'FTL')).toBeGreaterThan(at(4, 'Pallet'));
+    // Mục 3 (review 26/11): đổi trade unit khác R0 → cỡ đơn làm tròn lên bội số trade unit (FTL = palletsPerFtl pallet)
+    const ftl = sim(4, 'FTL'), pal = sim(4, 'Pallet');
+    const perFtl = d.palletsPerFtl! * d.components.find((c) => c.key === 'Pack')!.unitsPerPallet!;
+    const fl = ftl.opsRaw.components.find((c) => c.key === 'Pack')!, pl = pal.opsRaw.components.find((c) => c.key === 'Pack')!;
+    expect(fl.orderUnits / perFtl).toBeCloseTo(Math.round(fl.orderUnits / perFtl), 9);
+    expect(fl.orderUnits).toBeGreaterThan(pl.orderUnits);
+    expect(fl.deliveriesPerRound).toBeLessThan(pl.deliveriesPerRound);
+    expect(ftl.ops.rm.peakPallets).toBeGreaterThan(pal.ops.rm.peakPallets);
   });
 });
 
 describe('Payment term NCC → Investment (ước lượng)', () => {
   it('payment term dài hơn → phải trả ↑ → Investment: Payment terms ↓ → Investment ↓', () => {
     const { r } = run((i) => terms(i, 'Orange', { paymentTermWeeks: 8 }));
-    expect(finRow(r, /^Payment terms$/)).toBeCloseTo(finRow(b, /^Payment terms$/) - (pick(b, 'Orange').purchaseValue / 26) * 4, 6);
+    // Mục 4 (review 26/11): Miami "When ordering" → nợ thực = payment term − lead time (không âm)
+    const lt = pick(b, 'Orange').leadTimeDays, sup = pick(b, 'Orange').supplier;
+    expect(effectivePayWeeks(d, 'Orange', sup, 4, lt)).toBe(Math.max(0, 4 - lt / 7));
+    expect(finRow(r, /^Payment terms$/)).toBeCloseTo(finRow(b, /^Payment terms$/) - (pick(b, 'Orange').purchaseValue / 26) * (effectivePayWeeks(d, 'Orange', sup, 8, lt) - effectivePayWeeks(d, 'Orange', sup, 4, lt)), 6);
     expect(r.finance.investment).toBeLessThan(b.finance.investment);
   });
 });
