@@ -1,14 +1,16 @@
 # PROGRESS — Dự án đang ở đâu (đọc sau CLAUDE.md)
 
-> Cập nhật: 25/11/2026. **Phiên nào làm xong việc gì cũng phải sửa file này** (mục "Đã xong", "Việc tiếp theo", "Nhật ký phiên").
+> Cập nhật: 26/11/2026 (đã thi Round 1: ROI thật 5,04%, hạng 14). **Phiên nào làm xong việc gì cũng phải sửa file này** (mục "Đã xong", "Việc tiếp theo", "Nhật ký phiên").
 
 ## 0. Đọc theo thứ tự này trước khi làm bất cứ gì
 
 1. `CLAUDE.md` — brief, **mục 0 LUẬT SỐ 1: KHÔNG BỊA SỐ**, luật game, kiến trúc.
 2. `PROGRESS.md` (file này) — trạng thái, quyết định đã chốt, việc làm tay.
-3. `ROADMAP_M3_M4_M5.md` — cách làm các mốc còn lại, cái gì đã biết / CHƯA biết trong dữ liệu.
-4. `ASSUMPTIONS.md` — mọi giả định, hệ số, chỗ lệch giữa các tab.
-5. Chạy `npm install` rồi `npm run verify` (đọc Excel → test → build). Phải xanh hết rồi mới sửa.
+3. `MODEL_GUIDE.md` — model chạy thế nào, các phòng nối với nhau ở đâu trong code, test nào kiểm gì.
+4. `ROUND1_ANALYSIS.md` — quyết định đã nộp Round 1, kết quả thật, model lệch ở đâu, kế hoạch sửa (đọc kỹ trước khi làm Round 2).
+5. `ROADMAP_M3_M4_M5.md` — cách làm các mốc (đã xong M3, M4; M5 bỏ).
+6. `ASSUMPTIONS.md` — mọi giả định, hệ số, chỗ lệch giữa các tab.
+7. Chạy `npm install` rồi `npm run verify` (đọc Excel → test → build). Phải xanh hết rồi mới sửa.
 
 ## 1. Đã xong
 
@@ -44,9 +46,11 @@ Test: 394 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.
 
 ## 2. Việc tiếp theo (CHỜ người dùng ra lệnh — không tự làm)
 
-**Lộ trình đã xong: M0, M1, M1.5, M2, M3, M4.** **M5 (kịch bản có tên ở chế độ một mình, Copy link, Xuất/Nhập JSON): người dùng quyết định KHÔNG làm (25/11).** Chế độ nhóm vẫn có snapshot có tên + so sánh.
+**Lộ trình M0–M4 đã xong; M5 người dùng bỏ.** Đã nộp Round 1 (game: ROI 5,04%, model dự báo 4,29%) — chi tiết `ROUND1_ANALYSIS.md`.
 
-Chỉ còn việc phụ thuộc dữ liệu người dùng (mục 3) và ý tưởng chờ quyết định (mục 7).
+1. **Chờ người dùng upload sheet Round 1** (`TFC Round 1.xlsx`, trích bằng `notes/prompts_trich_xuat_R1.md`, các tab `R1_*`). Khi có: đọc tab R1_* trong `build-data.ts` (theo tiêu đề), thêm `tests/backtest-r1.test.ts`, rồi sửa model theo `ROUND1_ANALYSIS.md` mục 5 (A: tồn thực tế theo plan adherence là ưu tiên 1). Hỏi người dùng trước khi bắt đầu.
+2. **Round 2:** game có mục **KPI** mới — chưa biết nội dung, chờ ảnh chụp. Lập phương án R2 từ `ROUND1_ANALYSIS.md` mục 6.
+3. Ý tưởng chờ quyết định: mục 7.
 
 ## 3. Đang chờ dữ liệu từ người dùng
 
@@ -81,6 +85,8 @@ Chỉ còn việc phụ thuộc dữ liệu người dùng (mục 3) và ý tư�
 - Giữ và gửi mã đội cho đồng đội qua kênh riêng.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
+
+- 26/11/2026 — Round 1 đã nộp (Phương án Chính, kho TP 1.350, Customer priority F&G > LAND > Dominick's) → game ROI 5,04% (hạng 14, top 8,01%). Đối chiếu dashboard với model, dựng ngược P&L, phát hiện tồn thực ÷ lý thuyết ≈ plan adherence; báo cáo artifact + `ROUND1_ANALYSIS.md`, `MODEL_GUIDE.md`, `notes/prompts_trich_xuat_R1.md`. Không sửa code model.
 
 - 26/11/2026 — Thêm ô Shortage rule + thứ tự ưu tiên khách (Sales, ord.mgmt) — chưa mô hình, chỉ ghi nhận/đồng bộ + cảnh báo; rules đổi → cần Publish. 394/394 + rules 63/63.
 - 26/11/2026 — Sửa lỗi đồng bộ: sau F5, chính máy vừa ghi không thấy lại quyết định đã lưu (controller bỏ qua mọi bản ghi cùng clientId; clientId lưu trên máy). Nay chỉ bỏ qua "tiếng vọng" của lần ghi trong phiên (theo rev). Dữ liệu trên Firestore không mất. Thêm 3 test (`tests/sync.test.ts`). Không đổi rules.
