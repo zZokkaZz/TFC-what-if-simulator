@@ -74,6 +74,13 @@ export function baselineSalesTerms(data: Round0Data): Record<string, SalesCustom
   }]));
 }
 
+/** Màn hình ord.mgmt R0: shortage rule (khối lựa chọn tab 6, ô chung cho 3 khách) + thứ tự khách (thứ tự bảng hợp đồng tab 6). */
+export function baselineOrderMgmt(data: Round0Data): { shortageRule: string; customerPriority: string[] } {
+  const o = salesOption(data, 'shortageRule');
+  const r0 = o ? Object.values(o.r0).find((v) => typeof v === 'string' && v.trim() !== '') : undefined;
+  return { shortageRule: typeof r0 === 'string' ? r0 : (o?.choices?.[0] ?? 'Proportional'), customerPriority: data.sales.contracts.map((c) => c.customer) };
+}
+
 export interface SalesOptionCheck { customer: string; field: string; optionValue: string | number | null; contractValue: string | number; same: boolean; inChoices: boolean }
 
 /** Đối chiếu giá trị R0 trong khối lựa chọn với bảng hợp đồng (cùng tab 6) và với danh sách lựa chọn / khoảng. */

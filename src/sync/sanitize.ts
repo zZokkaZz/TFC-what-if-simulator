@@ -3,6 +3,11 @@ import type { Inputs } from '../model/types';
 import type { Dept } from './types';
 
 export function merge<T>(base: T, saved: unknown): T {
+  // Mảng (vd thứ tự ưu tiên khách): chỉ nhận đúng một hoán vị của các phần tử baseline
+  if (Array.isArray(base)) {
+    const ok = Array.isArray(saved) && saved.length === base.length && saved.every((x) => typeof x === 'string') && [...saved].sort().join('\u0000') === [...base].sort().join('\u0000');
+    return (ok ? [...(saved as unknown[])] : [...base]) as T;
+  }
   // Ô "bỏ trống được" (baseline null, vd CI game hiển thị): nhận số hữu hạn hoặc null
   if (base === null) return (typeof saved === 'number' && Number.isFinite(saved) ? saved : null) as T;
   if (saved === undefined) return base;

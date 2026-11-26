@@ -42,6 +42,8 @@ const LABELS: [RegExp, Dept, string][] = [
   [/^sales\.customers\..*\.paymentTermWeeks$/, 'Sales', 'payment term khách'],
   [/^sales\.customers\..*\.promotionalPressure$/, 'Sales', 'promotion'],
   [/^sales\.customers\..*\.promotionHorizon$/, 'Sales', 'promotion horizon'],
+  [/^sales\.shortageRule$/, 'Sales', 'shortage rule'],
+  [/^sales\.customerPriority\./, 'Sales', 'thứ tự ưu tiên khách'],
 ];
 
 const INTERVAL = /^sc\.products\..*\.productionIntervalDays$/;
@@ -119,7 +121,7 @@ export function causesFor(driverKey: string, changed: string[]): Cause[] {
 export function describePath(path: string): { dept: Dept; label: string } {
   const l = LABELS.find(([re]) => re.test(path));
   const parts = path.split('.');
-  const detail = parts.length >= 4 ? parts[2] : parts[0] === 'ops' && parts[1] === 'rmInspection' ? parts[2] : parts[0] === 'purchasing' ? parts[2] : '';
+  const detail = parts[0] === 'sales' && parts[1] === 'customerPriority' ? `hạng ${Number(parts[2]) + 1}` : parts.length >= 4 ? parts[2] : parts[0] === 'ops' && parts[1] === 'rmInspection' ? parts[2] : parts[0] === 'purchasing' ? parts[2] : '';
   if (!l) return { dept: 'Ops', label: path };
   return { dept: l[1], label: detail ? `${l[2]} (${detail})` : l[2] };
 }

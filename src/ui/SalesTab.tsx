@@ -45,6 +45,9 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
   const dis = !editable;
   const sa = inputs.sales, sb = base.sales;
   const anyChanged = changed.some((p) => p.startsWith('sales.'));
+  const optSR = salesOption(data, 'shortageRule');
+  const isPrio = /priority/i.test(sa.shortageRule);
+  const movePrio = (k: number, dir: -1 | 1) => { const p = [...sa.customerPriority]; const j = k + dir; if (j < 0 || j >= p.length) return; [p[k], p[j]] = [p[j], p[k]]; setSales({ ...sa, customerPriority: p }); };
   const setCust = (name: string, patch: Partial<SalesCustomerTerms>) => setSales({ ...sa, customers: { ...sa.customers, [name]: { ...sa.customers[name], ...patch } } });
   const optTU = salesOption(data, 'tradeUnit'), optDL = salesOption(data, 'orderDeadline');
   const optSLT = salesOption(data, 'serviceLevelType'), optPromo = salesOption(data, 'promotionalPressure'), optHz = salesOption(data, 'promotionHorizon');
@@ -66,6 +69,22 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
         {data.sales.options.length === 0
           ? <p class="warn-text">Sheet chưa có khối "LỰA CHỌN HỢP ĐỒNG SALES" (tab 6) — thiếu dữ liệu danh sách lựa chọn; dropdown chỉ có giá trị R0.</p>
           : <p class="f-hint">Lựa chọn đọc từ tab 6 "LỰA CHỌN HỢP ĐỒNG SALES" (form Negotiate của game). Đổi điều khoản thì game đổi contract index (công thức không công bố) — bấm Calculate trong game rồi nhập <b>CI game hiển thị</b>.</p>}
+        <fieldset>
+          <legend>Order management (ord.mgmt) — chung 3 khách</legend>
+          <SelectField label="Shortage rule" value={sa.shortageRule} disabled={dis} changed={sa.shortageRule !== sb.shortageRule}
+            options={[...new Set([...(optSR?.choices ?? []), sa.shortageRule])].map((x) => ({ value: x, label: `${x}${x === sb.shortageRule ? ' (R0)' : ''}` }))}
+            onChange={(v) => setSales({ ...sa, shortageRule: v })} hint="Chưa mô hình vào số — chỉ cảnh báo (ghi nhận để cả đội thống nhất)" />
+          {isPrio && <div class="prio">
+            <div class="f-hint">Thứ tự ưu tiên (1 = được giao trước khi thiếu hàng):</div>
+            <ol>{sa.customerPriority.map((c, k) => (
+              <li>{c}{' '}
+                <button class="btn small" disabled={dis || k === 0} onClick={() => movePrio(k, -1)} title="Lên">↑</button>
+                <button class="btn small" disabled={dis || k === sa.customerPriority.length - 1} onClick={() => movePrio(k, 1)} title="Xuống">↓</button>
+              </li>))}
+            </ol>
+          </div>}
+          {(sa.shortageRule !== sb.shortageRule) && <p class="warn-text small-text">⚠ Chưa mô hình: số trên trang KHÔNG đổi theo ô này — xem cảnh báo "Shortage rule" bên phải để cân nhắc.</p>}
+        </fieldset>
         {data.sales.contracts.map((k) => {
           const t = sa.customers[k.customer], tb = sb.customers[k.customer];
           const cu = S.customers.find((x) => x.customer === k.customer)!;
@@ -100,7 +119,7 @@ export function SalesTab({ data, inputs, base, res, baseRes, changed, setSales, 
           );
         })}
         {data.sales.options.filter((o) => o.key !== 'shortageRule' && o.key !== 'skus').map((o) => <p class="muted small-text"><b>{o.field}</b> (Info Center): {o.impact}</p>)}
-        <p class="muted small-text">Chưa có ô: shortage rule, SKU bán cho khách (giữ R0).</p>
+        <p class="muted small-text">Chưa có ô: SKU bán cho khách (cat.mgmt, giữ R0).</p>
       </aside>
 
       <section class="results">

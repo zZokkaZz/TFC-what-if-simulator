@@ -359,6 +359,22 @@ export function crossWarnings(data: Round0Data, base: Inputs, cur: Inputs, res: 
       });
     }
   }
+  // --- Sales ord.mgmt: shortage rule / thứ tự ưu tiên khách — CHƯA MÔ HÌNH, chỉ cảnh báo + số để cân nhắc ---
+  const prioChanged = JSON.stringify(cur.sales.customerPriority) !== JSON.stringify(base.sales.customerPriority);
+  if (cur.sales.shortageRule !== base.sales.shortageRule || (prioChanged && /priority/i.test(cur.sales.shortageRule))) {
+    const perPt = res.sales.customers.map((c) => {
+      const k = c.contractedR0 > 0 ? c.contracted / c.contractedR0 : 1;
+      const eur = c.shortfallR0 > 0 ? (-c.penaltyR0 * k) / (c.shortfallR0 * 100) : null;
+      return `${c.customer}: SL ${pct(c.slMeasured)} / hứa ${pct(c.promised, 0)}${eur !== null ? `, penalty ≈ €${n0(eur)}/điểm thiếu` : ''}`;
+    }).join('; ');
+    const impact = data.sales.options.find((x) => x.key === 'shortageRule')?.impact ?? '';
+    out.push({
+      id: 'sales-shortage', severity: 'warn', from: 'Sales', to: ['SC', 'Finance'],
+      title: `Shortage rule: ${base.sales.shortageRule} → ${cur.sales.shortageRule}${/priority/i.test(cur.sales.shortageRule) ? ` (ưu tiên: ${cur.sales.customerPriority.join(' > ')})` : ''}`,
+      detail: `CHƯA MÔ HÌNH: đổi ô này KHÔNG đổi số nào (sheet không có dữ liệu chia phần thiếu theo rule). Để cân nhắc — kịch bản hiện tại (ước lượng, neo R0): ${perPt}. Ưu tiên khách có penalty/điểm cao nhất có lợi nếu khách xếp sau vẫn giữ được SL hứa; khách nào chỉ dư ít điểm có thể bị kéo xuống dưới mức hứa. Info Center: ${impact}`,
+      roi: [notModeled('Penalty service level (3 khách)', 'shortage rule chưa mô hình')],
+    });
+  }
   // --- Tồn kho → Finance ---
   const dStock = res.sc.stockValue.total - baseRes.sc.stockValue.total;
   if (Math.abs(dStock) > 500) {

@@ -31,7 +31,7 @@
 | Sửa review 26/11 | Availability NL neo lai (hết trần 89%, không nổ khi xấu đi); số tuần tồn ÷ nhu cầu mới; cỡ đơn ≥ 1 trade unit + bội số khi đổi; phải trả theo start payment term; sửa chữ cũ; nhãn P&L khớp ops.ts | `src/model/ops.ts`, `supplyChain.ts`, `purchasing.ts`, `kpi.ts`, `tests/review-fixes.test.ts`, `ASSUMPTIONS.md` mục 22 |
 | Phần chung | Phân rã ROI, bảng kiểm tra dữ liệu Excel (16 phép), bảng nguyên văn Ops & SC từ tab 2/3/5/7/10/11/12/13 | `src/model/finance.ts`, `src/model/dataChecks.ts`, `src/ui/RawTable.tsx` |
 
-Test: 389 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
+Test: 394 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.mjs`), trong đó quan trọng nhất:
 - `tests/sheet-fidelity.test.ts` — đọc thẳng file Excel so **từng ô**; baseline hiển thị = đúng sheet (ROI = ô tab 2).
 - `tests/calibration.test.ts` — độ chính xác mô hình thô so với R0 (mục 7 CLAUDE.md).
 - `tests/kpi.test.ts`, `tests/supplychain.test.ts`, `tests/directions.test.ts`, `tests/sync.test.ts`.
@@ -82,6 +82,7 @@ Chỉ còn việc phụ thuộc dữ liệu người dùng (mục 3) và ý tư�
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
+- 26/11/2026 — Thêm ô Shortage rule + thứ tự ưu tiên khách (Sales, ord.mgmt) — chưa mô hình, chỉ ghi nhận/đồng bộ + cảnh báo; rules đổi → cần Publish. 394/394 + rules 63/63.
 - 26/11/2026 — Sửa lỗi đồng bộ: sau F5, chính máy vừa ghi không thấy lại quyết định đã lưu (controller bỏ qua mọi bản ghi cùng clientId; clientId lưu trên máy). Nay chỉ bỏ qua "tiếng vọng" của lần ghi trong phiên (theo rev). Dữ liệu trên Firestore không mất. Thêm 3 test (`tests/sync.test.ts`). Không đổi rules.
 
 - 26/11/2026 — Sửa 6 mục review (Gemini). Mục 1: công thức tỷ lệ người dùng giao làm Orange 32% khi đổi Cabana → người dùng chọn neo lai. 386/386. Không đổi rules.
@@ -99,7 +100,7 @@ Chỉ còn việc phụ thuộc dữ liệu người dùng (mục 3) và ý tư�
 - Không đổi hệ số COEFFS / EST cho tới khi có số trial.
 - Hạn dùng nguyên liệu (tab 3) chưa mô hình: trade unit lớn (vd Vitamin C sang Tank → đơn 30.000 L ≈ 163 tuần nhu cầu) làm tồn rất lớn và availability gần 100% mà không có hàng NL hết hạn.
 
-- Shortage rule (Proportional / FCFS / Customer priority) và bật/tắt SKU cho từng khách (tab 6 dòng 65–66) chưa có ô.
+- Shortage rule: đã có ô (26/11) nhưng CHƯA MÔ HÌNH. Bật/tắt SKU cho từng khách (cat.mgmt) chưa có ô.
 - Promotion làm nhu cầu biến động hơn (σ) và promotion horizon → safety stock TP: luật chỉ cho hướng, chưa có độ lớn.
 - Thưởng khi vượt SL hứa ("bonus nhỏ"): chưa có độ lớn.
 - Shelf life: app dùng mức cao nhất của các khách mua SKU; nếu game phân hàng già cho khách đòi thấp hơn thì obsolete thấp hơn — kiểm chứng bằng vòng trial.
