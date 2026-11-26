@@ -55,7 +55,7 @@ export function RoiBreakdownCard({ res, baseRes, roiR0 }: { res: Results; baseRe
           </tbody>
         </table>
       </div>
-      <p class="muted">Chi phí ghi dấu âm trong cây (COGS, operating expense) để cộng thẳng ra Operating profit. Nhãn <b>số R0</b> = chưa phụ thuộc quyết định nào trong app (contracted sales, overhead, phí phân phối, AR… sẽ mô hình ở M3 Sales (hợp đồng) / M4; đã nối: Ops, tồn kho SC, Purchasing, penalty service level); <b>thiếu dữ liệu</b> = file không có số tách riêng.</p>
+      <p class="muted">Chi phí ghi dấu âm trong cây (COGS, operating expense) để cộng thẳng ra Operating profit. Nhãn <b>số R0</b> = không phụ thuộc quyết định nào trong app (Energy, Water, Other, Interest, Contracted suppliers, Outbound orders, Fixed — lý do ở tab Finance); <b>thiếu dữ liệu</b> = file không có số tách riêng.</p>
     </Card>
   );
 }

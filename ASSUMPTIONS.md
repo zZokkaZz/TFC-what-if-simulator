@@ -88,7 +88,7 @@ Vì vậy đỉnh pallet, số ngày vượt sức chứa, đỉnh giờ và s�
 | Hỏng máy theo chất lượng bao bì | High ×1 · Middle ×1,25 · Poor ×1,6 (trung bình theo lít Pack/PET) | Luật chỉ nói "Poor gây hỏng". **Nguồn của PET 10,8 → 10,0 giờ khi bật inspection:** PET chiếm ~32% số lít; phần dư Poor (0,6) giảm 50% → hệ số chất lượng 1,190 → 1,095 (×0,92) |
 | RM inspection giảm phần hỏng do bao bì kém | 50% | Luật không cho độ lớn |
 | Tolerance dây chuyền | Narrow ×1,25 · Middle ×1 · Wide ×0,8 | Luật chỉ gợi ý |
-| Intake time | Chỉ dàn đỉnh giờ nhận hàng (mũ 0,5). **Tác động lên component availability chưa mô hình** (có cảnh báo trên ô) | Sẽ làm ở M2 |
+| Intake time | Cộng vào lead time NL (intake ÷ 5 tuần) → component availability (M2, mục 11); dàn đỉnh giờ nhận hàng (mũ 0,5) | Ước lượng (sửa chữ 26/11 — bản cũ ghi "chưa mô hình" là sai) |
 | Giới hạn thời vụ | Không giới hạn. Cảnh báo khi giờ vượt > 50% tổng giờ công kho | Luật không nêu giới hạn. Với 0 FTE, mô hình tính toàn bộ bằng thời vụ (€42 × 1,30), nên 0 FTE ≈ 5 FTE về chi phí và tối ưu là 2 FTE kho NL. Kết quả có thể quá lạc quan |
 | Gợi ý số pallet location | Hai số: (a) đỉnh mô hình + 10% biên; (b) số chỗ tối ưu theo chi phí (€100/chỗ/round so với €3/pallet/ngày). Nhãn "ước lượng – có thể quá lạc quan" | Đỉnh thật phụ thuộc nhu cầu ngẫu nhiên. Chưa tính giờ chuyển overflow. **Gợi ý cũ "kho TP thừa ~357 chỗ ≈ €35.653" đã bỏ:** đỉnh mới ~1.608 > 1.500, tức kho TP không thừa ở ngày đỉnh |
 | Drum/IBC ra pallet | 4 drum = 1 pallet · 1 IBC = 1 pallet · tank → tank yard | Không có quy đổi |
@@ -213,10 +213,10 @@ KPI giống dashboard game: Purchasing (rejection, raw material costs, delivery 
 | Giả định | Đang dùng | Vì sao |
 |---|---|---|
 | Phí vận chuyển | Phí R0 × (mô hình mới ÷ mô hình baseline). Mô hình = số chuyến × (phí mỗi chuyến + phí đơn vị × số đơn vị/chuyến làm tròn lên). Pallet/drum/IBC dùng "phí / Pallet-Drum-IBC"; FTL/tank dùng "phí / FTL-Tank" × số xe/bồn (30 pallet = 1 FTL, đọc từ ghi chú tab 3). Pallet layer (PET) tính như pallet tương đương | Công thức mô hình lệch R0: Pack +3,5%, PET +8,6%, Orange −5,7%, Mango −7,1%, Vitamin C +3,4% → chỉ dùng tỷ lệ |
-| FTL | Mỗi chuyến tính đủ số xe (làm tròn lên); **cỡ đơn không làm tròn** theo xe | Luật: "lot size có thể bị trade unit làm vượt" — game làm tròn thế nào chưa rõ; cỡ đơn R0 không phải bội số pallet/tank. Hệ quả: Pack lot 4 tuần ≈ 35,9 pallet/chuyến → FTL 2 xe đắt hơn pallet lẻ; lot 3,3 tuần (~30 pallet) → FTL rẻ hơn |
+| FTL | Mỗi chuyến tính đủ số xe (làm tròn lên). **Sửa 26/11 (mục 22):** cỡ đơn ≥ 1 trade unit; đổi trade unit khác R0 → làm tròn lên bội số (FTL = 30 pallet) | Luật: "lot size có thể bị trade unit làm vượt" — game làm tròn thế nào chưa rõ; cỡ đơn R0 không phải bội số pallet/tank. Hệ quả: Pack lot 4 tuần ≈ 35,9 pallet/chuyến → FTL 2 xe đắt hơn pallet lẻ; lot 3,3 tuần (~30 pallet) → FTL rẻ hơn |
 | Phí đơn hàng nhập | Inbound order lines (€271) và Inbound orders (€1.353) × (tổng số chuyến mới ÷ baseline 27,1) ≈ €10/order line, €50/đơn | Suy ra từ R0, game không công bố đơn giá |
 | Contracted suppliers (€100.000) | Giữ R0 | Luôn 5 NCC (1 NCC/nguyên liệu) |
-| Payment term NCC | Phải trả ≈ purchase value/tuần × payment term; Investment: Payment terms = R0 − (phải trả mới − phải trả baseline). Bỏ qua "start payment term" (When ordering / At delivery) | Cách game tính AR/AP chưa biết (M4) |
+| Payment term NCC | Phải trả ≈ purchase value/tuần × payment term; Investment: Payment terms = R0 − (phải trả mới − phải trả baseline). **Sửa 26/11 (mục 22):** tính theo "start payment term" — "When ordering" thì nợ thực = payment term − lead time (không âm). (Bản cũ: bỏ qua "start payment term" (When ordering / At delivery) | Cách game tính AR/AP chưa biết (M4) |
 | Contract index khi đổi điều kiện / NCC mới | Dùng CI niêm yết (hợp đồng R0 hoặc bảng thị trường) cho tới khi đội nhập "CI game hiển thị"; có cảnh báo "Chưa nhập số game" | Game chỉ hiện CI mới sau Calculate |
 | Reliability thực tế | NCC R0: số R0 + (cam kết mới − cam kết R0). NCC mới: cam kết − 4,72 điểm (chênh lệch TB cam kết − thực tế của 5 NCC R0). Nhập số game thì dùng số game | Sheet chỉ có reliability cam kết của NCC mới |
 | Rejection | NCC mới hoặc đổi quality: = rejection R0 của nguyên liệu đó (Pack 3,6%, PET 5,9%, Orange 1,0%, Mango 0,5%, Vitamin C 1,2%) | Không có dữ liệu rejection NCC mới. (Bản M1 dùng High 1% / Middle 3% / Poor 6% — đã bỏ vì tự đặt) |
@@ -454,3 +454,29 @@ Lựa chọn / khoảng của mọi ô đọc từ tab 6 "LỰA CHỌN HỢP Đ�
 (Promotion F&G Heavy trước M4: −8,16% → nay −8,30% vì thêm phí phân phối.)
 
 **Payment terms (Investment)** đã làm ở M3 (Δ AP Purchasing + Δ AR Sales, mục 15, 20) — M4 không đổi. AR / AP tách riêng: **thiếu dữ liệu** (tab 2 chỉ có số ròng 365.589).
+
+## 22. Sửa theo review 26/11 (6 mục)
+
+1. **Availability NL — neo lai** (người dùng chọn): thiếu **giảm** → thiếu mới = thiếu R0 (tab 7) × (tỷ lệ thiếu mô hình mới ÷ baseline) — hết trần cứng (bản cũ neo cộng r0 − Δ nên Vitamin C kẹt 89,0% dù SS 26 tuần hay đổi SYI); thiếu **tăng** → thiếu R0 + Δ mô hình (cộng). Lý do không dùng tỷ lệ cả hai chiều: Orange R0 thiếu 0,7% nhưng baseline mô hình thiếu 0,005% → đổi sang Cabana tỷ lệ ×97 → availability 32%, doanh thu 0, ROI −72,5%; Mango R0 100% thì tỷ lệ không bao giờ giảm. Baseline vẫn đúng tab 7.
+2. **Số tuần tồn TP** (cột tab 7 và KPI dashboard "Stock products/components (weeks)") = tồn ÷ nhu cầu/tuần **mới** — promotion không còn làm số tuần tăng theo % nhu cầu. KPI gộp theo giá trị: nhu cầu/tuần theo giá trị từng NL/SKU = giá trị tồn R0 ÷ số tuần R0 (tab 7) × hệ số nhu cầu kịch bản.
+3. **Trade unit NL**: cỡ đơn mỗi lần nhận ≥ 1 trade unit (Pallet, Pallet layer, FTL = 30 pallet, Tank 30.000, IBC 1.000, Drum 250 — số đọc từ tab 3); đổi trade unit khác R0 → làm tròn lên bội số. Baseline giữ số R0 (mọi NL R0 đã ≥ 1 trade unit; Orange 172.581 L không làm tròn vì giữ Tank). **Hệ quả:** Vitamin C sang Tank → cỡ đơn tối thiểu 30.000 L ≈ 163 tuần nhu cầu → availability gần 100% vì tồn rất lớn — **hạn dùng nguyên liệu (tab 3) chưa mô hình** nên kịch bản này lạc quan.
+4. **Phải trả NCC** theo start payment term (ước lượng): "When ordering" → nợ thực = max(0, payment term − lead time ngày ÷ 7); "At delivery" → payment term. Neo như cũ (Payment terms = R0 − Δ AP + Δ AR) nên baseline = 365.589. R0: Miami (When ordering, 30 ngày) và Seitan (When ordering, 60 ngày) có nợ thực 0 → phải trả mô hình baseline 72.480 (bản cũ 140.602; số nội bộ, không phải số sheet).
+5. Sửa chữ trên web: Intake time (đã nối lead time → availability, bản cũ ghi "CHƯA được mô hình" là sai), các câu "chờ M3/M4", "doanh thu giữ R0", "AR giữ R0"; Ops score nhãn "ước lượng".
+6. Nhãn P&L: Solve breakdowns training, Outsourcing tank yard, Flexible manpower (bottling) = "ước lượng" (khớp ops.ts). Ghi chú "Chưa tính phần giá tăng (CI)" chỉ hiện khi đã đổi điều khoản theo hướng làm CI tăng.
+
+**Test đổi kỳ vọng do quy tắc mới** (không phải nới để xanh): `tests/purchasing.test.ts` — Pack FTL lot 4 tuần giờ làm tròn 60 pallet/đơn (2 xe đầy: ít chuyến hơn, kho NL đầy hơn) thay cho "36 pallet → 2 xe thiếu tải"; payment term Orange 4 → 8 tuần: Δ phải trả theo nợ thực (Miami When ordering: 0 → 3,71 tuần) thay cho 4 tuần.
+
+**Trước / sau** (mỗi dòng đổi 1 quyết định):
+
+| Kịch bản | Vitamin C availability | ROI | Tuần tồn Orange 1L | KPI Stock products (tuần) | Tank yard TB / đỉnh | Payment terms (€) |
+|---|---|---|---|---|---|---|
+| R0 | 84,3% → **84,3%** | −7,68% → **−7,68%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 365.589 → 365.589 |
+| SS Vitamin C 2 → 6 tuần | 89,0% → **99,7%** | −6,82% → **−4,83%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 370.839 → 382.950 |
+| SS Vitamin C 2 → 26 tuần | 89,0% → **100,0%** | −6,81% → **−4,79%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 370.926 → 383.236 |
+| Vitamin C → SYI | 89,0% → **100,0%** | −6,78% → **−4,75%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 371.305 → 383.002 |
+| SYI + SS 6 tuần | 89,0% → **100,0%** | −6,78% → **−4,76%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 371.308 → 383.008 |
+| Promotion F&G → Heavy | 84,3% → **84,3%** | −8,30% → **−8,29%** | 3,31 → 3,20 | 3,27 → 3,18 | 6,13 → 6,13 / 12,0 → 12,0 | 365.473 → 367.338 |
+| Vitamin C trade unit Drum → Tank | 84,3% → **99,5%** | −7,87% → **−4,90%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,77 → 6,60 / 13,0 → 13,0 | 364.189 → 382.635 |
+| Orange: Miami → Cabana (At delivery) | 84,3% → **84,3%** | −8,10% → **−8,23%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 363.084 → 300.155 |
+
+Orange khi đổi Miami → Cabana: availability 99,3% → 98,8% (cả trước và sau, vì xấu đi vẫn neo cộng; công thức tỷ lệ thuần sẽ cho 32%).

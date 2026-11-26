@@ -35,6 +35,15 @@ const r0ResultOf = (data: Round0Data, c: ComponentKey) => {
   const k = contractOf(data, c);
   return data.purchasing.results.find((r) => r.supplier === k.supplier && r.component === c) ?? null;
 };
+/**
+ * Thời gian nợ NCC thực (tuần) — ƯỚC LƯỢNG theo "Start payment term" (tab 4): "When ordering" → tính từ lúc đặt hàng nên
+ * nợ thực = payment term − lead time (không âm); "At delivery" → = payment term. Game không công bố cách tính AP.
+ */
+export function effectivePayWeeks(data: Round0Data, c: ComponentKey, supplier: string, paymentTermWeeks: number, leadTimeDays: number): number {
+  const start = (specOf(data, c, supplier)?.startPaymentTerm ?? '').toLowerCase();
+  return start.includes('order') ? Math.max(0, paymentTermWeeks - leadTimeDays / 7) : paymentTermWeeks;
+}
+
 export const specOf = (data: Round0Data, c: ComponentKey, supplier: string) =>
   data.purchasing.specs.find((s) => s.component === c && s.supplier === supplier) ?? null;
 /** Điều kiện niêm yết của NCC: hợp đồng R0 (nếu là NCC đang dùng) hoặc bảng thị trường (trước đàm phán). */
@@ -183,7 +192,7 @@ export function simulatePurchasing(
       // Neo cột "Giá thực trả" tab 4: số sheet × (giá/đv mới ÷ giá/đv R0) → không đổi gì = đúng sheet
       pricePaid: r0.pricePaid * ratio(amountPurchased > 0 ? purchaseValue / amountPurchased : 0, r0.purchaseValue / (r0.purchasedInRound ?? amountPurchased)),
       deliveriesPerRound: f.deliveriesPerRound,
-      payables: (purchaseValue / ROUND.weeks) * s.paymentTermWeeks,
+      payables: (purchaseValue / ROUND.weeks) * effectivePayWeeks(data, c, s.supplier, s.paymentTermWeeks, s.leadTimeDays),
     };
   });
 
@@ -192,7 +201,7 @@ export function simulatePurchasing(
   const delBase = baseFlows.reduce((s, f) => s + f.deliveriesPerRound, 0);
   const kDel = ratio(del, delBase);
   // Payables baseline theo cùng công thức với số R0 → baseline chênh lệch = 0
-  const payablesBase = COMPONENTS.reduce((s, c) => s + (r0ResultOf(data, c)!.purchaseValue / ROUND.weeks) * baseSup[c].paymentTermWeeks, 0);
+  const payablesBase = COMPONENTS.reduce((s, c) => s + (r0ResultOf(data, c)!.purchaseValue / ROUND.weeks) * effectivePayWeeks(data, c, baseSup[c].supplier, baseSup[c].paymentTermWeeks, baseSup[c].leadTimeDays), 0);
   const payables = components.reduce((s, x) => s + x.payables, 0);
 
   const pv = components.reduce((s, x) => s + x.purchaseValue, 0);

@@ -78,7 +78,7 @@ export function OpsTab({ data, inputs, base, res, baseRes, changed, setOps, rese
           </div>
           <NumberField label="Number of pallet locations" unit="pallet" value={o.rmPalletLocations} disabled={dis} limit={OPS_LIMITS.rmPalletLocations} step={10} changed={o.rmPalletLocations !== b.rmPalletLocations} hint="€200/chỗ/năm · thiếu chỗ → overflow €3/pallet/ngày" onChange={(v) => setOps({ rmPalletLocations: v })} />
           <NumberField label="Number of permanent employees" unit="FTE" value={o.rmFte} disabled={dis} limit={OPS_LIMITS.rmFte} step={1} changed={o.rmFte !== b.rmFte} hint="€40.000/năm, 40 giờ/tuần · thiếu → thời vụ €42/giờ" onChange={(v) => setOps({ rmFte: v })} />
-          <NumberField label="Intake time" unit="ngày" value={o.intakeDays} limit={OPS_LIMITS.intakeDays} step={1} disabled={dis} changed={o.intakeDays !== b.intakeDays} hint={<><span class="warn-text">⚠ Tác động lên component availability (NL sẵn sàng muộn hơn → dễ thiếu NL, plan adherence ↓) CHƯA được mô hình.</span> Hiện chỉ dàn đỉnh giờ nhận hàng <Badge basis="estimate" />.</>} onChange={(v) => setOps({ intakeDays: v })} />
+          <NumberField label="Intake time" unit="ngày" value={o.intakeDays} limit={OPS_LIMITS.intakeDays} step={1} disabled={dis} changed={o.intakeDays !== b.intakeDays} hint={<>Cộng vào lead time NL → component availability (tab Supply Chain) → plan adherence; dàn đỉnh giờ nhận hàng (mũ 0,5) <Badge basis="estimate" /></>} onChange={(v) => setOps({ intakeDays: v })} />
         </fieldset>
 
         <fieldset>
@@ -290,13 +290,13 @@ function CostCard({ res, baseRes }: { res: Results; baseRes: Results }) {
   const tot = (r: Results) => r.ops.productionCost + r.ops.warehouseCost;
   const d = tot(res) - tot(baseRes);
   rows.push([<b>Tổng chi phí Ops</b>, '', <b>{eur(tot(baseRes))}</b>, <b>{eur(tot(res))}</b>, Math.abs(d) < 0.5 ? '' : <b class={d < 0 ? 'good' : 'bad'}>{signed(d, 'eur')}</b>]);
-  rows.push([<span>Ops score = (sản xuất + kho) / doanh thu <Badge basis="r0" /></span>, '', pct(baseRes.finance.opsScore), pct(res.finance.opsScore), '']);
+  rows.push([<span>Ops score = (sản xuất + kho) / doanh thu <Badge basis="estimate" /></span>, '', pct(baseRes.finance.opsScore), pct(res.finance.opsScore), '']);
   const dInv = res.ops.machinesInvestment - baseRes.ops.machinesInvestment;
   rows.push([<b>Thay đổi đầu tư (máy trộn + dây chuyền)</b>, 'Investment', eur(baseRes.ops.machinesInvestment), eur(res.ops.machinesInvestment), Math.abs(dInv) < 0.5 ? '' : <b class={dInv < 0 ? 'good' : 'bad'}>{signed(dInv, 'eur')}</b>]);
   return (
     <Card title="Chi phí Ops (cả round = 26 tuần)">
       <Table head={['Hạng mục', 'Nhóm', 'Baseline', 'Kịch bản', 'Δ']} rows={rows} cls="costs" />
-      <p class="muted">Doanh thu giữ số R0 cho tới M3. Chi phí năm × 0,5 = chi phí 1 round. Thay đổi đầu tư không phải chi phí, nhưng làm đổi Investment → ROI. Chi phí chuyển đổi máy chưa có dữ liệu (tính 0) <Badge basis="estimate" />.</p>
+      <p class="muted">Doanh thu theo mô hình Sales (penalty, promotion, CI — ước lượng). Chi phí năm × 0,5 = chi phí 1 round. Thay đổi đầu tư không phải chi phí, nhưng làm đổi Investment → ROI. Chi phí chuyển đổi máy chưa có dữ liệu (tính 0) <Badge basis="estimate" />.</p>
     </Card>
   );
 }

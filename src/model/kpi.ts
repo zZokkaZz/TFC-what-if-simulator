@@ -130,19 +130,28 @@ export function buildKpis(d: Round0Data, res: Results, base: Results): Kpi[] {
     r0: av ? { value: av.r0, source: 'tab 7 dashboard' } : MISSING('Availability R0'),
     scenario: av?.r0 != null ? Math.min(1, Math.max(0, av.r0 + avDelta)) : null, scenarioBasis: 'estimate', good: 'up', target: null, comment: av?.comment ?? null,
   });
+  // Số tuần tồn = giá trị tồn ÷ giá trị nhu cầu/tuần. Nhu cầu/tuần theo giá trị từng NL/SKU = giá trị tồn R0 ÷ số tuần R0 (tab 7),
+  // co giãn theo nhu cầu kịch bản (cột "Demand/tuần" mô hình) → promotion không làm số tuần tăng giả.
+  const weeklyValue = (items: { value: number | null; r0: number | null; sv: number | null; sw: number | null }[]) =>
+    items.reduce((s, x) => s + (x.sv && x.sw ? (x.sv / x.sw) * (x.r0 && x.value !== null ? x.value / x.r0 : 1) : 0), 0);
+  const useC = weeklyValue(res.sc.components.map((c) => ({ value: c.sheet.demandPerWeek.value, r0: c.sheet.demandPerWeek.r0, sv: c.stockValueR0, sw: c.sheet.stockWeeks.r0 })));
+  const useC0 = weeklyValue(base.sc.components.map((c) => ({ value: c.sheet.demandPerWeek.value, r0: c.sheet.demandPerWeek.r0, sv: c.stockValueR0, sw: c.sheet.stockWeeks.r0 })));
+  const useP = weeklyValue(res.sc.products.map((p) => ({ value: p.sheet.demandPerWeek.value, r0: p.sheet.demandPerWeek.r0, sv: p.stockValueR0, sw: p.sheet.stockWeeks.r0 })));
+  const useP0 = weeklyValue(base.sc.products.map((p) => ({ value: p.sheet.demandPerWeek.value, r0: p.sheet.demandPerWeek.r0, sv: p.stockValueR0, sw: p.sheet.stockWeeks.r0 })));
+  const kUseC = useC0 > 0 ? useC / useC0 : 1, kUseP = useP0 > 0 ? useP / useP0 : 1;
   out.push({
     id: 'sc-stc', dept: 'Supply Chain', label: 'Stock components (weeks)', unit: 'weeks',
     rMinus2: sc ? { value: sc.rMinus2, source: 'tab 7 dashboard' } : MISSING('Stock components R-2'),
     rMinus1: sc ? { value: sc.rMinus1, source: 'tab 7 dashboard' } : MISSING('Stock components R-1'),
     r0: sc ? { value: sc.r0, source: 'tab 7 dashboard' } : MISSING('Stock components R0'),
-    scenario: sc?.r0 != null ? sc.r0 * (res.sc.stockValue.components / base.sc.stockValue.components) : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sc?.comment ?? null,
+    scenario: sc?.r0 != null ? sc.r0 * (res.sc.stockValue.components / base.sc.stockValue.components) / kUseC : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sc?.comment ?? null,
   });
   out.push({
     id: 'sc-stp', dept: 'Supply Chain', label: 'Stock products (weeks)', unit: 'weeks',
     rMinus2: sp ? { value: sp.rMinus2, source: 'tab 7 dashboard' } : MISSING('Stock products R-2'),
     rMinus1: sp ? { value: sp.rMinus1, source: 'tab 7 dashboard' } : MISSING('Stock products R-1'),
     r0: sp ? { value: sp.r0, source: 'tab 7 dashboard' } : MISSING('Stock products R0'),
-    scenario: sp?.r0 != null ? sp.r0 * (res.sc.stockValue.products / base.sc.stockValue.products) : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sp?.comment ?? null,
+    scenario: sp?.r0 != null ? sp.r0 * (res.sc.stockValue.products / base.sc.stockValue.products) / kUseP : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sp?.comment ?? null,
   });
   return out;
 }
@@ -160,7 +169,7 @@ export function roleScores(d: Round0Data, res: Results, base: Results): RoleScor
   return [
     { dept: 'Purchasing', rule, r0: ciR0, scenario: res.purchasing.kpi.avgContractIndex, unit: 'index', good: 'down', note: 'Contract index TB đơn giản của 5 hợp đồng (tab 4) — game có thể tính trọng số khác (ước lượng). NCC mới / đổi điều kiện mà chưa nhập CI game → dùng CI trước đàm phán.' },
     { dept: 'Operations', rule, r0: opsScore(base), scenario: opsScore(res), unit: 'pct', good: 'down', note: 'Production costs + dòng kho (pallet locations, overflow, tank yard, nhân công kho) ÷ realized revenue (tab 2) — game chưa nói rõ dòng nào là "kho" (ước lượng).' },
-    { dept: 'Sales', rule, r0: d.finance.totals.realizedRevenue, scenario: res.finance.realizedRevenue, unit: 'eur', good: 'up', note: 'Realized revenue (tab 2) = contracted (R0 × CI ÷ CI R0; CI = số game hoặc ước lượng) + penalty service level ước lượng theo SL dự kiến. Ô SL hứa, shelf life, payment term, promotion chưa có.' },
+    { dept: 'Sales', rule, r0: d.finance.totals.realizedRevenue, scenario: res.finance.realizedRevenue, unit: 'eur', good: 'up', note: 'Realized revenue (tab 2) = contracted (R0 × lượng promotion × CI ÷ CI R0; CI = số game hoặc ước lượng) + penalty service level ước lượng theo SL dự kiến và SL hứa / SL type.' },
     { dept: 'Supply Chain', rule, r0: stock(base), scenario: stock(res), unit: 'eur', good: 'down', note: 'Investment: Stock (tab 2) — giá trị tồn NL + TP.' },
   ];
 }

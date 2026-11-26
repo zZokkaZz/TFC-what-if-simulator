@@ -209,7 +209,8 @@ describe('Ghi chú "chưa tính phần giá tăng (CI)" cạnh ô trade unit / o
   it('đúng câu người dùng chốt; hiện khi CI game trống; 2 hệ số CI giữ = 0', () => {
     const src = readFileSync(new URL('../src/ui/SalesTab.tsx', import.meta.url), 'utf8');
     expect(src).toContain("'Chưa tính phần giá tăng (CI) — lựa chọn này đang trông tệ hơn thực tế. Nhập CI game hiển thị để tính đúng.'");
-    expect(src).toMatch(/t\.ciGame === null && \(up \|\| !down\) && <p[^>]*>\{CI_MISSING_NOTE\}/);
+    // review 26/11: chưa đổi gì → không hiện ghi chú
+    expect(src).toMatch(/t\.ciGame === null && up && <p[^>]*>\{CI_MISSING_NOTE\}/);
     expect(src).toContain("'Chưa tính phần giá giảm (CI) — lựa chọn này đang trông tốt hơn thực tế. Nhập CI game hiển thị để tính đúng.'");
     expect(src).toMatch(/t\.ciGame === null && down && <p[^>]*>\{CI_DOWN_NOTE\}/);
     expect(COEFFS.salesCiPerStepTradeUnit.value).toBe(0);

@@ -118,15 +118,24 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, b
   const unused = expectedBelow(needHours, sigmaHours, C);
   const outsourced = expectedAbove(needHours, sigmaHours, BOTTLING.maxHoursPerWeek);
   const overtime = Math.max(0, expectedAbove(needHours, sigmaHours, C) - outsourced);
-  // Availability NL theo quyết định SC (safety stock, lot size), NCC (lead time, reliability), intake time:
-  // dạng cộng thêm so với R0 nên baseline = đúng availability game in ra (Vitamin C 84,3%…)
+  // Availability NL theo quyết định SC (safety stock, lot size), NCC (lead time, reliability), intake time. Baseline = đúng số game (Vitamin C 84,3%…).
+  // Neo LAI (người dùng chọn 26/11):
+  //  - thiếu GIẢM (tốt lên): thiếu mới = thiếu R0 × (tỷ lệ thiếu mô hình mới ÷ baseline) → không còn trần cứng (bản cũ cộng r0 − Δ nên Vitamin C kẹt 89,0%);
+  //  - thiếu TĂNG (xấu đi): thiếu mới = thiếu R0 + (mô hình mới − baseline) → không "nổ" khi baseline mô hình gần như không thiếu
+  //    (Orange: thiếu mô hình 0,005% vs R0 0,7% → tỷ lệ ×97 cho availability 32%), và NL có R0 = 100% (Mango) vẫn giảm được.
   const flows = componentFlows(inputs, data, cal, production, est);
   const risk = componentRisk(inputs, data, cal, production, flows, sup);
   const componentAvailability = {} as Record<ComponentKey, number>;
   for (const c of COMPONENTS) {
     const r0 = data.supplyChain.componentStock.find((x) => x.component === c)!.availability;
-    const delta = baseShort ? risk[c].shortRate - baseShort[c] : 0;
-    componentAvailability[c] = Math.min(1, Math.max(0, r0 - delta));
+    let a = r0;
+    if (baseShort) {
+      const bs = baseShort[c], sr = risk[c].shortRate;
+      if (Math.abs(sr - bs) <= 1e-15) a = r0;
+      else if (sr < bs && bs > 1e-12) a = 1 - (1 - r0) * (sr / bs); // tốt lên: tỷ lệ
+      else a = r0 - (sr - bs); // xấu đi: cộng thêm
+    }
+    componentAvailability[c] = Math.min(1, Math.max(0, a));
   }
   for (const p of production) {
     const prod = data.products.find((x) => x.key === p.sku)!;
