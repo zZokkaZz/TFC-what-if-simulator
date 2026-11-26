@@ -102,9 +102,13 @@ service cloud.firestore {
         && (!('LAND Market' in m) || validCust(m['LAND Market']))
         && (!("Dominick's" in m) || validCust(m["Dominick's"]));
     }
+    // ord.mgmt (chung 3 khách): shortage rule + thứ tự ưu tiên khách (khớp SALES_SHORTAGE_MAX, SALES_CUSTOMERS)
     function validSales(d) {
-      return d.keys().hasOnly(['customers'])
-        && (!('customers' in d) || validCustMap(d.customers));
+      return d.keys().hasOnly(['customers', 'shortageRule', 'customerPriority'])
+        && (!('customers' in d) || validCustMap(d.customers))
+        && (!('shortageRule' in d) || d.shortageRule.size() <= 30)
+        && (!('customerPriority' in d) || (d.customerPriority is list && d.customerPriority.size() <= 3
+              && d.customerPriority.hasOnly(['Food & Groceries', 'LAND Market', "Dominick's"])));
     }
     function validDeptData(dept, d) {
       return d is map && (

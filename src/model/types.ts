@@ -70,6 +70,10 @@ export interface SalesCustomerTerms {
 export interface SalesInputs {
   /** Theo tên khách (tab 6) */
   customers: Record<string, SalesCustomerTerms>;
+  /** Màn hình ord.mgmt (chung 3 khách): Proportional / First come, first served / Customer priority — CHƯA MÔ HÌNH (không đổi số) */
+  shortageRule: string;
+  /** Thứ tự ưu tiên khách khi Customer priority (đầu = ưu tiên nhất) — CHƯA MÔ HÌNH */
+  customerPriority: string[];
 }
 
 export interface Inputs {

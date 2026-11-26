@@ -77,6 +77,10 @@ await t('sales: payment term 0 bị chặn', assertFails(setDoc(salesRef, sal({ 
 await t('sales: payment term lẻ (4,5) bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, paymentTermWeeks: 4.5 } }))));
 await t('sales: promotion quá dài bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, promotionalPressure: 'x'.repeat(21) } }))));
 await t('sales: SL hứa là chuỗi bị chặn', assertFails(setDoc(salesRef, sal({ 'LAND Market': { ...full9, serviceLevel: '95' } }))));
+await t('sales: shortage rule + thứ tự ưu tiên khách hợp lệ', assertSucceeds(setDoc(salesRef, decision('bob', 'sales', { customers: { 'LAND Market': full9 }, shortageRule: 'First come, first served', customerPriority: ['Food & Groceries', "Dominick's", 'LAND Market'] }))));
+await t('sales: shortage rule quá dài bị chặn', assertFails(setDoc(salesRef, decision('bob', 'sales', { customers: {}, shortageRule: 'x'.repeat(31) }))));
+await t('sales: thứ tự ưu tiên có khách lạ bị chặn', assertFails(setDoc(salesRef, decision('bob', 'sales', { customers: {}, customerPriority: ['Hacker'] }))));
+await t('sales: thứ tự ưu tiên không phải danh sách bị chặn', assertFails(setDoc(salesRef, decision('bob', 'sales', { customers: {}, customerPriority: 'Food & Groceries' }))));
 await t('không xóa được decisions', assertFails(deleteDoc(doc(alice, 'teams', TEAM, 'decisions', 'ops'))));
 const log = { uid: 'alice', role: 'ops', dept: 'ops', summary: 'Ops đổi số ca 2 → 3', changes: [{ path: 'ops.shifts', label: 'số ca', from: '2', to: '3' }], at: serverTimestamp() };
 let logRef;

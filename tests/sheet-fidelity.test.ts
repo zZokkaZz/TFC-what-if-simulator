@@ -337,3 +337,15 @@ describe('M4 Finance: baseline = đúng từng ô tab 2 / tab 6', () => {
     for (const c of r.sales.customers) expect(c.distribution).toBe(rows6.slice(h + 1).find((y) => String(y?.[0] ?? '').trim() === c.customer)![i]);
   });
 });
+
+describe('Shortage rule (ord.mgmt): baseline = đúng ô Excel', () => {
+  it('ô "Shortage rule" R0 = đúng ô R0 của khối lựa chọn tab 6; danh sách lựa chọn = đúng ô', () => {
+    const rows6 = rowsOf('6_Sales');
+    const h = rows6.findIndex((x) => String(x?.[0] ?? '').trim() === 'Ô quyết định');
+    const H = rows6[h].map((x) => String(x ?? '').normalize('NFC').trim());
+    const row = rows6.slice(h + 1).find((x) => /^Shortage rule/.test(String(x?.[0] ?? '')))!;
+    const first = d.sales.contracts[0].customer;
+    expect(baselineInputs(d).sales.shortageRule).toBe(String(row[uniqueCol(H, new RegExp(`^R0 ${first.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))]).trim());
+    expect(d.sales.options.find((o) => o.key === 'shortageRule')!.choices).toEqual(String(row[uniqueCol(H, /^Lựa chọn/)]).split('|').map((x) => x.trim()));
+  });
+});

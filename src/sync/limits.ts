@@ -45,6 +45,8 @@ export const SALES_LIMITS = {
 };
 export const SALES_TEXT = ['tradeUnit', 'orderDeadline', 'serviceLevelType', 'promotionalPressure', 'promotionHorizon'] as const;
 export const SALES_TEXT_MAX = 20;
+/** Shortage rule ("First come, first served" = 23 ký tự) — khớp firestore.rules */
+export const SALES_SHORTAGE_MAX = 30;
 
 export interface Issue { path: string; label: string; value: string; message: string }
 
@@ -90,6 +92,11 @@ export function validateDept(dept: Dept, data: unknown): Issue[] {
       }
     }
   } else if (dept === 'sales') {
+    if (d.shortageRule !== undefined && (typeof d.shortageRule !== 'string' || d.shortageRule.length > SALES_SHORTAGE_MAX)) add('sales.shortageRule', 'Shortage rule', d.shortageRule, 'giá trị không hợp lệ');
+    if (d.customerPriority !== undefined) {
+      const p = d.customerPriority as unknown;
+      if (!Array.isArray(p) || p.length > SALES_CUSTOMERS.length || !p.every((x) => (SALES_CUSTOMERS as readonly string[]).includes(x as string))) add('sales.customerPriority', 'Thứ tự ưu tiên khách', p, 'phải là danh sách tên khách hợp lệ');
+    }
     for (const [c, t] of Object.entries((d.customers ?? {}) as Record<string, Record<string, unknown>>)) {
       if (!(SALES_CUSTOMERS as readonly string[]).includes(c)) { add(`sales.customers.${c}`, `Khách ${c}`, c, 'khách hàng không hợp lệ'); continue; }
       for (const k of SALES_TEXT) if (typeof t?.[k] !== 'string' || (t[k] as string).length > SALES_TEXT_MAX) add(`sales.customers.${c}.${k}`, `${k} (${c})`, t?.[k], 'giá trị không hợp lệ');

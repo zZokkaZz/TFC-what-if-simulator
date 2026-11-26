@@ -480,3 +480,7 @@ Lựa chọn / khoảng của mọi ô đọc từ tab 6 "LỰA CHỌN HỢP Đ�
 | Orange: Miami → Cabana (At delivery) | 84,3% → **84,3%** | −8,10% → **−8,23%** | 3,20 → 3,20 | 3,18 → 3,18 | 6,00 → 6,00 / 12,0 → 12,0 | 363.084 → 300.155 |
 
 Orange khi đổi Miami → Cabana: availability 99,3% → 98,8% (cả trước và sau, vì xấu đi vẫn neo cộng; công thức tỷ lệ thuần sẽ cho 32%).
+
+## 23. Shortage rule + thứ tự ưu tiên khách (ord.mgmt, 26/11/2026)
+
+Theo yêu cầu người dùng, tab Sales có ô **Shortage rule** (lựa chọn đọc từ tab 6: Proportional / First come, first served / Customer priority; R0 = Proportional) và **thứ tự ưu tiên khách** (khi chọn Customer priority; R0 = thứ tự bảng hợp đồng). **CHƯA MÔ HÌNH:** đổi ô KHÔNG đổi số nào — sheet không có dữ liệu game chia phần thiếu ra sao. Ô có để cả đội ghi nhận & đồng bộ lựa chọn; cảnh báo "Shortage rule" hiện SL từng khách so với mức hứa và penalty ≈ €/điểm thiếu (neo R0, ước lượng: F&G ≈ €66k, LAND ≈ €16k, Dominick's ≈ €13k ở R0) để cân nhắc. `firestore.rules` (`validSales`) thêm 2 trường → **cần Publish lại rules**; `scripts/test-rules.mjs` 63/63.
