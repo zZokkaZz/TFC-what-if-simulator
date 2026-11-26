@@ -91,6 +91,8 @@ export class SyncController {
   private sdkPendingWrites = false;
   private noticeSeq = 0;
   private revs: Partial<Record<Dept, number>> = {};
+  /** rev cao nhất PHIÊN NÀY đã ghi cho từng phòng — để nhận ra "tiếng vọng" của chính lần ghi này. */
+  private writtenRevs: Partial<Record<Dept, number>> = {};
   private readonly debounceMs: number;
   private readonly now: () => number;
 
@@ -193,6 +195,7 @@ export class SyncController {
     this.lastRemote[dept] = data;
     const rev = (this.revs[dept] ?? this.state.meta[dept]?.rev ?? 0) + 1;
     this.revs[dept] = rev;
+    this.writtenRevs[dept] = Math.max(this.writtenRevs[dept] ?? 0, rev);
     this.inflight.add(dept);
     this.refreshStatus();
     const uid = this.state.uid ?? 'unknown';
@@ -310,9 +313,13 @@ export class SyncController {
       const mine = doc.clientId === this.opts.clientId;
       metaOut[d] = { updatedAt: doc.updatedAt, role: doc.role, clientId: doc.clientId, rev: doc.rev };
       if (this.state.saves[d].state === 'idle') this.setSave(d, { state: 'saved', at: doc.updatedAt });
-      if (!mine && (this.revs[d] ?? 0) < doc.rev) this.revs[d] = doc.rev;
+      if ((this.revs[d] ?? 0) < doc.rev) this.revs[d] = doc.rev; // cả bản ghi cùng clientId (F5, tab khác) → lần ghi sau có rev lớn hơn
       const busy = this.dirty.has(d) || this.inflight.has(d);
-      if (mine) { this.lastRemote[d] = data; continue; }
+      // Chỉ bỏ qua bản ghi của CHÍNH PHIÊN NÀY (rev ≤ rev đã ghi): màn hình đã có số đó (hoặc mới hơn).
+      // Sửa lỗi 26/11: trước đây bỏ qua mọi bản ghi cùng clientId → sau F5 (clientId lưu trên máy, màn hình bắt đầu từ R0)
+      // quyết định đã lưu của chính mình không hiện lại; tab khác cùng trình duyệt cũng không thấy nhau.
+      const ownEcho = mine && this.writtenRevs[d] !== undefined && doc.rev <= this.writtenRevs[d]!;
+      if (ownEcho) { this.lastRemote[d] = data; continue; }
       if (busy) {
         this.lastRemote[d] = data;
         if (d === this.opts.role) this.notice('conflict', `Một máy khác (vai trò ${ROLE_LABEL[doc.role]}) vừa ghi phần ${DEPT_SHORT[d]}. Thay đổi đang chờ của bạn sẽ ghi đè lên (bản ghi sau thắng).`);
