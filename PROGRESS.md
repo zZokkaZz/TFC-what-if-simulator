@@ -48,7 +48,7 @@ Test: 394 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.
 
 **Lộ trình M0–M4 đã xong; M5 người dùng bỏ.** Đã nộp Round 1 (game: ROI 5,04%, model dự báo 4,29%) — chi tiết `ROUND1_ANALYSIS.md`.
 
-1. ~~Chờ người dùng upload sheet Round 1~~ — XONG 27/11 (xem nhật ký). Còn: xác nhận số pallet/FTL; lập phương án R2 bằng model đã hiệu chỉnh.
+1. ~~Chờ người dùng upload sheet Round 1~~ — XONG 27/11 (xem nhật ký). Còn: lập phương án R2 bằng model đã hiệu chỉnh.
    (cũ) **Chờ người dùng upload sheet Round 1** (`TFC Round 1.xlsx`, trích bằng `notes/prompts_trich_xuat_R1.md`, các tab `R1_*`). Khi có: đọc tab R1_* trong `build-data.ts` (theo tiêu đề), thêm `tests/backtest-r1.test.ts`, rồi sửa model theo `ROUND1_ANALYSIS.md` mục 5 (A: tồn thực tế theo plan adherence là ưu tiên 1). Hỏi người dùng trước khi bắt đầu.
 2. **Round 2:** game có mục **KPI** mới — chưa biết nội dung, chờ ảnh chụp. Lập phương án R2 từ `ROUND1_ANALYSIS.md` mục 6.
 3. Ý tưởng chờ quyết định: mục 7.
@@ -87,7 +87,7 @@ Test: 394 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
-- 27/11/2026 — Có `data/TFC_Round1.xlsx`. Backtest đầy đủ (`ROUND1_BACKTEST.md`), rồi theo yêu cầu người dùng hiệu chỉnh model theo R1: 12 sửa (thưởng SL, SL theo mức thiếu, adherence gồm changeover, tồn TP & obsolete ∝ adherence, AR theo contracted, cỡ đơn NL cộng thêm, dao động kho NL mũ 0,5, định giá tồn theo giá mới, phí Tank, reliability NCC mới theo trung vị, SMED/training vào Indirect). Backtest R1: ROI 5,12% (đoán NCC) / 5,36% (số NCC thật) vs game 5,04% (trước: 4,29%). R0 vẫn −7,68%. Test cũ kiểm hành vi bị R1 bác bỏ đã đổi kỳ vọng (ghi chú trong từng test). Còn chờ người dùng: số pallet/FTL (30 hay 27).
+- 27/11/2026 — Có `data/TFC_Round1.xlsx`. Backtest đầy đủ (`ROUND1_BACKTEST.md`), rồi theo yêu cầu người dùng hiệu chỉnh model theo R1: 12 sửa (thưởng SL, SL theo mức thiếu, adherence gồm changeover, tồn TP & obsolete ∝ adherence, AR theo contracted, cỡ đơn NL cộng thêm, dao động kho NL mũ 0,5, định giá tồn theo giá mới, phí Tank, reliability NCC mới theo trung vị, SMED/training vào Indirect). Backtest R1: ROI 5,12% (đoán NCC) / 5,36% (số NCC thật) vs game 5,04% (trước: 4,29%). R0 vẫn −7,68%. Test cũ kiểm hành vi bị R1 bác bỏ đã đổi kỳ vọng (ghi chú trong từng test). Người dùng chốt giữ 30 pallet/FTL (R1 suy ra ≈ 27 → model thấp phí FTL PET ~€12,8k). PR #14 đã merge.
 
 - 26/11/2026 — Round 1 đã nộp (Phương án Chính, kho TP 1.350, Customer priority F&G > LAND > Dominick's) → game ROI 5,04% (hạng 14, top 8,01%). Đối chiếu dashboard với model, dựng ngược P&L, phát hiện tồn thực ÷ lý thuyết ≈ plan adherence; báo cáo artifact + `ROUND1_ANALYSIS.md`, `MODEL_GUIDE.md`, `notes/prompts_trich_xuat_R1.md`. Không sửa code model.
 
