@@ -103,5 +103,7 @@ Lộ trình: (1) người dùng upload sheet R1 (prompt trích xuất: `notes/pr
 
 ## 7. Round 2
 
-- Game hiện sẵn quyết định Round 1 làm điểm xuất phát; có thêm mục **KPI** mới — nội dung CHƯA biết (chờ ảnh chụp từ người dùng, không đoán).
+- Game hiện sẵn quyết định Round 1 làm điểm xuất phát. Đã đối chiếu 4 phòng (tab `R2_*_khac`, `R2_thu` trong `data/TFC_Round1.xlsx`, 27/11): **mọi ô quyết định, lựa chọn dropdown, min/max, 23 NCC thị trường, 3 máy trộn, 4 dây chuyền đều giống R0/R1** (Claude so lại bằng số với `round0.json`). Không có ô "Bonus policy". PM trong game ghi None / A little / A lot (= None / Minimal / Extensive của simulator).
+- **Điểm mới duy nhất: tab "kpis"** ở mỗi phòng — chọn tối đa 4 KPI hiển thị (ROI bắt buộc) trong danh sách 69 KPI giống nhau ở 4 phòng; KPI chỉ quyết định dashboard + alert và được benchmark với các đội cùng pool. Popup không có mục tiêu/điểm/band. **Không ảnh hưởng ROI → không cần sửa model.**
+- Thư 11/20 và 11/26 (Purchasing): chỉ giải thích chung, không có số/sự kiện riêng của đội. Thư Ops/Sales/SC chưa đọc.
 - Khi lập phương án R2: dùng bậc thang mục 6 làm gốc, cộng biên an toàn theo mục 4, ghi lại CI game hiển thị khi đàm phán thử.

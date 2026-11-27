@@ -335,7 +335,7 @@ Dữ liệu R1 đọc tự động: `scripts/build-data-r1.ts` → `src/data/rou
 
 | Chỗ | Lệch (model − game) | Vì sao chưa sửa |
 |---|---|---|
-| Phí vận chuyển PET FTL | −12.799 | Sheet R0 ghi **30 pallet/xe**; số R1 khớp **≈ 27 pallet/xe** (2 cách tính độc lập: phí/đơn và cỡ đơn/xe). Đổi số sheet → cần người dùng xác nhận |
+| Phí vận chuyển PET FTL | −12.799 | Sheet R0 ghi **30 pallet/xe**; số R1 khớp **≈ 27 pallet/xe** (2 cách tính độc lập: phí/đơn và cỡ đơn/xe). **Người dùng chốt 27/11: giữ 30** → model thấp phí FTL PET ~€12,8k (≈ 0,3 điểm ROI) |
 | Hỏng máy | 4,1 vs 4,7 giờ | Muốn khớp phải cho PET Middle hỏng nhiều hơn Poor (trái Info Center) → giữ nguyên, báo |
 | Thời vụ kho NL | 13.924 vs 17.809 | Giờ TB model 66 vs 74 (biểu đồ ngày game TB 70,7) |
 | SL pieces SKU C-power | cao 1,4–2,3 điểm | Khách vẫn khớp; độ dốc theo availability Vitamin C có thể cao hơn thật |
