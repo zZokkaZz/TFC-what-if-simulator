@@ -1,0 +1,286 @@
+<title>Chiến lược TFC Team 48</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Bố cục: một cột đọc dài, mỗi phòng một khối "phiếu quyết định"; số liệu dùng font mono; màu theo 4 phòng ban */
+:root{
+  --bg:#f6f7f4; --surface:#ffffff; --fg:#1c2421; --muted:#5d6a64; --line:#dde3df;
+  --accent:#0f7a5c; --accent-soft:#e3f2ec;
+  --pur:#7a4fb5; --sc:#1f6fb2; --ops:#c25b12; --sales:#b0306a;
+  --up:#13804f; --down:#c0392b; --warn:#a86b00; --warn-soft:#fff4dc;
+  --display:"Be Vietnam Pro",system-ui,sans-serif; --body:"Be Vietnam Pro",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121715; --surface:#1a211e; --fg:#e6ece9; --muted:#9aa8a1; --line:#2c3632;
+  --accent:#4cc79b; --accent-soft:#183329;
+  --pur:#b18ae6; --sc:#69aee8; --ops:#f0954f; --sales:#e9719f;
+  --up:#4cc98a; --down:#f07a6b; --warn:#e3b04f; --warn-soft:#2e2715; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121715; --surface:#1a211e; --fg:#e6ece9; --muted:#9aa8a1; --line:#2c3632;
+  --accent:#4cc79b; --accent-soft:#183329;
+  --pur:#b18ae6; --sc:#69aee8; --ops:#f0954f; --sales:#e9719f;
+  --up:#4cc98a; --down:#f07a6b; --warn:#e3b04f; --warn-soft:#2e2715; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.65}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:2.1rem;font-weight:800;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:700;margin-top:56px;padding-top:18px;border-top:2px solid var(--fg)}
+h3{font-size:1.1rem;font-weight:700;margin-top:28px}
+p,li{max-width:68ch}
+p{margin:12px 0}
+.lead{font-size:1.08rem;color:var(--muted)}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.num,td.n,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.toc a{font-size:.85rem;padding:6px 12px;border:1px solid var(--line);border-radius:999px;color:var(--fg);text-decoration:none;background:var(--surface)}
+.toc a:hover,.toc a:focus-visible{border-color:var(--accent);outline:none}
+.note{background:var(--warn-soft);border-left:3px solid var(--warn);padding:12px 16px;margin:18px 0;font-size:.93rem}
+.key{background:var(--accent-soft);border-left:3px solid var(--accent);padding:12px 16px;margin:18px 0}
+.tbl{overflow-x:auto;margin:16px 0;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--bg)}
+td.n{text-align:right;white-space:nowrap}
+.up{color:var(--up)} .down{color:var(--down)}
+.dept{border:1px solid var(--line);background:var(--surface);margin:22px 0;padding:0 18px 6px}
+.dept>header{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;padding:14px 0 10px;border-bottom:1px solid var(--line)}
+.tag{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;color:#fff}
+.t-pur{background:var(--pur)} .t-sc{background:var(--sc)} .t-ops{background:var(--ops)} .t-sales{background:var(--sales)}
+:root[data-theme="dark"] .tag{color:#111}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tag{color:#111}}
+.dept h3{margin-top:0;font-size:1.15rem}
+.dec{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.dec:last-child{border-bottom:0}
+.dec>*{min-width:0}
+.dec dt{font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:3px}
+.dec dd{margin:0}
+.chain{font-family:var(--mono);font-size:.82rem;background:var(--bg);padding:8px 10px;border-radius:4px;overflow-x:auto;white-space:nowrap}
+@media (max-width:560px){.dec{grid-template-columns:1fr}.dec dt{padding-top:6px}}
+.steps{counter-reset:s;list-style:none;padding:0;margin:16px 0}
+.steps>li{counter-increment:s;position:relative;padding:14px 0 14px 52px;border-bottom:1px solid var(--line);max-width:none}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:14px;width:34px;height:34px;border-radius:50%;background:var(--fg);color:var(--bg);font-family:var(--mono);font-weight:600;display:grid;place-items:center}
+.steps b{font-family:var(--display)}
+.chart{background:var(--surface);border:1px solid var(--line);padding:12px;margin:16px 0;overflow-x:auto}
+.chart svg{display:block;min-width:560px;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted);margin-top:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+a{color:var(--accent)}
+footer{margin-top:60px;font-size:.82rem;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+</style>
+
+<div class="wrap">
+<p class="eyebrow">VSCC 2027 · Challenge A · Team 48 · The Fresh Connection</p>
+<h1>Round 1 đã chọn gì, vì sao, và từ round sau điền thế nào</h1>
+<p class="lead">Tài liệu cho cả 4 VP. Phần 1–2 giải thích cách nghĩ. Phần 3 đi từng phòng: mỗi quyết định Round 1 sửa vấn đề nào của Round 0, tác động lan sang phòng khác ra sao, tốn gì, game trả kết quả thế nào. Phần 4 là quy trình làm một round mới, theo thứ tự phòng ban.</p>
+<nav class="toc" aria-label="Mục lục">
+  <a href="#nguyen-tac">1. ROI kiếm từ đâu</a><a href="#van-de">2. Bệnh của Round 0</a><a href="#bac-thang">Bậc thang ROI</a>
+  <a href="#purchasing">3a. Purchasing</a><a href="#supply-chain">3b. Supply Chain</a><a href="#operations">3c. Operations</a><a href="#sales">3d. Sales</a>
+  <a href="#quy-trinh">4. Quy trình round mới</a><a href="#quy-tac">5. Quy tắc nhanh</a><a href="#bai-hoc">6. Bài học</a>
+</nav>
+
+<div class="note"><b>Nguồn số.</b> Số "R0" và "game R1" chép từ file sheet (<span class="mono">data/TFC_Round0.xlsx</span>, <span class="mono">data/TFC_Round1.xlsx</span>). Số "model" do simulator tính, đã hiệu chỉnh theo Round 1 ngày 27/11: chạy lại đúng bộ quyết định R1 ra ROI 5,12% so với game 5,04%. Model là ước lượng, không phải luật game. Phần đóng góp từng bước là của model và phụ thuộc thứ tự cộng dồn.</div>
+
+<h2 id="nguyen-tac">1. ROI kiếm từ đâu</h2>
+<p>Game xếp hạng chỉ bằng <b>ROI = Operating profit ÷ Investment</b>. Mọi quyết định của 4 phòng chỉ có giá trị khi chúng kéo một trong ba thứ sau:</p>
+<div class="tbl"><table>
+<thead><tr><th>Đòn bẩy</th><th>Gồm những dòng nào</th><th>Phòng nắm chính</th></tr></thead>
+<tbody>
+<tr><td><b>Doanh thu thực</b> (realized revenue)</td><td>Contracted sales × contract index, <b>trừ phạt</b> khi service level dưới mức hứa, <b>cộng thưởng nhỏ</b> khi vượt</td><td>Sales hứa; SC + Ops + Purchasing quyết định có giữ được lời hứa không</td></tr>
+<tr><td><b>Chi phí</b></td><td>Purchase value (giá NL × CI + vận chuyển), chi phí sản xuất (ca, thời vụ, máy), chi phí gián tiếp (kho, overflow, FTE, scrap, lãi tồn kho, phân phối)</td><td>Purchasing, Ops, SC</td></tr>
+<tr><td><b>Investment</b> (mẫu số)</td><td>Tài sản cố định + máy + <b>tồn kho</b> + phải thu khách − phải trả NCC</td><td>SC (tồn), Sales và Purchasing (payment term), Ops (đổi máy)</td></tr>
+</tbody></table></div>
+<p>Investment R0 khoảng €4 triệu, trong đó €3,3 triệu là tài sản cố định và máy, gần như không đổi được. Vì vậy <b>€40.000 lợi nhuận ≈ 1 điểm ROI</b>, còn giảm €40.000 tồn kho chỉ thêm khoảng 0,05 điểm. Kết luận cho cả nhóm: <b>ưu tiên lợi nhuận, tồn kho xếp sau.</b></p>
+<div class="key"><b>Ý chính:</b> phòng nào cũng có thể làm ROI chung tụt. Một quyết định "tiết kiệm" ở phòng mình (cắt safety stock, cắt FTE, chọn NCC rẻ) có thể gây hết hàng, giao trễ, bị phạt ở Sales và mất nhiều hơn số tiết kiệm được. Đó là lý do có simulator: đổi một ô, xem ROI chung chứ không chỉ chi phí của phòng mình.</div>
+
+<h2 id="van-de">2. Round 0 ốm ở đâu (đọc từ tab 1 của sheet)</h2>
+<p>Round 0 lỗ: ROI −7,68%, operating profit −€306.503. Trong 11 vấn đề sheet ghi, xếp theo số tiền:</p>
+<div class="tbl"><table>
+<thead><tr><th>#</th><th>Vấn đề</th><th>Bằng chứng (sheet R0)</th><th>Phòng gây ra</th></tr></thead>
+<tbody>
+<tr><td class="n">1</td><td><b>Bị phạt service level</b></td><td>Phạt −€322.708. SL order lines: F&amp;G 91,2%, LAND 92,1%, Dominick's 93,2%, đều dưới mức hứa 95%</td><td>Hậu quả của 2, 3, 4</td></tr>
+<tr><td class="n">2</td><td><b>Thiếu Vitamin C</b></td><td>Availability 84,3%, hết hàng 31/130 ngày. NCC Seitan (Trung Quốc) reliability 81,5%, lead time 60 ngày. SL C-power 1L 83,8%, C-power PET 83,6%</td><td>Purchasing, SC</td></tr>
+<tr><td class="n">3</td><td><b>Chai PET xấu (Trio PET)</b></td><td>Quality Poor, rejection 5,9%, reliability 84,1%, vận chuyển €145.393 (cao nhất 5 NCC)</td><td>Purchasing</td></tr>
+<tr><td class="n">4</td><td><b>Dây chuyền yếu</b></td><td>Swiss Fill 2: hỏng 10,8 giờ/tuần, changeover 12,1 giờ, tăng ca 9,4 giờ; plan adherence 78,7%; thời vụ dây chuyền €66.670</td><td>Ops (và PET xấu)</td></tr>
+<tr><td class="n">5</td><td><b>Kho NL tràn</b></td><td>840/900 pallet (93,4%), overflow 10,8%, phí €35.423. Lot size 4 tuần làm hàng về dồn một lúc</td><td>SC, Ops</td></tr>
+<tr><td class="n">6</td><td><b>Kho TP và FTE thừa</b></td><td>Kho TP dùng 1.061/1.500 chỗ (70,7%). Kho NL cần 74 giờ/tuần, 5 FTE có 200 giờ. Kho TP cần 100 giờ, 4 FTE có 160 giờ</td><td>Ops</td></tr>
+<tr><td class="n">7</td><td><b>Hàng hết hạn</b></td><td>Obsolete 8,1%, scrap €40.203. Cao nhất Mango 1L 8,8%, Orange 1L 8,4%, Orange PET 8,2%</td><td>SC, Sales</td></tr>
+</tbody></table></div>
+<p>Vấn đề 1 (phạt) không phải lỗi của Sales khi ký hợp đồng mà là <b>lỗi giao hàng</b>: thiếu nguyên liệu và dây chuyền trễ kế hoạch. Vì vậy chiến lược Round 1 là <b>sửa gốc ở Purchasing và Ops trước, giữ nguyên hợp đồng Sales</b>.</p>
+
+<h2 id="bac-thang">Bậc thang ROI: mỗi quyết định đóng góp bao nhiêu</h2>
+<p>Cộng dồn từng quyết định Round 1 lên R0 theo thứ tự, bằng model đã hiệu chỉnh. Phần cột là điểm ROI tăng thêm của bước đó.</p>
+<div class="chart" role="img" aria-label="Biểu đồ thác nước ROI từ -7,68% (R0) đến 5,12% (model R1), game thật 5,04%">
+<svg id="wf" viewBox="0 0 760 420"></svg>
+<div class="legend"><span><i style="background:var(--pur)"></i>Purchasing</span><span><i style="background:var(--sc)"></i>Supply Chain</span><span><i style="background:var(--ops)"></i>Operations</span><span><i style="background:var(--muted)"></i>R0 / kết quả</span></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>Bước</th><th>Quyết định</th><th class="n">ROI sau bước</th><th class="n">+ điểm</th><th>Tác động chính (model)</th></tr></thead>
+<tbody id="ladder"></tbody>
+</table></div>
+<p class="lead" style="font-size:.92rem">Đọc bảng: chỉ riêng đổi NCC Vitamin C đã đưa ROI từ −7,68% lên −2,79%, vì hết thiếu Vitamin C thì C-power giao đủ và phạt F&amp;G giảm từ €252.766 xuống €114.501. Hai bước Purchasing và gói Training + PM + SMED của Ops chiếm khoảng 80% mức cải thiện.</p>
+
+<h2 id="purchasing">3. Từng phòng: chọn gì, vì sao</h2>
+
+<section class="dept" id="purchasing-detail" aria-labelledby="h-pur">
+<header><span class="tag t-pur">Purchasing</span><h3 id="h-pur">Đổi 2 nhà cung cấp hỏng nhất, giữ 3 NCC tốt</h3></header>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Vitamin C: Seitan Vitamins → SYI</b> (Hà Lan, trade unit IBC, quality High, delivery window 4 hours, payment term 6 tuần, agreed reliability 98%).</dd>
+<dt>Vì sao</dt><dd>Seitan giao đúng hẹn chỉ 81,5%, lead time 60 ngày bằng tàu từ Trung Quốc, nên hết Vitamin C 31/130 ngày. Thiếu Vitamin C thì 2 SKU C-power không sản xuất được, SL rơi xuống ~84% và kéo theo phạt. SYI ở Hà Lan: lead time 4 ngày, giao sai hẹn thì bù kịp.<br>Giá không đáng lo: cả round chỉ mua Vitamin C khoảng €2.300, nên CI 1,052 (đắt hơn 5%) chỉ tốn thêm khoảng €100.</dd>
+<dt>Chuỗi tác động</dt><dd><div class="chain">reliability 81,5% → 98% · lead 60 → 4 ngày → availability Vitamin C 84,3% → 100% → plan adherence ↑ → SL C-power ↑ → phạt ↓ → doanh thu ↑</div></dd>
+<dt>Model</dt><dd>+4,89 điểm ROI, bước lớn nhất. Game R1: SYI giao đúng hẹn 98,2%, rejection 0%; availability NL cả công ty 99,8%.</dd>
+</dl>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>PET: Trio PET PLC → Philyp Jones Plastics</b>, trade unit <b>FTL</b> (xe đầy), quality Middle, certified, lead time 5 ngày.</dd>
+<dt>Vì sao</dt><dd>Trio có 3 lỗi cùng lúc: (1) quality Poor → rejection 5,9% và gây hỏng dây chuyền; (2) reliability 84,1%; (3) vận chuyển €145.393 vì xa (Tây Ban Nha) và tính theo pallet. Philyp ở Hà Lan, certified (giao tin cậy hơn), quality Middle. FTL €500 một xe rẻ hơn tính €20 từng pallet khi đơn lớn.</dd>
+<dt>Chuỗi tác động</dt><dd><div class="chain">vận chuyển PET ↓ → purchase value ↓ · quality Poor → Middle → hỏng máy ↓ → adherence ↑ (sang Ops) · FTL → đơn to hơn → kho NL đầy hơn (sang Ops, SC)</div></dd>
+<dt>Cái giá</dt><dd>CI 1,02 thay vì 0,962. FTL buộc đơn tròn xe, đơn to hơn nên kho NL chật hơn; vì vậy SC phải giảm lot size PET (xem dưới).</dd>
+<dt>Model</dt><dd>+2,64 điểm. Purchase value giảm từ €910k xuống €856k; tổng phí vận chuyển giảm từ €188,6k xuống €124k. Game R1: Philyp giao đúng hẹn 96,4%, rejection 3,8%, purchase value PET €260.842 (Trio R0: €307.931).</dd>
+</dl>
+<dl class="dec">
+<dt>Giữ nguyên</dt><dd><b>Pack (Mono), Orange (Miami), Mango (NO8DO).</b> Ba NCC này giao 92–98%, rejection thấp, chất lượng High. Đổi sang NCC khác hoặc là rẻ hơn nhưng quality Poor (gây scrap: nước ép không qua kiểm tra vị bị hủy ngay), hoặc là đắt hơn mà không sửa vấn đề nào đang có.</dd>
+</dl>
+</section>
+
+<section class="dept" id="supply-chain" aria-labelledby="h-sc">
+<header><span class="tag t-sc">Supply Chain</span><h3 id="h-sc">Chỉnh tồn kho theo NCC mới và theo kho</h3></header>
+<p style="margin-top:12px">SC quyết sau Purchasing vì safety stock và lot size phụ thuộc NCC giao nhanh hay chậm, tin cậy hay không.</p>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Lot size PET và Orange: 4 → 2 tuần.</b></dd>
+<dt>Vì sao</dt><dd>Kho NL R0 tràn 10,8%, phí overflow €35.423, và có 12 ngày vượt giờ công cố định (đỉnh 65 giờ/ngày). Lý do: lot 4 tuần làm mỗi lần nhận về một cục lớn. PET và Orange là 2 NL chiếm nhiều chỗ nhất. Lot nhỏ thì đỉnh tồn và đỉnh giờ nhận hàng nhỏ lại, nhờ vậy Ops cắt được chỗ kho và FTE.</dd>
+<dt>Cái giá</dt><dd>Số lần nhận gấp đôi, nên phí đặt hàng và phí mỗi chuyến tăng (vài trăm €). Rẻ hơn rất nhiều so với phí overflow.</dd>
+<dt>Model</dt><dd>+1,00 điểm (overflow NL €37,1k → €7,1k ở bước này). Game R1: kho NL 800 chỗ vẫn overflow 5,8% (€15.694), vì Ops đã cắt từ 900 xuống 800 chỗ.</dd>
+</dl>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Safety stock Vitamin C: 2 → 4 tuần.</b></dd>
+<dt>Vì sao</dt><dd>Bảo hiểm khi chuyển NCC: chưa biết SYI giao thật thế nào. Vitamin C rất rẻ (giá trị tồn khoảng €400), giữ gấp đôi gần như không tốn tiền nhưng chặn được kịch bản hết hàng 31 ngày như R0.</dd>
+<dt>Model</dt><dd>≈ 0 điểm, vì SYI đã giao đủ. Đây là bảo hiểm rẻ, không phải nguồn lợi nhuận.</dd>
+</dl>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Safety stock Pack (hộp giấy 1L): 2 → 3 tuần.</b></dd>
+<dt>Vì sao</dt><dd>Mono giao đúng hẹn chỉ 92,3%, lead time 15 ngày; R0 Pack hết 6 ngày. Pack dùng cho cả 3 SKU 1 lít (bán cho F&amp;G và LAND), nên thiếu Pack thì 3 SKU cùng trễ. Pack rẻ, thêm 1 tuần tồn tốn ít.</dd>
+<dt>Model</dt><dd>+0,77 điểm (SL tăng, phạt F&amp;G giảm thêm).</dd>
+</dl>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Safety stock thành phẩm Mango 1L, Orange PET, Mango PET: 3 → 2,5 tuần.</b> Giữ 3 tuần cho Orange 1L, C-power 1L, C-power PET.</dd>
+<dt>Vì sao</dt><dd>3 SKU này R0 đã giao 97–98% (thừa an toàn) nhưng hết hạn nhiều nhất: 8,0–8,8%. Hạn dùng 20 tuần, khách đòi còn ≥ 75% tức tối đa 5 tuần trong kho; SS 3 + nửa chu kỳ 2 tuần gần chạm mức đó. Giảm 0,5 tuần thì ít hàng quá tuổi hơn. Ba SKU còn lại có SL thấp (C-power) hoặc bán nhiều nhất (Orange 1L) nên không cắt.</dd>
+<dt>Model / game</dt><dd>Model ≈ −0,12 điểm ở bước này (tồn ít hơn nhưng SL nhích xuống trước khi Ops sửa dây chuyền). Game R1 xác nhận hướng đúng: obsolete 3 SKU này giảm còn 7,0% / 6,2% / 5,9%, SL vẫn 97,6% / 98,3% / 97,9%.</dd>
+</dl>
+<dl class="dec">
+<dt>Giữ nguyên</dt><dd>Production interval 10 ngày, frozen period 3 tuần. Interval ngắn hơn thì nhiều changeover hơn, mất giờ dây chuyền; trong khi dây chuyền đã là điểm nghẽn. Mẻ của C-power PET cũng sẽ dưới mức tối thiểu 8.000 L của máy trộn.</dd>
+</dl>
+</section>
+
+<section class="dept" id="operations" aria-labelledby="h-ops">
+<header><span class="tag t-ops">Operations</span><h3 id="h-ops">Sửa dây chuyền trước, cắt kho thừa sau</h3></header>
+<p style="margin-top:12px">Ops quyết <b>cuối cùng</b>, vì số chỗ kho và FTE cần bao nhiêu phụ thuộc lot size, safety stock, NCC mà 3 phòng kia vừa chọn.</p>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Solve breakdowns training = Yes, Preventive maintenance = A little (Minimal), SMED = Yes.</b> Giữ 2 ca, không Increase speed, không đổi máy.</dd>
+<dt>Vì sao</dt><dd>Dây chuyền R0 mất 10,8 giờ/tuần vì hỏng và 12,1 giờ vì changeover, nên phải tăng ca 9,4 giờ/tuần (thời vụ €66.670) mà plan adherence vẫn chỉ 78,7%. Ba lựa chọn này đánh thẳng vào giờ mất:
+<ul><li>Training: thời gian sửa hỏng −40%, chi phí €400 × 10 người = €4.000/round.</li><li>PM Minimal: số lần hỏng −30%, mất 1 giờ/tuần bảo trì.</li><li>SMED: thời gian changeover −30%, €10.000/round.</li></ul></dd>
+<dt>Chuỗi tác động</dt><dd><div class="chain">hỏng 9,8 → 4,1 giờ · changeover 12,1 → 8,5 giờ → tăng ca 8,7 → 3,9 giờ → thời vụ dây chuyền ↓ · plan adherence 84 → 90% → SL 94,7 → 96,4% → hết phạt, được thưởng</div></dd>
+<dt>Model</dt><dd>+2,45 điểm, đòn bẩy lớn thứ hai. Chi phí €14.000, đổi lại thời vụ dây chuyền giảm khoảng €34.000 và doanh thu tăng khoảng €81.000 (hết phạt). Game R1: hỏng 4,7 giờ, changeover 9,4 giờ, tăng ca 4,0 giờ, adherence 89,6%.</dd>
+<dt>Không chọn</dt><dd>3 ca (€200k/năm thêm người cho ~10 giờ thiếu mỗi tuần, quá đắt). Extensive PM (mất 3 giờ/tuần, khi dây chuyền đang thiếu giờ). Đổi dây chuyền (tốn đầu tư, Investment tăng, không cần khi sửa được bằng training/SMED).</dd>
+</dl>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Kho NL: 900 → 800 chỗ, FTE 5 → 3.</b></dd>
+<dt>Vì sao</dt><dd>Sau khi SC giảm lot, tồn NL thấp hơn. Mỗi chỗ €100/round; mỗi FTE €20.000/round cho 1.040 giờ. Kho NL R0 cần trung bình 74 giờ/tuần, 5 FTE cho 200 giờ. 3 FTE (120 giờ) vẫn dư, chỉ những ngày nhận hàng dồn mới thuê thời vụ.</dd>
+<dt>Cái giá</dt><dd>Overflow và thời vụ tăng lại: model €7,5k → €16,2k overflow, €1,5k → €15,0k thời vụ. Đổi lại tiết kiệm €10.000 chỗ + €40.000 lương.</dd>
+<dt>Model</dt><dd>+0,70 điểm. Game R1: kho NL tốn €80.000 chỗ + €60.000 lương + €15.694 overflow + €17.809 thời vụ = €173.503, so với R0 €90.000 + €100.000 + €35.423 + €6.753 = €232.176.</dd>
+</dl>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Kho TP: 1.500 → 1.350 chỗ, FTE 4 → 3.</b></dd>
+<dt>Vì sao</dt><dd>R0 chỉ dùng 70,7% (1.061/1.500). Không cắt sâu hơn vì tồn thành phẩm theo ngày có đỉnh cao và nhóm muốn chừa biên an toàn (sau này số R1 xác nhận: tồn thật cao hơn model cũ ~10%).</dd>
+<dt>Model</dt><dd>+0,47 điểm. Game R1: kho TP dùng 80,4%, overflow chỉ 0,7% (€2.970) → mức 1.350 hợp lý.</dd>
+</dl>
+</section>
+
+<section class="dept" id="sales" aria-labelledby="h-sales">
+<header><span class="tag t-sales">Sales</span><h3 id="h-sales">Giữ hợp đồng, chỉ đổi luật chia hàng khi thiếu</h3></header>
+<dl class="dec">
+<dt>Quyết định</dt><dd><b>Giữ nguyên toàn bộ điều khoản 3 khách</b> (SL hứa 95% order lines, shelf life 75%, payment term 4 tuần, promotion Middle/Short, trade unit, deadline).</dd>
+<dt>Vì sao</dt><dd>Phạt R0 đến từ giao hàng chứ không từ hợp đồng. Đổi điều khoản thì contract index đổi theo một công thức game không công bố; simulator để hệ số đó = 0 (chưa đo được). Mentor cũng khuyên chưa đổi. Trước hết phải chứng minh giao được 95% đã.</dd>
+<dt>Quyết định</dt><dd><b>Shortage rule: Proportional → Customer priority</b>, thứ tự F&amp;G → LAND Market → Dominick's.</dd>
+<dt>Vì sao</dt><dd>Khi thiếu hàng, ưu tiên khách bị phạt nặng nhất cho mỗi điểm thiếu. R0: F&amp;G mất 19,5% contracted khi thiếu 3,8 điểm; LAND 7,3% khi thiếu 2,9; Dominick's 3,4% khi thiếu 1,8. F&amp;G cũng là khách lớn nhất (€1,3 triệu/round).</dd>
+<dt>Model / game</dt><dd>Model chưa mô hình luật này (0 điểm). Game R1: không khách nào thiếu (SL 95,9 / 96,7 / 97,4%), cả 3 khách được <b>thưởng</b> +0,64% đến +0,71% contracted (tổng +€17.977). Nghĩa là: lời hứa 95% là an toàn, đang có dư khoảng 1–2 điểm.</dd>
+</dl>
+</section>
+
+<h2 id="quy-trinh">4. Quy trình cho một round mới</h2>
+<p>Làm theo thứ tự này. Mỗi bước có người phụ trách và ô cụ thể để nhìn trên web simulator.</p>
+<ol class="steps">
+<li><b>Cả nhóm (30 phút): đọc kết quả round trước, tìm 3 vấn đề tốn tiền nhất.</b><br>Mở Finance của game, xếp các dòng theo số tiền lệch so với round trước. Mở dashboard 4 phòng, đọc dòng nhận xét. Ghi 3 vấn đề kèm số €, giống bảng ở phần 2. Đừng bắt đầu bằng "phòng mình muốn đổi gì", hãy bắt đầu bằng "tiền đang rò ở đâu".</li>
+<li><b>Purchasing: NCC nào đang gây hại?</b><br>Xem tab component/supplier: reliability thấp hơn cam kết nhiều, rejection cao, phí vận chuyển &gt; 20% giá trị mua là dấu hiệu đổi NCC hoặc đổi trade unit. Trên web: tab Purchasing, đổi NCC, nhìn ROI và cột "availability" ở tab SC. NL rẻ (Vitamin C) thì chọn NCC tin cậy dù CI cao; NL đắt (Orange, Mango) thì cân CI kỹ vì 1% CI = vài nghìn €.</li>
+<li><b>Supply Chain: chỉnh tồn theo NCC.</b><br>NCC kém tin cậy hoặc lead time dài thì tăng safety stock NL; kho NL tràn thì giảm lot size NL. Thành phẩm: SKU có SL &gt; 97% mà obsolete cao thì giảm SS; SKU có SL thấp thì tăng SS hoặc tìm lý do (thiếu NL? dây chuyền?). Nhớ: tồn hàng tuổi tối đa = 20 tuần × (1 − shelf life khách); SS + nửa chu kỳ phải nằm dưới mức này.</li>
+<li><b>Operations (dây chuyền): đủ giờ chưa?</b><br>Nhìn biểu đồ giờ dây chuyền trên tab Ops. Tăng ca nhiều, plan adherence &lt; 90% thì xử lý giờ mất trước (training, PM, SMED, chất lượng bao bì) rồi mới tính thêm ca. Production interval ngắn hơn chỉ khi còn giờ trống.</li>
+<li><b>Sales: hứa bao nhiêu thì an toàn?</b><br>Xem SL theo khách mà model dự báo ở bộ quyết định trên. Hứa thấp hơn mức đó ít nhất 1 điểm. Thiếu 1 điểm bị phạt 2–5% contracted, vượt chỉ được thưởng 0,675%. Muốn đổi điều khoản để tăng CI, phải bấm thử Negotiate trong game, ghi CI game hiện ra vào ô "CI game hiển thị" trên web (đừng bấm Deal khi chưa chốt).</li>
+<li><b>Operations (kho, FTE): chốt sức chứa cuối cùng.</b><br>Giờ mới biết tồn kho thật. Trên tab Ops, mỗi kho có "số chỗ tối ưu chi phí" và "đỉnh pallet". Chọn gần số tối ưu, cộng biên vì game dao động. FTE: xem giờ công/tuần và số ngày vượt.</li>
+<li><b>Cả nhóm: kiểm tra chéo rồi mới nhập game.</b><br>Mở bảng cảnh báo chéo phòng trên web: dòng đỏ nào còn thì giải thích được mới bỏ qua. So ROI chính và ROI thận trọng. Chụp bản chung (snapshot) với tên round. Nhập vào game, bấm Calculate một lần.</li>
+</ol>
+<div class="key"><b>Vì sao thứ tự này:</b> mỗi phòng phía sau phụ thuộc phòng phía trước. NCC quyết định cần bao nhiêu tồn; tồn và dây chuyền quyết định giao được bao nhiêu phần trăm; giao được bao nhiêu thì Sales mới biết hứa bao nhiêu; cuối cùng mọi thứ đó mới cho biết kho cần bao nhiêu chỗ và người. Làm ngược (cắt kho trước) là cách nhanh nhất để bị overflow và phạt.</div>
+
+<h2 id="quy-tac">5. Quy tắc nhanh có số</h2>
+<div class="tbl"><table>
+<thead><tr><th>Câu hỏi</th><th>Quy tắc</th><th>Nguồn</th></tr></thead>
+<tbody>
+<tr><td>Đổi gì đáng làm?</td><td>€40.000 lợi nhuận ≈ 1 điểm ROI. Giảm €40.000 tồn ≈ 0,05 điểm</td><td>Investment ≈ €4 triệu</td></tr>
+<tr><td>Có nên thêm 1 chỗ kho?</td><td>1 chỗ = €100/round; overflow €3/pallet/ngày → pallet nào tràn quá ~33 ngày/round thì thuê chỗ rẻ hơn</td><td>Info Center</td></tr>
+<tr><td>Có nên thêm 1 FTE?</td><td>1 FTE = €20.000/round cho 1.040 giờ. Thời vụ €42/giờ nhưng năng suất thấp hơn (model: mỗi giờ thiếu tốn khoảng 1,3–1,6 giờ thời vụ ≈ €55–67) → thêm FTE khi giờ thiếu &gt; khoảng 300–360 giờ/round (12–14 giờ/tuần)</td><td>Info Center + hiệu chỉnh R0, R1</td></tr>
+<tr><td>Hứa service level bao nhiêu?</td><td>Thấp hơn SL dự báo ít nhất 1 điểm. Thiếu 1 điểm mất 2–5% contracted; vượt chỉ thêm 0,675%</td><td>Finance R0, R1</td></tr>
+<tr><td>Safety stock thành phẩm tối đa?</td><td>SS + nửa chu kỳ ≤ 20 × (1 − shelf life khách) tuần; shelf life 75% → ≤ 5 tuần</td><td>Tab 3, luật</td></tr>
+<tr><td>Interval ngắn có lợi không?</td><td>Mỗi changeover mất 2–4 giờ dây chuyền (SMED −30%) cộng start-up loss; mẻ dưới 8.000 L bị máy trộn làm tròn lên</td><td>Tab 5</td></tr>
+<tr><td>NCC giao đúng hẹn thật bao nhiêu?</td><td>Thường thấp hơn cam kết khoảng 2–3 điểm (NCC certified và còn free capacity thì sát cam kết)</td><td>R0 + R1</td></tr>
+</tbody></table></div>
+
+<h2 id="bai-hoc">6. Round 1 dạy gì</h2>
+<ul>
+<li><b>Đúng:</b> sửa gốc (NCC, dây chuyền) thay vì vá ngọn. Hai thứ này mang lại khoảng 10 điểm ROI.</li>
+<li><b>Đúng:</b> giữ SL hứa 95%. Thực tế giao 95,9–97,4%, được thưởng thay vì bị phạt.</li>
+<li><b>Chưa tận dụng:</b> SL đang dư 1–2 điểm. Hứa cao hơn (hoặc đổi điều khoản khác) có thể nâng contract index, nhưng phải thử Negotiate trong game để biết CI thật. Đây là đòn bẩy lớn chưa đo.</li>
+<li><b>Chưa tận dụng:</b> kho NL vẫn tràn 5,8% và thời vụ kho NL €17,8k. Lot size PET 2 tuần với trade unit FTL vẫn khá to.</li>
+<li><b>Model lúc nộp</b> dự báo 4,29%, game ra 5,04%. Model cũ thiếu thưởng SL, tính tồn và obsolete sai theo plan adherence, đoán NCC mới quá bi quan. Đã sửa ngày 27/11 (backtest mới 5,12%). Các round sau dùng model mới; phương án Round 2 cần tính lại bằng model này.</li>
+</ul>
+
+<footer>Số liệu: sheet R0/R1 của đội; model: TFC What-if Simulator (repo <span class="mono">TFC-what-if-simulator</span>), báo cáo đối chiếu <span class="mono">ROUND1_BACKTEST.md</span>. Bậc thang ROI cộng dồn theo thứ tự trong bảng; đổi thứ tự thì phần chia cho từng bước đổi, tổng giữ nguyên.</footer>
+</div>
+
+<script>
+(function(){
+  var rows=[
+    ['R0','Round 0 (sheet)',-7.68,null,'base','ROI R0 thật'],
+    ['P1','Vitamin C → SYI',-2.79,4.89,'pur','Availability Vitamin C 84,3% → 100%; phạt F&G −252.766 → −114.501'],
+    ['P2','PET → Philyp Jones, FTL',-0.15,2.64,'pur','Purchase value 910k → 856k; hỏng máy 10,8 → 9,8 giờ/tuần'],
+    ['S1','SS Vitamin C 2 → 4 tuần',-0.15,0.00,'sc','Bảo hiểm; không đổi số vì SYI đã giao đủ'],
+    ['S2','Lot PET, Orange 4 → 2 tuần',0.85,1.00,'sc','Overflow kho NL 37,1k → 7,1k; tồn giảm'],
+    ['S3','SS Pack 2 → 3 tuần',1.62,0.77,'sc','SL 1 lít ↑, phạt F&G −74,5k → −49,2k'],
+    ['S4','SS TP 3 SKU 3 → 2,5 tuần',1.50,-0.12,'sc','Scrap 41,3k → 33,6k nhưng SL nhích xuống'],
+    ['O1','Training + PM + SMED',3.95,2.45,'ops','Adherence 84 → 90%; tăng ca 8,7 → 3,9 giờ; hết phạt, được thưởng'],
+    ['O2','Kho NL 800 chỗ, 3 FTE',4.65,0.70,'ops','−€50k chỗ + lương; +€22k overflow, thời vụ'],
+    ['O3','Kho TP 1.350 chỗ, 3 FTE',5.12,0.47,'ops','−€35k chỗ + lương; +€16k overflow, thời vụ'],
+    ['G','Game R1 thật',5.04,null,'base','So với model 5,12%']
+  ];
+  var tb=document.getElementById('ladder'),h='';
+  rows.forEach(function(r){
+    var d=r[3]===null?'':(r[3]>=0?'+':'−')+Math.abs(r[3]).toFixed(2).replace('.',',');
+    var cls=r[3]===null?'':(r[3]>0?'up':(r[3]<0?'down':''));
+    h+='<tr><td class="n">'+r[0]+'</td><td>'+r[1]+'</td><td class="n">'+r[2].toFixed(2).replace('.',',').replace('-','−')+'%</td><td class="n '+cls+'">'+d+'</td><td>'+r[5]+'</td></tr>';
+  });
+  tb.innerHTML=h;
+  var svg=document.getElementById('wf'),W=760,H=420,L=170,R=20,T=16,B=36,min=-8,max=6;
+  var x=function(v){return L+(v-min)/(max-min)*(W-L-R)};
+  var bh=(H-T-B)/rows.length,o='';
+  var col={base:'var(--muted)',pur:'var(--pur)',sc:'var(--sc)',ops:'var(--ops)'};
+  for(var t=-8;t<=6;t+=2){o+='<line x1="'+x(t)+'" x2="'+x(t)+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--line)" stroke-width="1"/><text x="'+x(t)+'" y="'+(H-B+18)+'" fill="var(--muted)" font-size="11" text-anchor="middle" font-family="JetBrains Mono, monospace">'+(t>0?'+':'')+t+'%</text>';}
+  o+='<line x1="'+x(0)+'" x2="'+x(0)+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--fg)" stroke-width="1.2"/>';
+  rows.forEach(function(r,i){
+    var y=T+i*bh+bh*0.18,hh=bh*0.64,a,b;
+    if(r[3]===null){a=Math.min(0,r[2]);b=Math.max(0,r[2]);}else{var p=r[2]-r[3];a=Math.min(p,r[2]);b=Math.max(p,r[2]);}
+    var w=Math.max(1.5,x(b)-x(a));
+    o+='<text x="'+(L-8)+'" y="'+(y+hh/2+4)+'" fill="var(--fg)" font-size="12" text-anchor="end" font-family="Be Vietnam Pro, sans-serif">'+r[0]+' · '+r[1].replace(/&/g,'&amp;').slice(0,20)+'</text>';
+    o+='<rect x="'+x(a)+'" y="'+y+'" width="'+w+'" height="'+hh+'" fill="'+col[r[4]]+'" rx="2"/>';
+    var lab=r[3]===null?r[2].toFixed(2)+'%':(r[3]>=0?'+':'')+r[3].toFixed(2);
+    var lx=x(b)+6;if(lx>W-40)lx=x(a)-6;
+    o+='<text x="'+lx+'" y="'+(y+hh/2+4)+'" fill="var(--fg)" font-size="11" text-anchor="'+(lx<x(a)?'end':'start')+'" font-family="JetBrains Mono, monospace">'+lab.replace('.',',')+'</text>';
+  });
+  svg.innerHTML=o;
+})();
+</script>
