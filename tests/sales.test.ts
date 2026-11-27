@@ -62,14 +62,15 @@ describe('Service level ← availability NL + plan adherence + safety stock TP',
     expect(r.sales.penaltyTotal).toBeGreaterThan(b.sales.penaltyTotal);
     expect(r.sales.realizedRevenue).toBeGreaterThan(b.sales.realizedRevenue);
   });
-  it('thêm ca (plan adherence ↑) → SL ↑ → penalty ↓; đạt SL hứa thì penalty = 0, không âm thành thưởng', () => {
+  // Hiệu chỉnh R1 (27/11): đạt/vượt SL hứa → THƯỞNG nhỏ (Info Center + Finance R1), không còn chặn ở 0
+  it('thêm ca (plan adherence ↑) → SL ↑ → penalty ↓; đạt SL hứa thì hết phạt và được thưởng = contracted × COEFFS.salesBonusRate', () => {
     const { r } = run((x) => { x.ops.shifts = 3; });
     expect(r.ops.line.planAdherence).toBeGreaterThan(b.ops.line.planAdherence);
     expect(r.sales.penaltyTotal).toBeGreaterThan(b.sales.penaltyTotal);
     for (const c of r.sales.customers) {
-      expect(c.penalty).toBeLessThanOrEqual(0);
-      if (c.slOrderLines >= c.promised) expect(c.penalty).toBe(0);
-      expect(c.revenue).toBeLessThanOrEqual(c.contracted);
+      if (c.slOrderLines >= c.promised) expect(c.penalty).toBeCloseTo(c.contracted * COEFFS.salesBonusRate.value, 9);
+      else expect(c.penalty).toBeLessThan(0);
+      expect(c.revenue).toBeLessThanOrEqual(c.contracted * (1 + COEFFS.salesBonusRate.value) + 1e-9);
     }
   });
   it('tăng safety stock TP 3 → 5 → SL ↑ → penalty ↓ (doanh thu ↑)', () => {

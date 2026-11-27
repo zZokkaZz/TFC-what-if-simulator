@@ -48,15 +48,20 @@ describe('1. Availability NL: neo tỷ lệ trên phần thiếu, không có tr�
 
 describe('2. Số tuần tồn thành phẩm = tồn ÷ nhu cầu/tuần mới (promotion không làm tăng giả)', () => {
   const r = run((i) => { i.sales.customers['Food & Groceries'].promotionalPressure = 'Heavy'; });
-  it('Promotion Heavy, safety stock & interval giữ nguyên → số tuần tồn từng SKU = R0; giá trị tồn vẫn tăng', () => {
-    for (const p of r.sc.products) expect(p.sheet.stockWeeks.value!).toBeCloseTo(p.sheet.stockWeeks.r0!, 9);
+  // Từ 27/11 (hiệu chỉnh R1) tồn TP thực tế ∝ plan adherence: Heavy làm tải dây chuyền ↑ → adherence đổi → số tuần đổi ĐÚNG theo tỷ lệ adherence, không theo % nhu cầu
+  it('Promotion Heavy, safety stock & interval giữ nguyên → số tuần tồn từng SKU = R0 × (adherence ÷ baseline); giá trị tồn vẫn tăng', () => {
+    for (const p of r.sc.products) {
+      const a = r.opsRaw.production.find((x) => x.sku === p.sku)!.adherence, a0 = b.opsRaw.production.find((x) => x.sku === p.sku)!.adherence;
+      expect(p.sheet.stockWeeks.value!).toBeCloseTo(p.sheet.stockWeeks.r0! * (a / a0), 9);
+    }
     expect(r.sc.stockValue.products).toBeGreaterThan(b.sc.stockValue.products);
   });
   it('KPI "Stock products (weeks)" / "Stock components (weeks)" không tăng theo % nhu cầu', () => {
     const k = buildKpis(d, r, b), k0 = buildKpis(d, b, b);
     const get = (ks: typeof k, id: string) => ks.find((x) => x.id === id)!.scenario!;
-    // KPI gộp theo giá trị: chỉ còn hiệu ứng cơ cấu SKU (< 0,5%); trước khi sửa tăng đúng theo % nhu cầu (3,18 → 3,27)
-    expect(Math.abs(get(k, 'sc-stp') / get(k0, 'sc-stp') - 1)).toBeLessThan(0.005);
+    // KPI gộp theo giá trị: chỉ còn hiệu ứng cơ cấu SKU và plan adherence (hiệu chỉnh R1); trước khi sửa tăng đúng theo % nhu cầu (3,18 → 3,27 = +2,8%)
+    const adh = r.opsRaw.line.planAdherence / b.opsRaw.line.planAdherence;
+    expect(Math.abs(get(k, 'sc-stp') / get(k0, 'sc-stp') / adh - 1)).toBeLessThan(0.005);
     expect(Math.abs(get(k, 'sc-stc') / get(k0, 'sc-stc') - 1)).toBeLessThan(0.01);
   });
   it('safety stock TP tăng thì số tuần vẫn tăng (sửa không làm mất tác động thật)', () => {

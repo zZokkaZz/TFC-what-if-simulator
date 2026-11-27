@@ -467,7 +467,8 @@ export interface ScProductResult {
 export interface ScResults {
   components: ScComponentResult[];
   products: ScProductResult[];
-  stockValue: { components: number; products: number; total: number; componentsR0: number; productsR0: number };
+  /** components/products: giá trị theo giá mua mới; *AtR0Price: cùng lượng tồn nhưng giá R0 (dùng cho KPI số tuần tồn — theo LƯỢNG) */
+  stockValue: { components: number; products: number; total: number; componentsR0: number; productsR0: number; componentsAtR0Price: number; productsAtR0Price: number };
   /** C2: tổng giá trị obsolete/tuần (6 SKU) kịch bản và R0 (tab 7) */
   obsoleteValuePerWeek: number;
   obsoleteValuePerWeekR0: number;

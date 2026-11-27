@@ -144,14 +144,14 @@ export function buildKpis(d: Round0Data, res: Results, base: Results): Kpi[] {
     rMinus2: sc ? { value: sc.rMinus2, source: 'tab 7 dashboard' } : MISSING('Stock components R-2'),
     rMinus1: sc ? { value: sc.rMinus1, source: 'tab 7 dashboard' } : MISSING('Stock components R-1'),
     r0: sc ? { value: sc.r0, source: 'tab 7 dashboard' } : MISSING('Stock components R0'),
-    scenario: sc?.r0 != null ? sc.r0 * (res.sc.stockValue.components / base.sc.stockValue.components) / kUseC : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sc?.comment ?? null,
+    scenario: sc?.r0 != null ? sc.r0 * (res.sc.stockValue.componentsAtR0Price / base.sc.stockValue.componentsAtR0Price) / kUseC : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sc?.comment ?? null,
   });
   out.push({
     id: 'sc-stp', dept: 'Supply Chain', label: 'Stock products (weeks)', unit: 'weeks',
     rMinus2: sp ? { value: sp.rMinus2, source: 'tab 7 dashboard' } : MISSING('Stock products R-2'),
     rMinus1: sp ? { value: sp.rMinus1, source: 'tab 7 dashboard' } : MISSING('Stock products R-1'),
     r0: sp ? { value: sp.r0, source: 'tab 7 dashboard' } : MISSING('Stock products R0'),
-    scenario: sp?.r0 != null ? sp.r0 * (res.sc.stockValue.products / base.sc.stockValue.products) / kUseP : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sp?.comment ?? null,
+    scenario: sp?.r0 != null ? sp.r0 * (res.sc.stockValue.productsAtR0Price / base.sc.stockValue.productsAtR0Price) / kUseP : null, scenarioBasis: 'estimate', good: 'down', target: null, comment: sp?.comment ?? null,
   });
   return out;
 }

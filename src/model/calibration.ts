@@ -12,6 +12,8 @@ export interface Calibration {
   prodFactor: number;
   /** Cỡ đơn hàng thực tế R0 / (lot size × lượng mua mỗi tuần) */
   orderRatio: Record<ComponentKey, number>;
+  /** Cỡ đơn = lot × lượng mua/tuần + offset × nhu cầu/tuần (offset hiệu chỉnh R0, kiểm chứng R1) */
+  orderOffsetWeeks: Record<ComponentKey, number>;
   /** Chuỗi 130 ngày R0 (tab 11) quy ra đơn vị: tồn NL (cái/lít), tồn TP (đv), giờ công 2 kho */
   replay: {
     rmUnits: Record<ComponentKey, number[]>;
@@ -55,11 +57,15 @@ export function calibrate(data: Round0Data): Calibration {
 
   // 2. Tỷ lệ cỡ đơn hàng
   const orderRatio = {} as Record<ComponentKey, number>;
+  const orderOffsetWeeks = {} as Record<ComponentKey, number>;
   for (const c of COMPONENTS) {
     const st = data.supplyChain.componentStock.find((x) => x.component === c)!;
     const lot = data.supplyChain.components.find((x) => x.component === c)!.lotSizeWeeks;
     const purchasedPerWeek = st.purchasedInRound / ROUND.weeks;
     orderRatio[c] = st.orderSize / (lot * purchasedPerWeek);
+    // Phần cỡ đơn vượt lot size, tính bằng tuần NHU CẦU (cộng thêm, không nhân): R0 → R1 game gần như không đổi
+    // (vd PET 0,66 → 0,62 tuần, Orange 0,88 → 0,78, Pack 0,68 → 0,73, Mango 0,90 → 0,85) trong khi tỷ lệ nhân đổi 1,16 → 1,31 khi lot 4 → 2.
+    orderOffsetWeeks[c] = st.demandPerWeek > 0 ? Math.max(0, (st.orderSize - lot * purchasedPerWeek) / st.demandPerWeek) : 0;
   }
 
   // 3. Chuỗi theo ngày (tab 11). "Tồn (tuần)" tính theo nhu cầu DỰ BÁO các tuần tới; proxy dự báo =
@@ -103,7 +109,9 @@ export function calibrate(data: Round0Data): Calibration {
   const wSum = batches.reduce((s, b) => s + b.w, 0);
   const meanAvail = batches.reduce((s, b) => s + (b.w / wSum) * skuAvailability[b.sku], 0);
   const capAdh = r.line.planAdherence / meanAvail;
-  const disruption = (r.line.breakdown + r.line.overtime) / (C + r.line.overtime);
+  // Gián đoạn = hỏng + changeover + overtime (R0 không có PM). Hiệu chỉnh R0, kiểm chứng R1 (tests/backtest-r1.test.ts):
+  // chỉ (hỏng + overtime) thì R0 cần k ≈ 0,71 nhưng R1 cần k ≈ 1,0; thêm changeover thì 1 hệ số khớp cả hai round.
+  const disruption = (r.line.breakdown + r.line.changeover + r.line.overtime) / (C + r.line.overtime);
   const adherenceK = (1 - capAdh) / disruption;
 
   // 8. Thời vụ dây chuyền
@@ -119,14 +127,14 @@ export function calibrate(data: Round0Data): Calibration {
 
   const notes: CalibrationNote[] = [
     { id: 'prodFactor', label: 'Sản lượng sản xuất / nhu cầu', value: fmt(prodFactor, 4), derivation: `Bao bì tiêu thụ R0 (Pack + PET = ${fmt(packUse, 0)}/tuần) ÷ nhu cầu 6 SKU (${fmt(unitDemand, 0)} đv/tuần). Phần dư ≈ obsolete + reject + bù tồn.`, matchesByConstruction: [] },
-    { id: 'orderRatio', label: 'Cỡ đơn hàng NL / (lot size × lượng mua/tuần)', value: COMPONENTS.map((c) => `${c} ${fmt(orderRatio[c], 2)}`).join(' · '), derivation: 'Cỡ đơn hàng thực tế R0 (tab 7) lớn hơn lot size × nhu cầu khoảng 10–20%; giữ tỷ lệ này khi đổi lot size.', matchesByConstruction: [] },
+    { id: 'orderOffsetWeeks', label: 'Cỡ đơn NL vượt lot size (tuần nhu cầu)', value: COMPONENTS.map((c) => `${c} ${fmt(orderOffsetWeeks[c], 2)}`).join(' · '), derivation: 'Cỡ đơn = lot size × lượng mua/tuần + phần cộng thêm cố định (tuần nhu cầu) hiệu chỉnh R0. Kiểm chứng R1: phần cộng thêm gần như không đổi khi lot 4 → 2 tuần (tỷ lệ nhân thì đổi 1,16 → 1,31).', matchesByConstruction: [] },
     { id: 'replay', label: 'Dao động theo ngày (tab 11)', value: 'Replay 130 ngày R0', derivation: 'Tồn NL/TP và giờ công 2 kho theo từng ngày lấy từ tab 11 (tồn tuần × nhu cầu dự báo ≈ TB tuần này + tuần sau). Mô hình = mức TB mô hình + dao động R0 × (cỡ lô mới / cỡ lô R0). Tồn TB mô hình = lý thuyết (SS + ½ lô) × (TB tab 11 / lý thuyết R0).', matchesByConstruction: ['Đỉnh pallet', 'Số ngày vượt sức chứa', 'Overflow (2 kho)', 'Đỉnh & số ngày vượt giờ cố định (gần đúng)'] },
     { id: 'sizeShare', label: 'Tỷ lệ changeover tính như size changeover', value: `${fmt(sizeShare * 100, 0)}% (thô ${fmt(sizeShareRaw * 100, 0)}%)`, derivation: `R0: ${r.line.changeover} giờ/tuần ÷ ${fmt(coPerWeek, 1)} changeover/tuần = ${fmt(avgCo, 2)} giờ/lần ≈ size changeover (${line.sizeChangeoverH} giờ) của ${line.name}.`, matchesByConstruction: ['Changeover (giờ/tuần)'] },
     { id: 'breakdownPerRunHour', label: 'Giờ hỏng máy / giờ chạy (điều kiện R0)', value: fmt(breakdownPerRunHour, 4), derivation: `R0: breakdown ${r.line.breakdown} ÷ run ${r.line.run}. Điều kiện R0: PET Poor, tolerance ${line.tolerance}, không PM, không training, không inspection.`, matchesByConstruction: ['Breakdown (giờ/tuần)'] },
     { id: 'loadCv', label: 'Biến động giờ tải dây chuyền theo tuần (CV)', value: `${fmt(loadCv * 100, 1)}%`, derivation: `Giờ tải tuần ~ chuẩn(TB, CV×TB). Chọn CV để giờ không dùng TB = ${r.line.unused} khi tải TB = ${fmt(need, 1)} và ${C} giờ ca. Overtime suy ra = ${fmt(r.line.unused + need - C, 1)}.`, matchesByConstruction: ['Unused (giờ/tuần)', 'Overtime (giờ/tuần)'] },
-    { id: 'adherenceK', label: 'Độ nhạy plan adherence', value: fmt(adherenceK, 3), derivation: `Adherence = [1 − k × (breakdown + overtime)/(giờ ca + overtime)] × availability NL của SKU. R0: adherence ${r.line.planAdherence}, availability TB ${fmt(meanAvail, 3)} → phần năng lực ${fmt(capAdh, 3)}. Kiểm chứng: SKU C-power có adherence thấp ≈ 0,70 = 0,84 × availability Vitamin C 0,843.`, matchesByConstruction: ['Production plan adherence'] },
+    { id: 'adherenceK', label: 'Độ nhạy plan adherence', value: fmt(adherenceK, 3), derivation: `Adherence = [1 − k × (breakdown + changeover + giờ PM + overtime)/(giờ ca + overtime)] × availability NL của SKU. R0: adherence ${r.line.planAdherence}, availability TB ${fmt(meanAvail, 3)} → phần năng lực ${fmt(capAdh, 3)}. Kiểm chứng: SKU C-power có adherence thấp ≈ 0,70 = 0,84 × availability Vitamin C 0,843.`, matchesByConstruction: ['Production plan adherence'] },
     { id: 'flexProductivity', label: 'Hệ số năng suất thời vụ', value: fmt(flexProductivity, 3), derivation: `Dây chuyền: Flexible manpower (bottling) R0 €${fmt(flexLine, 0)} ÷ (overtime ${r.line.overtime} giờ/tuần × 26 × ${line.workersPerShift} người × €42). Áp cho cả 2 kho. Kiểm chứng độc lập: kho TP R0 có ${fmt(fgExcess, 1)} giờ vượt (tab 11) × €42 × hệ số = €${fmt(fgExcess * 42 * flexProductivity, 0)} vs P&L €${fmt(fgFlexR0, 0)}; kho NL ${fmt(rmExcess, 1)} giờ → €${fmt(rmExcess * 42 * flexProductivity, 0)} vs €${fmt(rmFlexR0, 0)}. Khớp với ghi chú Info Center "thời vụ năng suất thấp hơn".`, matchesByConstruction: ['Flexible manpower (bottling) €'] },
   ];
 
-  return { prodFactor, orderRatio, replay, sizeShare, breakdownPerRunHour, loadCv, adherenceK, flexProductivity, skuAvailability, notes };
+  return { prodFactor, orderRatio, orderOffsetWeeks, replay, sizeShare, breakdownPerRunHour, loadCv, adherenceK, flexProductivity, skuAvailability, notes };
 }

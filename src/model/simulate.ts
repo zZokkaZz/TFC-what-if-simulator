@@ -5,8 +5,8 @@ import { calibrate, type Calibration } from './calibration';
 import { EST, type Est } from './assumptions';
 import { simulateOps } from './ops';
 import { simulateFinance } from './finance';
-import { simulateSupplyChain } from './supplyChain';
-import { simulateSales } from './sales';
+import { repriceStock, simulateSupplyChain } from './supplyChain';
+import { simulateSales, unitCostBySku } from './sales';
 import { baselineInputs } from './baseline';
 import { anchorOps } from './anchor';
 import { activeSupplier, COMPONENTS, simulatePurchasing, type ActiveSupplier } from './purchasing';
@@ -31,19 +31,38 @@ function baseOps(data: Round0Data, est: Est) {
   return b;
 }
 
+const basePurCache = new WeakMap<Round0Data, Map<Est, ReturnType<typeof simulatePurchasing>>>();
+function basePurchasing(data: Round0Data, est: Est) {
+  let m = basePurCache.get(data);
+  if (!m) { m = new Map(); basePurCache.set(data, m); }
+  let b = m.get(est);
+  if (!b) {
+    const bi = baselineInputs(data), bo = baseOps(data, est);
+    const sup = Object.fromEntries(COMPONENTS.map((c) => [c, activeSupplier(bi, data, c)])) as Record<ComponentKey, ActiveSupplier>;
+    b = simulatePurchasing(data, sup, bo.components, sup, bo.components, data.finance.totals.realizedRevenue, data.finance.totals.realizedRevenue);
+    m.set(est, b);
+  }
+  return b;
+}
+
 export function simulate(inputs: Inputs, data: Round0Data, est: Est = EST): Results {
   const cal = getCalibration(data);
   const opsRaw = simulateOps(inputs, data, cal, est);
   const base = baseOps(data, est);
   // Số hiển thị neo vào số đề bài: R0 + (mô hình − mô hình baseline)
   const ops = anchorOps(opsRaw, base, data);
-  const sc = simulateSupplyChain(inputs, data, opsRaw, base);
+  const scQty = simulateSupplyChain(inputs, data, opsRaw, base);
   // M3 Sales: service level TP → penalty → realized revenue
-  const sales = simulateSales(data, sc, inputs);
+  const sales = simulateSales(data, scQty, inputs);
   const rev = sales.realizedRevenue;
   const rev0 = data.finance.totals.realizedRevenue;
   const supOf = (i: Inputs) => Object.fromEntries(COMPONENTS.map((c) => [c, activeSupplier(i, data, c)])) as Record<ComponentKey, ActiveSupplier>;
   const purchasing = simulatePurchasing(data, supOf(inputs), opsRaw.components, supOf(baselineInputs(data)), base.components, rev, rev0);
+  // Định giá lại tồn theo giá mua mới (R1: PET Philyp rẻ hơn Trio → tồn NL, Interest components, tồn TP, start-up loss giảm)
+  const priceOf = (p: typeof purchasing) => Object.fromEntries(p.components.map((c) => [c.key, c.pricePaid])) as Record<ComponentKey, number>;
+  const { sc, materialRatio } = repriceStock(scQty, data, priceOf(purchasing), priceOf(basePurchasing(data, est)), unitCostBySku(data));
+  const skuLoss = (o: typeof ops) => o.production.reduce((s, p) => s + p.startupLossEur * (materialRatio[p.sku] ?? 1), 0);
+  if (Object.values(materialRatio).some((r) => Math.abs(r - 1) > 1e-12)) ops.line = { ...ops.line, startupLossEur: ops.line.startupLossEur * (skuLoss(opsRaw) / Math.max(1e-9, opsRaw.line.startupLossEur)) };
   const finance = simulateFinance(data, ops, sc, purchasing, sales);
   // V1 "thận trọng": SL = min(phương án B, C) từng SKU → doanh thu thấp hơn hoặc bằng; chỉ doanh thu đổi (Investment giữ nguyên)
   const salesCons = simulateSales(data, { ...sc, products: sc.products.map((p) => ({ ...p, slPiecesEst: p.slPiecesEstCons })) }, inputs);

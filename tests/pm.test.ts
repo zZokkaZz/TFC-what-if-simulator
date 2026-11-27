@@ -39,19 +39,19 @@ describe('PM: giờ bảo trì có trừ vào công suất dây chuyền', () =>
 });
 
 describe('PM: chênh lệch Minimal / Extensive đến từ plan adherence (hệ số maintenanceDisruptionWeight)', () => {
-  it('mặc định (hệ số 0): giờ PM không tính là gián đoạn → Extensive có plan adherence cao hơn Minimal (hỏng đột xuất ít hơn)', () => {
-    expect(COEFFS.maintenanceDisruptionWeight.value).toBe(0);
-    const m = sim('Minimal'), e = sim('Extensive');
-    expect(e.opsRaw.line.capacityAdherence).toBeGreaterThan(m.opsRaw.line.capacityAdherence + 0.01);
-    expect(e.finance.roi).toBeGreaterThan(m.finance.roi);
-  });
-  it('hệ số = 1 (coi giờ PM như giờ hỏng): Minimal và Extensive gần như bằng nhau về plan adherence', () => {
-    COEFFS.maintenanceDisruptionWeight.value = 1;
+  // Hiệu chỉnh R1 (27/11): mặc định đổi 0 → 1 (game gộp giờ PM vào changeover, xem COEFFS.maintenanceDisruptionWeight)
+  it('mặc định (hệ số 1, R1): giờ PM tính như gián đoạn → Minimal và Extensive gần như bằng nhau về plan adherence', () => {
+    expect(COEFFS.maintenanceDisruptionWeight.value).toBe(1);
     const m = sim('Minimal'), e = sim('Extensive');
     expect(Math.abs(e.opsRaw.line.capacityAdherence - m.opsRaw.line.capacityAdherence)).toBeLessThan(0.005);
   });
+  it('hệ số = 0 (giờ PM không tính là gián đoạn): Extensive có plan adherence cao hơn Minimal (hỏng đột xuất ít hơn)', () => {
+    COEFFS.maintenanceDisruptionWeight.value = 0;
+    const m = sim('Minimal'), e = sim('Extensive');
+    expect(e.opsRaw.line.capacityAdherence).toBeGreaterThan(m.opsRaw.line.capacityAdherence + 0.005);
+  });
   it('baseline R0 (không PM) không phụ thuộc hệ số: ROI vẫn −7,68%', () => {
-    COEFFS.maintenanceDisruptionWeight.value = 1;
+    COEFFS.maintenanceDisruptionWeight.value = 0;
     expect((sim('None').finance.roi * 100).toFixed(2)).toBe('-7.68');
   });
 });

@@ -145,9 +145,9 @@ describe('3. Service level hứa + SL type → mốc penalty (neo từng khách 
     expect(c.penalty).toBeLessThan(c.penaltyR0);
     expect(r.finance.roi).toBeLessThan(b.finance.roi);
   });
-  it('SL hứa F&G 95 → 90% (≤ SL đạt được): penalty = 0, ROI ↑', () => {
+  it('SL hứa F&G 95 → 90% (≤ SL đạt được): hết phạt, được THƯỞNG = contracted × COEFFS.salesBonusRate (hiệu chỉnh R1), ROI ↑', () => {
     const { r } = run((i) => { i.sales.customers[F].serviceLevel = 0.9; });
-    expect(cust(r, F).penalty).toBe(0);
+    expect(cust(r, F).penalty).toBeCloseTo(cust(r, F).contracted * COEFFS.salesBonusRate.value, 9);
     expect(r.finance.roi).toBeGreaterThan(b.finance.roi);
   });
   it('SL type Orders (khó đạt hơn) → penalty nặng hơn; Units → nhẹ hơn; cả hai gắn "ngoài vùng dữ liệu R0" khi còn thiếu', () => {
@@ -168,10 +168,11 @@ describe('3. Service level hứa + SL type → mốc penalty (neo từng khách 
 });
 
 describe('4. Payment term khách → phải thu (AR) → Investment "Payment terms" (neo 365.589)', () => {
-  it('F&G 4 → 8 tuần: AR = revenue ÷ 26 × 8; Payment terms ↑ đúng Δ AR; Investment ↑; doanh thu, OP không đổi', () => {
+  // Hiệu chỉnh R1 (27/11): phải thu theo CONTRACTED sales (trước phạt/thưởng) — R1 game Payment terms chỉ đổi phần NCC
+  it('F&G 4 → 8 tuần: AR = contracted ÷ 26 × 8; Payment terms ↑ đúng Δ AR; Investment ↑; doanh thu, OP không đổi', () => {
     const { r } = run((i) => { i.sales.customers[F].paymentTermWeeks = 8; });
     const c = cust(r, F);
-    expect(c.ar).toBeCloseTo((c.revenue / 26) * 8, 6);
+    expect(c.ar).toBeCloseTo((c.contracted / 26) * 8, 6);
     expect(finRow(r, 'Payment terms') - finRow(b, 'Payment terms')).toBeCloseTo(c.ar - c.arR0, 6);
     expect(r.finance.investment).toBeGreaterThan(b.finance.investment);
     expect(r.finance.operatingProfit).toBe(b.finance.operatingProfit);
@@ -181,11 +182,12 @@ describe('4. Payment term khách → phải thu (AR) → Investment "Payment ter
     expect(r.finance.investment).toBeLessThan(b.finance.investment);
     expect(cust(r, F).ciSteps.paymentTerm).toBe(-3);
   });
-  it('doanh thu đổi (penalty) cũng đổi AR theo cùng payment term', () => {
+  it('penalty/thưởng đổi KHÔNG đổi AR (game tính phải thu theo contracted — R1: doanh thu +340.685 mà Payment terms chỉ +16.523 ≈ phần NCC)', () => {
     const { r } = run((i) => { i.sales.customers[F].serviceLevel = 0.98; });
     const c = cust(r, F);
-    expect(c.ar).toBeCloseTo((c.revenue / 26) * c.terms.paymentTermWeeks, 6);
-    expect(r.sales.arDelta).toBeLessThan(0);
+    expect(c.penalty).not.toBe(c.penaltyR0);
+    expect(c.ar).toBeCloseTo((c.contracted / 26) * c.terms.paymentTermWeeks, 6);
+    expect(r.sales.arDelta).toBeCloseTo(0, 6);
   });
 });
 

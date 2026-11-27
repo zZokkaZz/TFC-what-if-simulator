@@ -250,7 +250,7 @@ export function slMeasureOf(type: string): SlMeasure {
  *  - SL của khách (pieces / order lines / orders) = SL R0 tab 6 + TB (theo nhu cầu khách × SKU) của thay đổi SL TP từng SKU;
  *  - mức thiếu = max(0, SL hứa − SL theo LOẠI ĐO đang hứa (ô Sales)); R0: 95% − SL order lines;
  *  - penalty = penalty R0 của khách × (contracted ÷ contracted R0) × (mức thiếu mới ÷ mức thiếu R0)^mũ (COEFFS, mũ = 1).
- *    Neo TỪNG KHÁCH (tỷ lệ penalty/điểm thiếu R0 khác nhau: 5,1% / 2,5% / 1,9% contracted). Đạt hoặc vượt SL hứa → 0; thưởng khi vượt CHƯA tính.
+ *    Neo TỪNG KHÁCH (tỷ lệ penalty/điểm thiếu R0 khác nhau: 5,1% / 2,5% / 1,9% contracted). Đạt hoặc vượt SL hứa → THƯỞNG contracted × COEFFS.salesBonusRate (hiệu chỉnh R1).
  *    Đổi SL type → không có dữ liệu R0 cho loại đo khác → cờ "ngoài vùng dữ liệu R0" nếu còn thiếu.
  *  - Contracted sales = contracted R0 × (Σ nhu cầu × giá sau promotion ÷ R0) × (CI ÷ CI R0). CI = "CI game hiển thị" nếu đội nhập;
  *    bỏ trống mà đã đổi điều khoản → CI R0 × (1 + Σ hệ số COEFFS × bậc) (người dùng chốt hệ số = 0).
@@ -265,7 +265,9 @@ const PENALTY_EXP = COEFFS.penaltyShortfallExponent.value;
 export function simulateSales(data: Round0Data, sc: ScResults, inputs?: Inputs): SalesResults {
   const baseTerms = baselineSalesTerms(data);
   const fin = (label: string) => data.finance.lines.find((l) => l.label.normalize('NFC') === label.normalize('NFC'))?.value ?? null;
-  const dSl = Object.fromEntries(sc.products.map((p) => [p.sku, p.slPiecesEst - p.slPiecesR0])) as Record<SkuKey, number>;
+  // SL SKU (pieces / order lines): R0 và kịch bản → mức thiếu theo khách co giãn TỶ LỆ (không cộng thẳng):
+  // R1 game: F&G order lines 91,2 → 95,9 trong khi TB gia quyền SKU chỉ +2,8 điểm → cộng thẳng đánh giá thấp mức cải thiện.
+  const skuSl = Object.fromEntries(sc.products.map((p) => [p.sku, { p0: p.slPiecesR0, p: p.slPiecesEst, ol0: p.sheet.slOrderLines.r0 ?? p.slPiecesR0, ol: p.sheet.slOrderLines.value ?? p.slPiecesEst }])) as Record<SkuKey, { p0: number; p: number; ol0: number; ol: number }>;
   const slOf = (r: { slPieces: number; slOrderLines: number; slOrders: number }, type: string) => { const m = slMeasureOf(type); return m === 'pieces' ? r.slPieces : m === 'orderLines' ? r.slOrderLines : r.slOrders; };
   // Tỷ lệ penalty/điểm thiếu TB của R0 — chỉ dùng khi một khách R0 KHÔNG thiếu (penalty R0 = 0) mà kịch bản thiếu
   const rates: number[] = [];
@@ -301,11 +303,14 @@ export function simulateSales(data: Round0Data, sc: ScResults, inputs?: Inputs):
   const customers: SalesCustomerResult[] = pre.map(({ k, r, t, t0, steps, ciBasis, ci, ciStale, contractedR0, contracted, penaltyR0Scaled, penaltyR0, shortfallR0, demandR0, demand }) => {
     const rows = data.sales.customerProduct.filter((x) => x.customer === k.customer);
     const w = rows.reduce((s, x) => s + x.demandPerWeek, 0);
-    const delta = w > 0 ? rows.reduce((s, x) => s + x.demandPerWeek * (dSl[x.sku] ?? 0), 0) / w : 0;
+    const wAvgSku = (f: (v: { p0: number; p: number; ol0: number; ol: number }) => number) => (w > 0 ? rows.reduce((s, x) => s + x.demandPerWeek * (skuSl[x.sku] ? f(skuSl[x.sku]) : 0), 0) / w : 0);
+    const shortP0 = 1 - wAvgSku((v) => v.p0), shortP = 1 - wAvgSku((v) => v.p);
+    const shortL0 = 1 - wAvgSku((v) => v.ol0), shortL = 1 - wAvgSku((v) => v.ol);
     const clip = (x: number) => Math.min(1, Math.max(0, x));
-    const slOrderLines = clip(r.slOrderLines + delta);
-    const slPieces = clip(r.slPieces + delta);
-    const slOrders = clip(r.slOrders + delta);
+    const scaled = (r0v: number, s0: number, s1: number) => (Math.abs(s1 - s0) < 1e-12 ? r0v : s0 > 1e-9 ? clip(1 - (1 - r0v) * (s1 / s0)) : clip(r0v - (s1 - s0)));
+    const slPieces = scaled(r.slPieces, shortP0, shortP);
+    const slOrderLines = scaled(r.slOrderLines, shortL0, shortL);
+    const slOrders = scaled(r.slOrders, shortL0, shortL);
     const typeChanged = slMeasureOf(t.serviceLevelType) !== slMeasureOf(k.serviceLevelType);
     const slMeasuredR0 = slOf(r, k.serviceLevelType);
     const slMeasured = slOf({ slPieces, slOrderLines, slOrders }, t.serviceLevelType);
@@ -317,14 +322,17 @@ export function simulateSales(data: Round0Data, sc: ScResults, inputs?: Inputs):
     // Chặn: penalty không vượt contracted → doanh thu khách ≥ 0 (không có dữ liệu R0 cho vùng này)
     const capped = penaltyRaw < -contracted;
     const penaltyCapped = capped ? -contracted : penaltyRaw;
-    const penalty = penaltyCapped === 0 ? 0 : penaltyCapped; // tránh -0
+    // Thưởng khi đạt/vượt SL hứa (Info Center: "small bonus"; R1 game: +0,64…0,71% contracted cả 3 khách khi vượt 0,9…2,4 điểm) — COEFFS
+    const bonus = shortfall <= 0 && slMeasured >= t.serviceLevel ? contracted * COEFFS.salesBonusRate.value : 0;
+    const penalty = penaltyCapped + bonus === 0 ? 0 : penaltyCapped + bonus; // dương = thưởng; tránh -0
     const revenue = contracted + penalty;
     const revenueR0 = contractedR0 + penaltyR0;
     // "Ngoài vùng dữ liệu R0": mức thiếu > OUT_OF_RANGE_FACTOR × mức thiếu R0, hoặc R0 không thiếu mà kịch bản thiếu,
     // hoặc đã phải chặn, hoặc đổi SL type mà vẫn thiếu (R0 chỉ có dữ liệu penalty cho loại đo R0)
     const outOfRange = capped || (typeChanged && shortfall > 0) || (shortfallR0 > 0 ? shortfall > OUT_OF_RANGE_FACTOR * shortfallR0 : shortfall > 0);
-    const arR0 = (revenueR0 / ROUND.weeks) * t0.paymentTermWeeks;
-    const ar = Math.abs(revenue - revenueR0) < 1e-9 && t.paymentTermWeeks === t0.paymentTermWeeks ? arR0 : (revenue / ROUND.weeks) * t.paymentTermWeeks;
+    // Phải thu theo CONTRACTED sales (trước phạt/thưởng): R1 game Payment terms +16.523 ≈ chỉ phần NCC; R0 theo realized thì phải trả âm (ROUND1_BACKTEST.md 6.3)
+    const arR0 = (contractedR0 / ROUND.weeks) * t0.paymentTermWeeks;
+    const ar = Math.abs(contracted - contractedR0) < 1e-9 && t.paymentTermWeeks === t0.paymentTermWeeks ? arR0 : (contracted / ROUND.weeks) * t.paymentTermWeeks;
     const distributionR0 = r.distributionCost;
     const pN = pick.find((x) => x.customer === k.customer)?.palletsPerWeek ?? 0, pB = pick0.find((x) => x.customer === k.customer)?.palletsPerWeek ?? 0;
     const distribution = pB > 0 && Math.abs(pN - pB) > 1e-9 * pB ? distributionR0 * (pN / pB) : distributionR0;

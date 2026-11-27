@@ -33,8 +33,8 @@ describe('COEFFS: mỗi hệ số có nguồn, trạng thái, nơi dùng, cách 
     expect(c.usedIn.length).toBeGreaterThan(3);
     expect(c.verifyWith.length).toBeGreaterThan(5);
   });
-  it('hiện tại mọi hệ số đều "chưa xác minh" (đổi trạng thái khi có dữ liệu trial)', () => {
-    for (const [, c] of entries) expect(c.status).toBe('chưa xác minh');
+  it('hệ số "đã xác minh" phải ghi nguồn Round 1 (hiệu chỉnh R1, 27/11); còn lại "chưa xác minh"', () => {
+    for (const [id, c] of entries) if (c.status === 'đã xác minh') expect(c.source, id).toMatch(/R1/);
   });
   it('"usedIn" khớp thực tế: hệ số "chưa dùng" thì không file nào đọc; hệ số đang dùng thì file ghi trong usedIn có đọc COEFFS.<id>', () => {
     for (const [id, c] of entries) {

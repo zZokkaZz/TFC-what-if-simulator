@@ -296,3 +296,48 @@ Xếp theo tác động lên ROI dự báo:
 8. Nhỏ: SMED 22%, hỏng máy, start-up loss theo giá NL, đổi nhóm SMED/training sang Indirect.
 
 Mỗi sửa: thêm `tests/backtest-r1.test.ts` (R1 đúng trong ngưỡng) **và** giữ `tests/sheet-fidelity.test.ts` (R0 đúng từng ô).
+
+## 9. Sau hiệu chỉnh R1 (27/11, người dùng yêu cầu "chỉnh bám sát kết quả thật")
+
+Dữ liệu R1 đọc tự động: `scripts/build-data-r1.ts` → `src/data/round1.json` (chạy trong `npm run data`). Bộ quyết định R1 dựng lại: `src/model/round1.ts`. Kiểm tra cố định: `tests/backtest-r1.test.ts` (12 test). R0 vẫn đúng từng ô (ROI −7,68%).
+
+### 9.1 Đã sửa (theo thứ tự tác động)
+
+| # | Sửa | Loại | Bằng chứng R1 |
+|---|---|---|---|
+| 1 | **Thưởng SL**: đạt/vượt SL hứa → + contracted × `COEFFS.salesBonusRate` (0,675%) | hệ số mới, đã xác minh R1 | 3 khách +0,64…0,71%; Info Center "small bonus" |
+| 2 | **SL theo khách / order lines**: mức THIẾU co giãn tỷ lệ (SKU: order lines theo pieces; khách: theo TB gia quyền SKU), thay cho cộng thẳng | cấu trúc | 6 SKU: tỷ số mức thiếu OL ÷ pieces R0→R1 lệch ≤ 0,09; khách: 95,97 / 96,31 / 97,31 so với game 95,9 / 96,7 / 97,4 |
+| 3 | **Plan adherence**: gián đoạn = hỏng + **changeover** + giờ PM + overtime (k hiệu chỉnh R0); `maintenanceDisruptionWeight` 0 → 1 | cấu trúc + hệ số | chỉ (hỏng + overtime) thì R0 cần k 0,71, R1 cần 1,0; thêm changeover → 1 hệ số khớp cả hai. Game gộp giờ PM vào changeover (9,4 ≈ 12,1 × 0,7 + 1) |
+| 4 | **Tồn TP thực ∝ plan adherence SKU** (giả thuyết A) | cấu trúc | bảng 5.1; cube kho TP 79,8% vs 80,4% |
+| 5 | **Obsolete × (adherence ÷ baseline)** và `obsoleteAgeSpreadScale` 2 → 4 | cấu trúc + hệ số | RMSE 6 SKU 0,43 điểm (3 → 0,83; 5 → 0,55) |
+| 6 | **Phải thu theo contracted sales** | cấu trúc | Payment terms 381.384 vs 382.112 |
+| 7 | **Cỡ đơn NL = lot × lượng mua + phần cộng thêm cố định (tuần nhu cầu)** thay cho × tỷ lệ | cấu trúc | phần cộng thêm R0 → R1: PET 0,66 → 0,62; Orange 0,88 → 0,78; Pack 0,68 → 0,73; Mango 0,90 → 0,85 tuần. Cỡ đơn PET 517k vs 528k |
+| 8 | **Dao động kho NL theo ngày ∝ (cỡ đơn mới ÷ R0)^0,5** (`rmLotDispersionExp`, trước = 1) | hệ số mới, đã xác minh R1 | overflow kho NL 5,7% vs 5,8% (mũ 1: 2,7%; mũ 0: 10,0%) |
+| 9 | **Định giá lại tồn theo giá mua mới** (NL: giá mua; TP: giá vốn + Δ giá NL; start-up loss theo chi phí vật tư) | cấu trúc | Stock 290k vs 287k; Interest components 0,82 × R0 như game; start-up loss 7.783 vs 7.812 |
+| 10 | **Vận chuyển Tank tính theo phần xe bồn** (không làm tròn lên) | cấu trúc | Miami: lot 4 → 2 mà phí gần như không đổi |
+| 11 | **Reliability NCC mới = cam kết − TRUNG VỊ chênh lệch R0** (trước: trung bình) | cấu trúc | trung bình 4,7 bị Trio/Seitan kéo; Philyp thật 96,4%, SYI 98,2% |
+| 12 | SMED / Increase speed / Training xếp vào **Indirect** (như game), không vào Production costs | trình bày | ROI không đổi; Gross margin đúng nhóm |
+
+### 9.2 Kết quả
+
+| | model trước | model sau (đoán NCC như lúc nộp) | model sau (nhập số NCC thật) | game |
+|---|---|---|---|---|
+| ROI | 4,29% | **5,12%** | 5,36% | 5,04% |
+| Realized revenue | 2.580.589 | — | 2.646.709 | 2.646.940 |
+| Investment | 4.006.249 | — | 3.973.142 | 3.971.406 |
+| SL outbound order lines | 95,0% | — | 96,41% | 96,52% |
+| Plan adherence | 92,6% | — | 90,2% | 89,6% |
+| Obsolete | 4,8% | — | 7,0% | 7,4% |
+| Cube kho TP / NL | 72,5 / 80,4% | — | 79,8 / 82,8% | 80,4 / 86,8% |
+| Overflow kho NL (€) | 4.406 | — | 14.360 | 15.694 |
+
+### 9.3 Còn lệch (chưa sửa — cần dữ liệu / người dùng quyết)
+
+| Chỗ | Lệch (model − game) | Vì sao chưa sửa |
+|---|---|---|
+| Phí vận chuyển PET FTL | −12.799 | Sheet R0 ghi **30 pallet/xe**; số R1 khớp **≈ 27 pallet/xe** (2 cách tính độc lập: phí/đơn và cỡ đơn/xe). Đổi số sheet → cần người dùng xác nhận |
+| Hỏng máy | 4,1 vs 4,7 giờ | Muốn khớp phải cho PET Middle hỏng nhiều hơn Poor (trái Info Center) → giữ nguyên, báo |
+| Thời vụ kho NL | 13.924 vs 17.809 | Giờ TB model 66 vs 74 (biểu đồ ngày game TB 70,7) |
+| SL pieces SKU C-power | cao 1,4–2,3 điểm | Khách vẫn khớp; độ dốc theo availability Vitamin C có thể cao hơn thật |
+| Overflow kho TP | 5.524 vs 2.970 | Nhỏ |
+| Energy / Interest (giữ R0) | +726 / −1.239 | Nhỏ |

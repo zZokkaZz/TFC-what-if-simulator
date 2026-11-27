@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "data": "tsx scripts/build-data.ts",
+    "data": "tsx scripts/build-data.ts && tsx scripts/build-data-r1.ts",
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node -e \"require('fs').copyFileSync('dist/index.html','docs/index.html')\"",
     "test": "vitest run",
