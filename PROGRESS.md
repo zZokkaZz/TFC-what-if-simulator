@@ -87,6 +87,8 @@ Test: 394 test (`npm test`) + 59 test rules trên emulator (`scripts/test-rules.
 
 ## 6. Nhật ký phiên (thêm dòng mới ở trên cùng)
 
+- 27/11/2026 — Upload lại `TFC Round Trial 1.xlsx` (thêm tab R2_SC_khac, R2_Pur_khac, R2_Ops_khac, R2_Sales_khac, R2_thu; tab R1_* không đổi) → đè `data/TFC_Round1.xlsx`. Round 2 chỉ mới tab chọn KPI (không ảnh hưởng ROI); mọi quyết định/NCC/máy giống R0. 408/408.
+
 - 27/11/2026 — Có `data/TFC_Round1.xlsx`. Backtest đầy đủ (`ROUND1_BACKTEST.md`), rồi theo yêu cầu người dùng hiệu chỉnh model theo R1: 12 sửa (thưởng SL, SL theo mức thiếu, adherence gồm changeover, tồn TP & obsolete ∝ adherence, AR theo contracted, cỡ đơn NL cộng thêm, dao động kho NL mũ 0,5, định giá tồn theo giá mới, phí Tank, reliability NCC mới theo trung vị, SMED/training vào Indirect). Backtest R1: ROI 5,12% (đoán NCC) / 5,36% (số NCC thật) vs game 5,04% (trước: 4,29%). R0 vẫn −7,68%. Test cũ kiểm hành vi bị R1 bác bỏ đã đổi kỳ vọng (ghi chú trong từng test). Người dùng chốt giữ 30 pallet/FTL (R1 suy ra ≈ 27 → model thấp phí FTL PET ~€12,8k). PR #14 đã merge.
 
 - 26/11/2026 — Round 1 đã nộp (Phương án Chính, kho TP 1.350, Customer priority F&G > LAND > Dominick's) → game ROI 5,04% (hạng 14, top 8,01%). Đối chiếu dashboard với model, dựng ngược P&L, phát hiện tồn thực ÷ lý thuyết ≈ plan adherence; báo cáo artifact + `ROUND1_ANALYSIS.md`, `MODEL_GUIDE.md`, `notes/prompts_trich_xuat_R1.md`. Không sửa code model.
