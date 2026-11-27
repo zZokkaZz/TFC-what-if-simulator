@@ -97,6 +97,10 @@ Lộ trình: (1) người dùng upload sheet R1 (prompt trích xuất: `notes/pr
 - Tham khảo (CI / chất lượng chưa mô hình): Orange Tank → IBC +0,56 điểm; Orange → Medina (quality Middle) +0,1.
 - **Đòn bẩy lớn nhất chưa mô hình: CI khách.** +1% CI cả 3 khách ≈ +0,65 điểm ROI (+2% → 7,16%, +3% → 7,81% từ mức 6,07%). Hạng Sales 44 → đội top nhiều khả năng lấy doanh thu ở đây (SL thật 96,5% cho phép hứa SL cao hơn).
 
+## 6b. Backtest đầy đủ (27/11)
+
+Đã có `data/TFC_Round1.xlsx`. Kết quả đối chiếu từng dòng, từng giả định: **`ROUND1_BACKTEST.md`** (thay các số "suy ra" ở mục 2–3 trên).
+
 ## 7. Round 2
 
 - Game hiện sẵn quyết định Round 1 làm điểm xuất phát; có thêm mục **KPI** mới — nội dung CHƯA biết (chờ ảnh chụp từ người dùng, không đoán).

@@ -1,4 +1,6 @@
-# Prompt trích xuất dữ liệu Round 1 từ game (dùng với Claude chat có trình duyệt)
+# Prompt trích xuất dữ liệu Round 1 (kết quả) + Round 2 (KPI, quyết định) từ game (dùng với Claude chat có trình duyệt)
+
+Model gợi ý: Sonnet, effort Medium (Finance và mixing & bottling: High). Mỗi phiên 1 phòng. Mỗi lần dán: Phần chung + Phần riêng của phòng + Phần thêm Round 2 (thay <PHÒNG>).
 
 Làm 4 lần, mỗi lần 1 tài khoản/phòng ban. Mỗi lần dán **Phần chung** + **Phần riêng** của phòng đó. Cả 4 lần ghi vào CÙNG một Google Sheet (share cho 4 tài khoản), mỗi lần thêm tab mới. Xong: File → Download → .xlsx → upload lên repo tên `TFC Round 1.xlsx` ở thư mục gốc, báo Claude Code.
 
@@ -70,4 +72,16 @@ PHÒNG: SUPPLY CHAIN. Vào mục Supply Chain, chọn Round 1, chép:
 - R1_SC_analysis: mọi bảng; nếu có biểu đồ tồn kho theo ngày/tuần thì chép vào tab R1_SC_daily (mỗi dòng 1 ngày/tuần, mỗi cột 1 nguyên liệu/SKU), chỗ không đọc được ghi "thiếu".
 - R1_SC_decisions: safety stock và lot size 5 nguyên liệu; production interval và safety stock 6 SKU; frozen period.
 - R1_SC_decisionlog: nguyên văn.
+```
+
+## Phần thêm — Round 2 (dán cuối mỗi prompt, thay <PHÒNG> = Pur / Ops / Sales / SC)
+
+```text
+PHẦN THÊM — ROUND 2 (làm ngay trong phiên này, sau khi xong Round 1)
+- Ở thanh "Round" bên trái chọn 2 (round đang chơi). Vẫn CHỈ ĐỌC, không bấm Save/Calculate/Negotiate/Deal/Submit.
+- R2_<PHÒNG>_KPI: chép TOÀN BỘ mục "KPI" mới (mọi bảng, chỉ tiêu, mục tiêu, điểm, chú thích, nút "i" nếu có giải thích) đúng nguyên văn.
+- R2_<PHÒNG>_decisions: chép mọi ô quyết định đang hiện ở Round 2 (tên ô | giá trị). Thêm cột "Khác R1?" ghi "có" nếu giá trị khác tab R1_<PHÒNG>_decisions.
+- R2_<PHÒNG>_moi: bất kỳ màn hình, tab, ô, thông báo nào ở Round 2 mà Round 1 không có (vd thông điệp từ ban tổ chức, sự kiện, thay đổi thị trường, NCC/khách mới, giá mới). Chép nguyên văn; không có thì ghi "không thấy mục mới".
+- Màn hình kết quả (dashboard, supplier, product...) của Round 2 chưa có số thì bỏ qua, ghi "chưa có kết quả" trong README.
+- Cập nhật README_<PHÒNG>: thêm danh sách tab R2_* đã chép.
 ```

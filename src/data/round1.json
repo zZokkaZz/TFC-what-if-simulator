@@ -1,0 +1,1207 @@
+{
+ "meta": {
+  "source": "data/TFC_Round1.xlsx",
+  "generatedAt": "2026-11-27T06:47:56.608Z",
+  "sheets": [
+   "R1_Ops_decisions",
+   "Trang tính1",
+   "R1_Ops_dashboard",
+   "R1_Ops_warehousing",
+   "R1_Ops_mixing_bottling",
+   "R1_Ops_analysis",
+   "R1_Ops_decisionlog",
+   "README_OPERATIONS",
+   "R1_Ops_infocenter",
+   "R1_Finance",
+   "R1_Pur_dashboard",
+   "R1_Pur_supplier",
+   "R1_Pur_component",
+   "R1_Pur_analysis",
+   "R1_Pur_decisions",
+   "R1_Pur_decisionlog",
+   "README_PURCHASING",
+   "R1_Pur_infocenter",
+   "R1_Sales_dashboard",
+   "R1_Sales_customer",
+   "R1_Sales_product",
+   "R1_Sales_customer_product",
+   "R1_Sales_product_customer",
+   "R1_Sales_analysis",
+   "R1_Sales_decisions",
+   "R1_Sales_decisionlog",
+   "R1_Sales_infocenter",
+   "README_SALES",
+   "R1_SC_dashboard",
+   "R1_SC_component",
+   "R1_SC_product",
+   "R1_SC_analysis",
+   "R1_SC_daily",
+   "R1_SC_decisions",
+   "R1_SC_decisionlog",
+   "R1_SC_infocenter",
+   "README_SUPPLYCHAIN"
+  ]
+ },
+ "finance": {
+  "rows": [
+   {
+    "label": "ROI",
+    "r1": 0.0504,
+    "r0": -0.0768,
+    "level": 1
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 2646940,
+    "r0": 2306255,
+    "level": 1
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 2628963,
+    "r0": 2628963,
+    "level": 2
+   },
+   {
+    "label": "Food & Groceries",
+    "r1": 1297902,
+    "r0": 1297902,
+    "level": 4
+   },
+   {
+    "label": "LAND Market",
+    "r1": 632821,
+    "r0": 632821,
+    "level": 4
+   },
+   {
+    "label": "Dominick's",
+    "r1": 698240,
+    "r0": 698240,
+    "level": 4
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 17977,
+    "r0": -322708,
+    "level": 2
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 17977,
+    "r0": -322708,
+    "level": 4
+   },
+   {
+    "label": "Food & Groceries",
+    "r1": 9200,
+    "r0": -252766,
+    "level": 6
+   },
+   {
+    "label": "LAND Market",
+    "r1": 4075,
+    "r0": -46360,
+    "level": 6
+   },
+   {
+    "label": "Dominick's",
+    "r1": 4702,
+    "r0": -23582,
+    "level": 6
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 1335030,
+    "r0": 903148,
+    "level": 1
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 1311910,
+    "r0": 1403107,
+    "level": 2
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 858846,
+    "r0": 911617,
+    "level": 4
+   },
+   {
+    "label": "Mono Packaging Materials",
+    "r1": 110598,
+    "r0": 110692,
+    "level": 6
+   },
+   {
+    "label": "Philyp Jones Plastics",
+    "r1": 260842,
+    "r0": 0,
+    "level": 6
+   },
+   {
+    "label": "Trio PET PLC",
+    "r1": 0,
+    "r0": 307931,
+    "level": 6
+   },
+   {
+    "label": "Miami Oranges",
+    "r1": 405783,
+    "r0": 409042,
+    "level": 6
+   },
+   {
+    "label": "NO8DO Mango",
+    "r1": 80263,
+    "r0": 81658,
+    "level": 6
+   },
+   {
+    "label": "SYI",
+    "r1": 1360,
+    "r0": 0,
+    "level": 6
+   },
+   {
+    "label": "Seitan Vitamins",
+    "r1": 0,
+    "r0": 2295,
+    "level": 6
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 453064,
+    "r0": 491489,
+    "level": 4
+   },
+   {
+    "label": "Bottling lines fixed costs",
+    "r1": 49000,
+    "r0": 49000,
+    "level": 6
+   },
+   {
+    "label": "Permanent employees",
+    "r1": 200000,
+    "r0": 200000,
+    "level": 6
+   },
+   {
+    "label": "Flexible manpower",
+    "r1": 28704,
+    "r0": 66670,
+    "level": 6
+   },
+   {
+    "label": "Mixer fixed costs",
+    "r1": 31250,
+    "r0": 31250,
+    "level": 6
+   },
+   {
+    "label": "Mixer variable costs",
+    "r1": 144110,
+    "r0": 144569,
+    "level": 6
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 1134836,
+    "r0": 1209651,
+    "level": 1
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 323574,
+    "r0": 324302,
+    "level": 2
+   },
+   {
+    "label": "Energy",
+    "r1": 150178,
+    "r0": 150904,
+    "level": 4
+   },
+   {
+    "label": "Water",
+    "r1": 26777,
+    "r0": 26779,
+    "level": 4
+   },
+   {
+    "label": "Other",
+    "r1": 146619,
+    "r0": 146619,
+    "level": 4
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 313643,
+    "r0": 365621,
+    "level": 2
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 21510,
+    "r0": 24107,
+    "level": 4
+   },
+   {
+    "label": "Interest components",
+    "r1": 9179,
+    "r0": 11181,
+    "level": 6
+   },
+   {
+    "label": "Interest products",
+    "r1": 12330,
+    "r0": 12926,
+    "level": 6
+   },
+   {
+    "label": "#NAME?",
+    "r1": 254891,
+    "r0": 301311,
+    "level": 4
+   },
+   {
+    "label": "Pallet locations raw materials warehouse",
+    "r1": 80000,
+    "r0": 90000,
+    "level": 6
+   },
+   {
+    "label": "Overflow raw materials warehouse",
+    "r1": 15694,
+    "r0": 35423,
+    "level": 6
+   },
+   {
+    "label": "Outsourcing tank yard",
+    "r1": 21228,
+    "r0": 25282,
+    "level": 6
+   },
+   {
+    "label": "Pallet locations finished goods warehouse",
+    "r1": 135000,
+    "r0": 150000,
+    "level": 6
+   },
+   {
+    "label": "Overflow finished goods warehouse",
+    "r1": 2970,
+    "r0": 607,
+    "level": 6
+   },
+   {
+    "label": "#NAME?",
+    "r1": 37242,
+    "r0": 40203,
+    "level": 4
+   },
+   {
+    "label": "Costs of scrap",
+    "r1": 37242,
+    "r0": 40203,
+    "level": 6
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 152645,
+    "r0": 190477,
+    "level": 2
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 77809,
+    "r0": 106753,
+    "level": 4
+   },
+   {
+    "label": "Inbound permanent employees",
+    "r1": 60000,
+    "r0": 100000,
+    "level": 6
+   },
+   {
+    "label": "Inbound flexible manpower",
+    "r1": 17809,
+    "r0": 6753,
+    "level": 6
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 74836,
+    "r0": 83725,
+    "level": 4
+   },
+   {
+    "label": "Outbound permanent employees",
+    "r1": 60000,
+    "r0": 80000,
+    "level": 6
+   },
+   {
+    "label": "Outbound flexible manpower",
+    "r1": 14836,
+    "r0": 3725,
+    "level": 6
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 110201,
+    "r0": 109717,
+    "level": 2
+   },
+   {
+    "label": "#NAME?",
+    "r1": 102108,
+    "r0": 101624,
+    "level": 4
+   },
+   {
+    "label": "Inbound order lines",
+    "r1": 351,
+    "r0": 271,
+    "level": 6
+   },
+   {
+    "label": "Inbound orders",
+    "r1": 1757,
+    "r0": 1353,
+    "level": 6
+   },
+   {
+    "label": "Contracted suppliers",
+    "r1": 100000,
+    "r0": 100000,
+    "level": 6
+   },
+   {
+    "label": "#NAME?",
+    "r1": 8093,
+    "r0": 8093,
+    "level": 4
+   },
+   {
+    "label": "Outbound order lines",
+    "r1": 927,
+    "r0": 927,
+    "level": 6
+   },
+   {
+    "label": "Outbound orders",
+    "r1": 7167,
+    "r0": 7167,
+    "level": 6
+   },
+   {
+    "label": "Distribution costs",
+    "r1": 192114,
+    "r0": 192114,
+    "level": 2
+   },
+   {
+    "label": "#ERROR!",
+    "r1": 14000,
+    "r0": 0,
+    "level": 2
+   },
+   {
+    "label": "Solve breakdowns training",
+    "r1": 4000,
+    "r0": 0,
+    "level": 4
+   },
+   {
+    "label": "SMED",
+    "r1": 10000,
+    "r0": 0,
+    "level": 4
+   },
+   {
+    "label": "Interest",
+    "r1": 28658,
+    "r0": 27419,
+    "level": 2
+   },
+   {
+    "label": "Operating profit",
+    "r1": 200194,
+    "r0": -306503,
+    "level": 1
+   },
+   {
+    "label": "#NAME?",
+    "r1": 3971406,
+    "r0": 3989513,
+    "level": 1
+   },
+   {
+    "label": "Fixed",
+    "r1": 2500000,
+    "r0": 2500000,
+    "level": 2
+   },
+   {
+    "label": "Stock",
+    "r1": 286794,
+    "r0": 321424,
+    "level": 2
+   },
+   {
+    "label": "Machines",
+    "r1": 802500,
+    "r0": 802500,
+    "level": 2
+   },
+   {
+    "label": "Payment terms",
+    "r1": 382112,
+    "r0": 365589,
+    "level": 2
+   }
+  ],
+  "roi": 0.0504,
+  "realizedRevenue": 2646940,
+  "contracted": {
+   "Food & Groceries": 1297902,
+   "LAND Market": 632821,
+   "Dominick's": 698240
+  },
+  "penaltyBonus": {
+   "Food & Groceries": 9200,
+   "LAND Market": 4075,
+   "Dominick's": 4702
+  },
+  "operatingProfit": 200194,
+  "investment": 3971406,
+  "paymentTerms": {
+   "r1": 382112,
+   "r0": 365589
+  },
+  "stock": 286794
+ },
+ "decisions": {
+  "ops": {
+   "rmPalletLocations": 800,
+   "rmFte": 3,
+   "intakeDays": 5,
+   "preventiveMaintenance": "A little",
+   "breakdownTraining": true,
+   "bottlingLine": "Swiss Fill 2",
+   "shifts": 2,
+   "smed": true,
+   "increaseSpeed": false,
+   "fgPalletLocations": 1350,
+   "fgFte": 3,
+   "rmInspection": {
+    "NO8DO Mango": false,
+    "Mono Packaging Materials": false,
+    "Miami Oranges": false,
+    "Philyp Jones Plastics": false,
+    "SYI": false
+   }
+  },
+  "sc": {
+   "components": {
+    "Pack": {
+     "safetyStockWeeks": 3,
+     "lotSizeWeeks": 4
+    },
+    "PET": {
+     "safetyStockWeeks": 2,
+     "lotSizeWeeks": 2
+    },
+    "Orange": {
+     "safetyStockWeeks": 2,
+     "lotSizeWeeks": 2
+    },
+    "Mango": {
+     "safetyStockWeeks": 2,
+     "lotSizeWeeks": 4
+    },
+    "Vitamin C": {
+     "safetyStockWeeks": 4,
+     "lotSizeWeeks": 4
+    }
+   },
+   "frozenPeriodWeeks": 3,
+   "products": {
+    "Orange 1L": {
+     "productionIntervalDays": 10,
+     "safetyStockWeeks": 3
+    },
+    "C-power 1L": {
+     "productionIntervalDays": 10,
+     "safetyStockWeeks": 3
+    },
+    "Mango 1L": {
+     "productionIntervalDays": 10,
+     "safetyStockWeeks": 2.5
+    },
+    "Orange PET": {
+     "productionIntervalDays": 10,
+     "safetyStockWeeks": 2.5
+    },
+    "C-power PET": {
+     "productionIntervalDays": 10,
+     "safetyStockWeeks": 3
+    },
+    "Mango PET": {
+     "productionIntervalDays": 10,
+     "safetyStockWeeks": 2.5
+    }
+   }
+  },
+  "purchasing": {
+   "Pack": {
+    "supplier": "Mono Packaging Materials",
+    "contractIndex": 0.994,
+    "quality": "High",
+    "leadTimeDays": 15,
+    "certified": false,
+    "transport": "Truck",
+    "freeCapacity": 0.18,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Pallet",
+    "agreedReliability": 0.95,
+    "deliveryWindow": "4 hours"
+   },
+   "PET": {
+    "supplier": "Philyp Jones Plastics",
+    "contractIndex": 1.02,
+    "quality": "Middle",
+    "leadTimeDays": 5,
+    "certified": true,
+    "transport": "Truck",
+    "freeCapacity": 0.05,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "FTL",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "1 day"
+   },
+   "Orange": {
+    "supplier": "Miami Oranges",
+    "contractIndex": 1.004,
+    "quality": "High",
+    "leadTimeDays": 30,
+    "certified": true,
+    "transport": "Boat",
+    "freeCapacity": 0.38,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "Tank",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "1 day"
+   },
+   "Mango": {
+    "supplier": "NO8DO Mango",
+    "contractIndex": 1.058,
+    "quality": "High",
+    "leadTimeDays": 10,
+    "certified": true,
+    "transport": "Truck",
+    "freeCapacity": 0.04,
+    "paymentTermWeeks": 4,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.96,
+    "deliveryWindow": "1 day"
+   },
+   "Vitamin C": {
+    "supplier": "SYI",
+    "contractIndex": 1.0518,
+    "quality": "High",
+    "leadTimeDays": 4,
+    "certified": false,
+    "transport": "Truck",
+    "freeCapacity": 0.29,
+    "paymentTermWeeks": 6,
+    "tradeUnit": "IBC",
+    "agreedReliability": 0.98,
+    "deliveryWindow": "4 hours"
+   }
+  },
+  "sales": {
+   "customers": {
+    "Food & Groceries": {
+     "contractIndex": 1.0085,
+     "serviceLevelType": "Order lines",
+     "serviceLevel": 0.95,
+     "shelfLife": 0.75,
+     "orderDeadline": "20.00 pm",
+     "tradeUnit": "Pallet layer",
+     "paymentTermWeeks": 4,
+     "promotionalPressure": "Middle",
+     "promotionHorizon": "Short"
+    },
+    "LAND Market": {
+     "contractIndex": 0.9615,
+     "serviceLevelType": "Order lines",
+     "serviceLevel": 0.95,
+     "shelfLife": 0.75,
+     "orderDeadline": "17.00 pm",
+     "tradeUnit": "Pallet layer",
+     "paymentTermWeeks": 4,
+     "promotionalPressure": "Middle",
+     "promotionHorizon": "Short"
+    },
+    "Dominick's": {
+     "contractIndex": 1.0166,
+     "serviceLevelType": "Order lines",
+     "serviceLevel": 0.95,
+     "shelfLife": 0.75,
+     "orderDeadline": "12.00 pm",
+     "tradeUnit": "Pallet",
+     "paymentTermWeeks": 4,
+     "promotionalPressure": "Middle",
+     "promotionHorizon": "Short"
+    }
+   },
+   "shortageRule": "Customer priority",
+   "customerPriority": [
+    "Food & Groceries",
+    "LAND Market",
+    "Dominick's"
+   ]
+  }
+ },
+ "line": {
+  "name": "Swiss Fill 2",
+  "run": 62.2,
+  "changeover": 9.4,
+  "breakdown": 4.7,
+  "unused": 7.7,
+  "overtime": 4,
+  "startupLossEur": 7812,
+  "planAdherence": 0.896
+ },
+ "mixer": {
+  "cleaningShare": 0.146,
+  "avgLotL": 11013
+ },
+ "warehouse": {
+  "rm": {
+   "capacity": 800,
+   "usage": 694,
+   "utilization": 0.868,
+   "overflow": 0.058,
+   "orderLinesPerWeek": 1.4,
+   "palletsPerWeek": 204.7,
+   "hoursPerWeek": 74,
+   "flexFte": 0.4
+  },
+  "fg": {
+   "capacity": 1350,
+   "usage": 1085,
+   "utilization": 0.804,
+   "overflow": 0.007,
+   "orderLinesPerWeek": 17.8,
+   "palletsPerWeek": 334.5,
+   "hoursPerWeek": 102,
+   "flexFte": 0.3
+  },
+  "tankDaysPerWeek": 23,
+  "dailyHours": {
+   "rm": [
+    4.92,
+    4.92,
+    4.92,
+    16.2,
+    4,
+    4,
+    15,
+    26.1,
+    15.8,
+    20.76,
+    15.46,
+    4.46,
+    33.26,
+    4.46,
+    4,
+    5.3,
+    30,
+    45.5,
+    4,
+    4,
+    6.92,
+    4.92,
+    13.76,
+    16.76,
+    13.76,
+    12.84,
+    47.84,
+    4,
+    4,
+    4,
+    14.4,
+    17.2,
+    16.9,
+    13.7,
+    13.74,
+    4.54,
+    38.74,
+    4.54,
+    27.04,
+    7.9,
+    4,
+    4,
+    4,
+    4.5,
+    4,
+    4,
+    12.5,
+    28.7,
+    14.4,
+    14.4,
+    14.4,
+    15.6,
+    17.6,
+    4,
+    13.1,
+    13.8,
+    28.7,
+    36.4,
+    13.8,
+    16.54,
+    5.34,
+    33.74,
+    13.94,
+    53.84,
+    4.4,
+    14.9,
+    4,
+    4,
+    4,
+    5.7,
+    4,
+    6.24,
+    4.84,
+    7.64,
+    16.44,
+    35.34,
+    15.6,
+    24.5,
+    17.1,
+    4,
+    10.4,
+    4.48,
+    6.68,
+    55.78,
+    18.12,
+    17.52,
+    29.74,
+    17.84,
+    5.44,
+    27.1,
+    4.2,
+    11.5,
+    4,
+    4.84,
+    50.34,
+    18.14,
+    4.84,
+    4.84,
+    13.2,
+    14.3,
+    15,
+    14.1,
+    14.1,
+    5.2,
+    28.4,
+    4,
+    4.98,
+    4.48,
+    12.78,
+    4.48,
+    4.48,
+    5.8,
+    6.8,
+    4.3,
+    18.2,
+    4,
+    14.9,
+    15,
+    15,
+    15,
+    19.1,
+    17.56,
+    15.26,
+    27.96,
+    15.66,
+    40.16,
+    14.4,
+    5.72,
+    41.72,
+    4.52
+   ],
+   "fg": [
+    19.48,
+    7.62,
+    10.93,
+    23.75,
+    19.78,
+    8.05,
+    9.58,
+    14.57,
+    25.42,
+    23.9,
+    10.98,
+    10.23,
+    22.4,
+    24.58,
+    14.85,
+    12.22,
+    19.75,
+    27.48,
+    21.37,
+    13.02,
+    26.87,
+    25.42,
+    11.83,
+    11.63,
+    19.23,
+    19.78,
+    29.07,
+    26.6,
+    7.53,
+    17.8,
+    25.77,
+    31.67,
+    26.83,
+    13.25,
+    23.65,
+    23.5,
+    19.25,
+    18.28,
+    21.32,
+    22.87,
+    9.9,
+    10.38,
+    11.75,
+    9.22,
+    8.3,
+    11.52,
+    17.07,
+    45.45,
+    41.5,
+    10.67,
+    7.7,
+    17.4,
+    23.88,
+    13.4,
+    8.22,
+    8.05,
+    12.5,
+    22.35,
+    20.75,
+    27.6,
+    26.08,
+    10.07,
+    22.48,
+    32.23,
+    23.87,
+    22.23,
+    15.3,
+    13.67,
+    17.52,
+    21.58,
+    27.2,
+    28.63,
+    24.22,
+    13.2,
+    13.18,
+    20.03,
+    16.65,
+    11.27,
+    26.33,
+    23.75,
+    18.97,
+    21.67,
+    16.53,
+    28.72,
+    26.12,
+    15.67,
+    16.5,
+    20.02,
+    25.37,
+    38.97,
+    36.12,
+    22.57,
+    18.02,
+    11,
+    21.85,
+    32.85,
+    21.88,
+    12.62,
+    13.3,
+    29.2,
+    34.42,
+    16.07,
+    15.42,
+    25.08,
+    25.68,
+    16.05,
+    10.47,
+    17.52,
+    31.48,
+    28.27,
+    13.67,
+    28.05,
+    30.92,
+    15.97,
+    20.35,
+    17.18,
+    14.8,
+    17.08,
+    11.52,
+    13.2,
+    19.47,
+    25.03,
+    18.08,
+    8.85,
+    15.13,
+    20.82,
+    15.37,
+    22.65,
+    26.62,
+    15.68
+   ]
+  }
+ },
+ "components": {
+  "Pack": {
+   "reliability": 0.924,
+   "stockUnits": 693591,
+   "stockWeeks": 5.2,
+   "stockValue": 21570,
+   "demandPerWeek": 132139,
+   "availability": 0.998,
+   "amountPurchased": 3556340,
+   "orderSize": 625430
+  },
+  "PET": {
+   "reliability": 0.964,
+   "stockUnits": 687456,
+   "stockWeeks": 3.4,
+   "stockValue": 32903,
+   "demandPerWeek": 201629,
+   "availability": 1,
+   "amountPurchased": 5449939,
+   "orderSize": 527683
+  },
+  "Orange": {
+   "reliability": 0.978,
+   "stockUnits": 121793,
+   "stockWeeks": 3.4,
+   "stockValue": 53570,
+   "demandPerWeek": 35229,
+   "availability": 0.996,
+   "amountPurchased": 922562,
+   "orderSize": 97846
+  },
+  "Mango": {
+   "reliability": 0.935,
+   "stockUnits": 14065,
+   "stockWeeks": 4.5,
+   "stockValue": 13962,
+   "demandPerWeek": 3108,
+   "availability": 1,
+   "amountPurchased": 80855,
+   "orderSize": 15065
+  },
+  "Vitamin C": {
+   "reliability": 0.982,
+   "stockUnits": 1397,
+   "stockWeeks": 7.4,
+   "stockValue": 387,
+   "demandPerWeek": 188,
+   "availability": 1,
+   "amountPurchased": 4903,
+   "orderSize": 1134
+  }
+ },
+ "products": {
+  "Orange 1L": {
+   "demandPerWeek": 67394,
+   "slPieces": 0.961,
+   "slOrderLines": 0.957,
+   "stockWeeks": 3.4,
+   "stockValue": 51439,
+   "obsoletes": 0.091,
+   "obsoleteValuePerWeek": 1383,
+   "batches": 13,
+   "startupLossPerBatch": 911,
+   "rejects": 734,
+   "planAdherence": 0.895
+  },
+  "C-power 1L": {
+   "demandPerWeek": 11361,
+   "slPieces": 0.967,
+   "slOrderLines": 0.957,
+   "stockWeeks": 3.2,
+   "stockValue": 9146,
+   "obsoletes": 0.09,
+   "obsoleteValuePerWeek": 257,
+   "batches": 13,
+   "startupLossPerBatch": 1006,
+   "rejects": 1101,
+   "planAdherence": 0.895
+  },
+  "Mango 1L": {
+   "demandPerWeek": 42162,
+   "slPieces": 0.976,
+   "slOrderLines": 0.971,
+   "stockWeeks": 3.2,
+   "stockValue": 34463,
+   "obsoletes": 0.07,
+   "obsoleteValuePerWeek": 747,
+   "batches": 13,
+   "startupLossPerBatch": 1027,
+   "rejects": 1360,
+   "planAdherence": 0.895
+  },
+  "Orange PET": {
+   "demandPerWeek": 118084,
+   "slPieces": 0.983,
+   "slOrderLines": 0.981,
+   "stockWeeks": 3.3,
+   "stockValue": 43001,
+   "obsoletes": 0.062,
+   "obsoleteValuePerWeek": 809,
+   "batches": 13,
+   "startupLossPerBatch": 1488,
+   "rejects": 857,
+   "planAdherence": 0.897
+  },
+  "C-power PET": {
+   "demandPerWeek": 17741,
+   "slPieces": 0.956,
+   "slOrderLines": 0.944,
+   "stockWeeks": 3.1,
+   "stockValue": 7004,
+   "obsoletes": 0.081,
+   "obsoleteValuePerWeek": 184,
+   "batches": 13,
+   "startupLossPerBatch": 1728,
+   "rejects": 1876,
+   "planAdherence": 0.897
+  },
+  "Mango PET": {
+   "demandPerWeek": 51040,
+   "slPieces": 0.979,
+   "slOrderLines": 0.971,
+   "stockWeeks": 3.1,
+   "stockValue": 19349,
+   "obsoletes": 0.059,
+   "obsoleteValuePerWeek": 368,
+   "batches": 13,
+   "startupLossPerBatch": 1653,
+   "rejects": 2000,
+   "planAdherence": 0.897
+  }
+ },
+ "suppliers": {
+  "Pack": {
+   "supplier": "Mono Packaging Materials",
+   "reliability": 0.924,
+   "rejection": 0.036,
+   "deliveries": 5.7,
+   "purchaseValue": 110598,
+   "transportCosts": 4548,
+   "amountPurchased": 3556340,
+   "pricePaid": 0.0311,
+   "orderSize": 625430
+  },
+  "PET": {
+   "supplier": "Philyp Jones Plastics",
+   "reliability": 0.964,
+   "rejection": 0.038,
+   "deliveries": 10.3,
+   "purchaseValue": 260842,
+   "transportCosts": 94074,
+   "amountPurchased": 5449939,
+   "pricePaid": 0.0479,
+   "orderSize": 527683
+  },
+  "Orange": {
+   "supplier": "Miami Oranges",
+   "reliability": 0.978,
+   "rejection": 0.009,
+   "deliveries": 9.4,
+   "purchaseValue": 405783,
+   "transportCosts": 35282,
+   "amountPurchased": 922562,
+   "pricePaid": 0.4398,
+   "orderSize": 97846
+  },
+  "Mango": {
+   "supplier": "NO8DO Mango",
+   "reliability": 0.935,
+   "rejection": 0.006,
+   "deliveries": 5.4,
+   "purchaseValue": 80263,
+   "transportCosts": 3273,
+   "amountPurchased": 80855,
+   "pricePaid": 0.9927,
+   "orderSize": 15065
+  },
+  "Vitamin C": {
+   "supplier": "SYI",
+   "reliability": 0.982,
+   "rejection": 0,
+   "deliveries": 4.3,
+   "purchaseValue": 1360,
+   "transportCosts": 586,
+   "amountPurchased": 4903,
+   "pricePaid": 0.2773,
+   "orderSize": 1134
+  }
+ },
+ "customers": {
+  "Food & Groceries": {
+   "attainedContractIndex": 1.016,
+   "slPieces": 0.966,
+   "slOrderLines": 0.959,
+   "slOrders": 0.931,
+   "revenue": 1307102,
+   "palletsPerWeek": 168.7,
+   "distributionCost": 94368
+  },
+  "LAND Market": {
+   "attainedContractIndex": 0.968,
+   "slPieces": 0.97,
+   "slOrderLines": 0.967,
+   "slOrders": 0.944,
+   "revenue": 636896,
+   "palletsPerWeek": 88.6,
+   "distributionCost": 52623
+  },
+  "Dominick's": {
+   "attainedContractIndex": 1.023,
+   "slPieces": 0.987,
+   "slOrderLines": 0.974,
+   "slOrders": 0.965,
+   "revenue": 702942,
+   "palletsPerWeek": 77.2,
+   "distributionCost": 45124
+  }
+ },
+ "kpi": {
+  "ROI (%)": 0.0504,
+  "Cube utilization raw materials warehouse": 0.8676999999999999,
+  "Cube utilization finished goods warehouse": 0.8039000000000001,
+  "Production plan adherence": 0.8959,
+  "Availability components (%)": 0.998,
+  "Stock components (weeks)": 3.77,
+  "Stock products (weeks)": 3.26,
+  "Gross margin (customer)": 1335029.62,
+  "Obsolete products (%)": 0.07440000000000001,
+  "Service level outbound order lines": 0.9652,
+  "Rejection components (%)": 0.021099999999999997,
+  "Raw material costs (%)": 0.3245,
+  "Delivery reliability suppliers (%)": 0.9629000000000001
+ }
+}

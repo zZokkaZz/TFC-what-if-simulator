@@ -79,10 +79,16 @@ describe('C2: tuổi tồn → obsolete → Costs of scrap (ước lượng, hi�
       for (const p of r.sc.products) expect(p.obsoleteEst).toBeLessThanOrEqual(p.obsoleteR0);
     }
   });
-  it('quyết định không đổi tuổi tồn (số ca, SMED) không đổi obsolete & scrap', () => {
+  // Hiệu chỉnh R1 (27/11): tồn TP thực tế ∝ plan adherence → obsolete cũng vậy. Quyết định không đổi tuổi tồn (số ca, SMED)
+  // chỉ đổi obsolete đúng theo tỷ lệ plan adherence (trước 27/11 test này đòi obsolete đứng yên — R1 game bác bỏ).
+  it('quyết định không đổi tuổi tồn (số ca, SMED): obsolete từng SKU = R0 × (adherence mới ÷ baseline)', () => {
     for (const f of [(x: Inputs) => { x.ops.shifts = 3; }, (x: Inputs) => { x.ops.smed = true; }]) {
       const { r } = run(f);
-      expect(scrap(r)).toBe(scrap(b));
+      for (const p of r.sc.products) {
+        const a = r.opsRaw.production.find((x) => x.sku === p.sku)!.adherence, a0 = b.opsRaw.production.find((x) => x.sku === p.sku)!.adherence;
+        expect(p.obsoleteEst).toBeCloseTo(Math.min(1, p.obsoleteR0 * (a / a0)), 12);
+      }
+      expect(scrap(r)).toBeGreaterThan(scrap(b)); // adherence ↑ → tồn thực ↑ → hủy ↑
     }
   });
 });
@@ -102,10 +108,12 @@ describe('V1: số chính theo B, thận trọng (min B, C) luôn ≤ số chín
     expect(r.conservative.roi).toBeLessThanOrEqual(r.finance.roi + 1e-12);
     for (const p of r.sc.products) expect(p.slPiecesEstCons).toBeLessThanOrEqual(p.slPiecesEst + 1e-12);
   });
-  it('tăng capacity (3 ca, PM Extensive): thận trọng thấp hơn hẳn số chính', () => {
+  // Từ 27/11 có thưởng khi đạt SL hứa: cả 2 phương án cùng vượt mức hứa thì ROI bằng nhau → kiểm ở mức SL SKU (phần capacity ≠ 0)
+  it('tăng capacity (3 ca, PM Extensive): SL thận trọng thấp hơn hẳn số chính; ROI thận trọng ≤ số chính', () => {
     for (const f of [(x: Inputs) => { x.ops.shifts = 3; }, (x: Inputs) => { x.ops.preventiveMaintenance = 'Extensive'; }]) {
       const { r } = run(f);
-      expect(r.conservative.roi).toBeLessThan(r.finance.roi - 1e-4);
+      expect(r.sc.products.some((p) => p.slPiecesEstCons < p.slPiecesEst - 1e-4)).toBe(true);
+      expect(r.conservative.roi).toBeLessThanOrEqual(r.finance.roi + 1e-12);
     }
   });
   it('chỉ đổi phần thiếu nguyên liệu (SS Vitamin C 6): phần capacity = 0 → thận trọng = số chính', () => {

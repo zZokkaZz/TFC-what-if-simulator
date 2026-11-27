@@ -130,7 +130,11 @@ describe('Bảng SC hiển thị đúng số tab 7 ở baseline', () => {
     const { r } = run((i) => allComp(i, { lotSizeWeeks: 2 }));
     const pet = r.sc.components.find((x) => x.key === 'PET')!;
     expect(pet.sheet.orderSize.basis).toBe('scaled');
-    expect(pet.sheet.orderSize.value!).toBeCloseTo(951612 / 2, -1);
-    expect(pet.deliveries.value!).toBeCloseTo(5.9 * 2, 1);
+    // Hiệu chỉnh R1 (27/11): cỡ đơn = lot × lượng mua + phần cộng thêm cố định (tuần nhu cầu) → lot 4 → 2 KHÔNG giảm đúng ½
+    const k = r.opsRaw.components.find((x) => x.key === 'PET')!.orderUnits / b.opsRaw.components.find((x) => x.key === 'PET')!.orderUnits;
+    expect(k).toBeGreaterThan(0.5);
+    expect(k).toBeLessThan(0.65);
+    expect(pet.sheet.orderSize.value!).toBeCloseTo(951612 * k, -1);
+    expect(pet.deliveries.value!).toBeCloseTo(5.9 / k, 1);
   });
 });

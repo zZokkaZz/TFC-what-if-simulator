@@ -143,7 +143,7 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, b
   }
   // Giờ PM đã nằm trong needHours (→ overtime). Có tính PM như "gián đoạn" giống hỏng đột xuất không: COEFFS (mặc định 0)
   const pmDisruption = COEFFS.maintenanceDisruptionWeight.value * maintenance;
-  const capacityAdherence = Math.min(1, Math.max(0, 1 - cal.adherenceK * (breakdown + pmDisruption + overtime + outsourced) / (C + overtime)));
+  const capacityAdherence = Math.min(1, Math.max(0, 1 - cal.adherenceK * (breakdown + changeover + pmDisruption + overtime + outsourced) / (C + overtime)));
   for (const p of production) p.adherence = capacityAdherence * p.availability;
   const wSum = production.reduce((s, p) => s + p.batchesPerWeek, 0);
   const planAdherence = production.reduce((s, p) => s + p.adherence * p.batchesPerWeek, 0) / wSum;
@@ -188,7 +188,8 @@ function opsCore(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est, b
     batchItems.push({ size: batchPallets, perWeek: p.batchesPerWeek });
     fgMeanHours.inbound += batchPallets * FG_NORMS.inboundHoursPerPallet * p.batchesPerWeek;
     fgMeanHours.scrap += ((obsolete[p.sku] * p.prodUnits) / prod.unitsPerPallet) * FG_NORMS.overflowOrScrapHoursPerPallet;
-    fgTheory[p.sku] = fgTheoryUnits(inputs, p.sku, p.demandUnits);
+    // Tồn TP thực tế ≈ lý thuyết × k_SKU × plan adherence SKU (R0 + R1: (thực ÷ lý thuyết) ÷ adherence gần như không đổi từng SKU — ROUND1_BACKTEST.md 5.1)
+    fgTheory[p.sku] = fgTheoryUnits(inputs, p.sku, p.demandUnits) * p.adherence;
     fgBatch[p.sku] = batchUnits;
   }
   const picking = customerPicking(data, inputs);
@@ -260,7 +261,7 @@ function stockDaily(inputs: Inputs, data: Round0Data, cal: Calibration, est: Est
     const series = cal.replay.rmUnits[c];
     const m0 = mean(series);
     const M = base ? (base.rmTheory[c] > 0 ? core.rmTheory[c] * (m0 / base.rmTheory[c]) : 0) : m0;
-    const s = base && base.rmLot[c] > 0 ? core.rmLot[c] / base.rmLot[c] : 1;
+    const s = base && base.rmLot[c] > 0 ? Math.pow(core.rmLot[c] / base.rmLot[c], COEFFS.rmLotDispersionExp.value) : 1;
     const comp = data.components.find((x) => x.key === c)!;
     const tu = core.sup[c].tradeUnit.toLowerCase();
     for (let d = 0; d < D; d++) {
@@ -370,7 +371,7 @@ export function simulateOps(inputs: Inputs, data: Round0Data, cal: Calibration, 
   const daily = stockDaily(inputs, data, cal, est, core, base.core);
 
   const intakeShape = Math.pow(data.ops.decisions.intakeDays / Math.max(1, o.intakeDays), est.intakeSmoothingExp);
-  const lotShape = base.core.rmLotPallets > 0 ? core.rmLotPallets / base.core.rmLotPallets : 1;
+  const lotShape = base.core.rmLotPallets > 0 ? Math.pow(core.rmLotPallets / base.core.rmLotPallets, COEFFS.rmLotDispersionExp.value) : 1;
   const batchShape = base.core.fgBatchPallets > 0 ? core.fgBatchPallets / base.core.fgBatchPallets : 1;
   const rmH = core.rmMeanHours, rmB = base.core.rmMeanHours;
   const rmHours = hoursDaily(cal.replay.rmHours, RM_NORMS.fixedHoursPerDay, [

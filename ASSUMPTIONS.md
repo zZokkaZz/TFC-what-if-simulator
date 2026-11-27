@@ -484,3 +484,12 @@ Orange khi đổi Miami → Cabana: availability 99,3% → 98,8% (cả trước 
 ## 23. Shortage rule + thứ tự ưu tiên khách (ord.mgmt, 26/11/2026)
 
 Theo yêu cầu người dùng, tab Sales có ô **Shortage rule** (lựa chọn đọc từ tab 6: Proportional / First come, first served / Customer priority; R0 = Proportional) và **thứ tự ưu tiên khách** (khi chọn Customer priority; R0 = thứ tự bảng hợp đồng). **CHƯA MÔ HÌNH:** đổi ô KHÔNG đổi số nào — sheet không có dữ liệu game chia phần thiếu ra sao. Ô có để cả đội ghi nhận & đồng bộ lựa chọn; cảnh báo "Shortage rule" hiện SL từng khách so với mức hứa và penalty ≈ €/điểm thiếu (neo R0, ước lượng: F&G ≈ €66k, LAND ≈ €16k, Dominick's ≈ €13k ở R0) để cân nhắc. `firestore.rules` (`validSales`) thêm 2 trường → **cần Publish lại rules**; `scripts/test-rules.mjs` 63/63.
+
+## 24. Hiệu chỉnh theo Round 1 thật (27/11/2026)
+
+Nguồn: `data/TFC_Round1.xlsx` (tab R1_*), đọc bằng `scripts/build-data-r1.ts`. Chi tiết, bằng chứng và bảng trước/sau: `ROUND1_BACKTEST.md` mục 9.
+
+- **Hệ số đổi** (COEFFS, trạng thái "đã xác minh", nguồn R1): `salesBonusRate` (mới, 0,675%), `rmLotDispersionExp` (mới, 0,5), `obsoleteAgeSpreadScale` 2 → 4, `maintenanceDisruptionWeight` 0 → 1. Hai hệ số cuối là số người dùng chốt trước đây — đổi theo yêu cầu "chỉnh bám sát kết quả thật" ngày 27/11.
+- **Cấu trúc đổi** (thay giả định cũ bị R1 bác bỏ): plan adherence tính cả changeover; tồn TP thực ∝ plan adherence; obsolete ∝ plan adherence; phải thu theo contracted; cỡ đơn NL = lot + phần cộng thêm cố định; SL khách/order lines co giãn theo mức thiếu; tồn định giá theo giá mua mới; phí Tank theo phần xe; reliability NCC mới theo trung vị chênh lệch; SMED/speed/training vào Indirect.
+- **Vẫn là ước lượng**: mọi hệ số trên chỉ có 1–2 điểm dữ liệu (R0, R1). Đặc biệt `salesBonusRate` chỉ biết trong khoảng vượt 0,9–2,4 điểm; `rmLotDispersionExp` khớp 1 lần đổi lot (PET + Orange 4 → 2).
+- **Chưa đổi, chờ người dùng**: số pallet/FTL (sheet 30, R1 suy ra ≈ 27); hỏng máy theo chất lượng bao bì.

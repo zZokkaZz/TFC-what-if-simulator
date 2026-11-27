@@ -79,8 +79,9 @@ Lệnh: `npm run verify` = đọc Excel → toàn bộ test → build `dist/inde
 
 Viết test tạm trong `tests/zz-*.test.ts` (gọi `baselineInputs`, `simulate`, `defaultTerms`), chạy `npx vitest run tests/zz-x.test.ts`, **xóa khi xong**. Ví dụ bộ quyết định Round 1 đã nộp: xem `ROUND1_ANALYSIS.md` mục 1.
 
-## 7. Giới hạn đã biết (chi tiết ở `ROUND1_ANALYSIS.md`)
+## 7. Giới hạn đã biết (chi tiết ở `ROUND1_BACKTEST.md` mục 9.3)
 
-- Tồn thực tế ÷ lý thuyết đang cố định theo R0; số Round 1 cho thấy nó bám theo plan adherence → dự báo thiếu tồn TP, obsolete, SL khi adherence đổi nhiều.
-- Penalty, độ dốc SL, obsolete mới hiệu chỉnh trên 1 điểm (R0).
+- Đã hiệu chỉnh theo 2 điểm (R0 + R1, 27/11): backtest R1 ROI 5,36% (nhập số NCC thật) / 5,12% (đoán NCC) vs game 5,04%. Test: `tests/backtest-r1.test.ts`; dữ liệu R1: `src/data/round1.json` (`scripts/build-data-r1.ts`), bộ quyết định R1: `src/model/round1.ts`.
+- Còn lệch: phí FTL PET (pallet/xe 30 trong sheet vs ≈ 27 suy ra), hỏng máy thấp hơn game, thời vụ kho NL thấp, SL pieces C-power cao.
+- Hệ số mới chỉ có 1–2 điểm dữ liệu: thưởng SL, dao động kho NL, phân tán tuổi tồn.
 - Chưa mô hình: CI khi đổi điều khoản (hệ số = 0), shortage rule, frozen period, promotion horizon, hạn dùng NL, sản xuất bù hàng hủy, Energy/Water/Other/Interest (giữ R0).

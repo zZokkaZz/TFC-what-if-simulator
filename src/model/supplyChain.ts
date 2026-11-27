@@ -61,7 +61,7 @@ export function componentFlows(inputs: Inputs, data: Round0Data, cal: Calibratio
     const { safetyStockWeeks, lotSizeWeeks } = inputs.sc.components[c];
     // Cỡ đơn theo lot size (hiệu chỉnh R0). Trade unit: mỗi lần nhận ≥ 1 đơn vị (FTL 30 pallet, Tank, IBC, Drum, Pallet, layer);
     // đổi trade unit khác R0 → làm tròn lên bội số. Giữ trade unit R0 → không làm tròn (cỡ đơn R0, vd Orange 172.581 L, không phải bội số tank).
-    const lotOrder = lotSizeWeeks * purchased * cal.orderRatio[c];
+    const lotOrder = lotSizeWeeks * purchased + cal.orderOffsetWeeks[c] * usage;
     const unit = tradeUnitSize(data, c, sup.tradeUnit);
     const tuR0 = data.purchasing.contracts.find((x) => x.component === c)?.tradeUnit ?? sup.tradeUnit;
     let order = unit ? Math.max(lotOrder, unit) : lotOrder;
@@ -330,7 +330,8 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
     const withCap = (slopeAtR0: number) => (Math.abs(dCap) < 1e-12 ? clip01(sl0) : clip01(1 - clip01(1 - sl0) * Math.exp(-(slopeAtR0 / shortageR0) * dCap)));
     const slEst = withCap(COEFFS.capacitySlopeB.value);
     const slCons = Math.min(slEst, withCap(COEFFS.capacitySlopeC.value));
-    const slOlEst = Math.min(1, Math.max(0, st.slOrderLines + (slEst - st.slPieces)));
+    // SL order lines: mức THIẾU co giãn tỷ lệ với mức thiếu pieces (R0 → R1 game: 6 SKU, tỷ số 2 mức thiếu lệch ≤ 0,09 — ROUND1_BACKTEST.md)
+    const slOlEst = st.slPieces < 1 - 1e-9 ? clip01(1 - (1 - st.slOrderLines) * ((1 - slEst) / (1 - st.slPieces))) : clip01(st.slOrderLines + (slEst - st.slPieces));
     // C2: obsolete theo tuổi tồn = obsolete R0 × (tỷ lệ quá tuổi kịch bản ÷ tỷ lệ quá tuổi R0), σ hiệu chỉnh R0 × hệ số COEFFS
     const sg0 = ageSigma[p.sku];
     const P = p.intervalDays / ROUND.daysPerWeek, Sss = inputs.sc.products[p.sku].safetyStockWeeks;
@@ -343,6 +344,9 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
       const fNew = overAgeShare(Sss, P, ageNew, sg), fR0 = overAgeShare(dec0.safetyStockWeeks, dec0.productionIntervalDays / ROUND.daysPerWeek, ageA, sg);
       obsEst = fR0 > 1e-12 ? Math.min(1, st.obsolete * (fNew / fR0)) : st.obsolete + fNew;
       if (Math.abs(Sss - dec0.safetyStockWeeks) < 1e-12 && Math.abs(P - dec0.productionIntervalDays / ROUND.daysPerWeek) < 1e-12 && Math.abs(ageNew - ageA) < 1e-12) obsEst = st.obsolete;
+      // Tồn thực tế ∝ plan adherence (R0 + R1) → hàng quá tuổi cũng vậy: R1 game SKU giữ SS 3 có obsolete tăng theo adherence
+      // (Orange 1L 8,4 → 9,1%; C-power 1L 7,1 → 9,0%; C-power PET 5,5 → 8,1%)
+      if (pb && pb.adherence > 1e-9 && Math.abs(p.adherence - pb.adherence) > 1e-12) obsEst = Math.min(1, obsEst * (p.adherence / pb.adherence));
     }
     // Giá trị obsolete/tuần ∝ tỷ lệ hủy × lượng (promotion đổi lượng; không đổi gì → đúng số tab 7)
     const kVol = ratio(p.demandUnits, pb?.demandUnits);
@@ -394,7 +398,7 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
   const rmR0 = components.reduce((s, c) => s + c.stockValueR0, 0);
   const fgR0 = products.reduce((s, p) => s + p.stockValueR0, 0);
   return {
-    components, products, stockValue: { components: rmValue, products: fgValue, total: rmValue + fgValue, componentsR0: rmR0, productsR0: fgR0 },
+    components, products, stockValue: { components: rmValue, products: fgValue, total: rmValue + fgValue, componentsR0: rmR0, productsR0: fgR0, componentsAtR0Price: rmValue, productsAtR0Price: fgValue },
     obsoleteValuePerWeek: products.reduce((s, p) => s + p.obsoleteValuePerWeek, 0),
     obsoleteValuePerWeekR0: products.reduce((s, p) => s + p.obsoleteValuePerWeekR0, 0),
   };
@@ -403,4 +407,45 @@ export function simulateSupplyChain(inputs: Inputs, data: Round0Data, ops: OpsRe
 /** Quyết định SC/Ops/Purchasing của R0 (để tính rủi ro baseline cùng cách). */
 function baselineFromOps(data: Round0Data): Inputs {
   return baselineInputsSc(data);
+}
+
+/**
+ * Định giá lại tồn theo GIÁ MUA MỚI (gồm vận chuyển) — game định giá tồn NL theo giá mua TB, tồn TP theo giá vốn (tab 7 popup).
+ * R1 game: PET Philyp €0,0479 vs Trio €0,0547 → giá trị tồn NL R1 = 0,821 × R0 và Interest components cũng 0,821 × R0.
+ * NL: giá trị × (giá mua mới ÷ giá mua baseline mô hình). TP: giá vốn/đv R0 + Σ BOM × Δ giá NL. Start-up loss (vật tư hao hụt): × tỷ lệ chi phí vật tư.
+ * Không đổi NCC / điều kiện → tỷ lệ = 1 → đúng số sheet.
+ */
+export function repriceStock(sc: ScResults, data: Round0Data, priceNow: Record<ComponentKey, number>, priceBase: Record<ComponentKey, number>, unitCostR0: Record<SkuKey, number>): { sc: ScResults; materialRatio: Record<SkuKey, number> } {
+  const k = Object.fromEntries(COMPONENTS.map((c) => [c, priceBase[c] > 0 ? priceNow[c] / priceBase[c] : 1])) as Record<ComponentKey, number>;
+  const p0 = Object.fromEntries(COMPONENTS.map((c) => [c, data.purchasing.results.find((r) => r.component === c)?.pricePaid ?? 0])) as Record<ComponentKey, number>;
+  const same = COMPONENTS.every((c) => Math.abs(k[c] - 1) < 1e-12);
+  const materialRatio = {} as Record<SkuKey, number>;
+  for (const p of data.products) {
+    const m0 = COMPONENTS.reduce((s, c) => s + p.bom[c] * p0[c], 0);
+    const m1 = COMPONENTS.reduce((s, c) => s + p.bom[c] * p0[c] * k[c], 0);
+    materialRatio[p.key] = m0 > 0 ? m1 / m0 : 1;
+  }
+  if (same) return { sc, materialRatio };
+  const components = sc.components.map((c) => {
+    const f = k[c.key];
+    return { ...c, stockValue: c.stockValue * f, sheet: { ...c.sheet, stockValue: { ...c.sheet.stockValue, value: c.sheet.stockValue.value === null ? null : c.sheet.stockValue.value * f, basis: 'model' as const } } };
+  });
+  const products = sc.products.map((p) => {
+    const prod = data.products.find((x) => x.key === p.sku)!;
+    const u0 = unitCostR0[p.sku];
+    const du = COMPONENTS.reduce((s, c) => s + prod.bom[c] * p0[c] * (k[c] - 1), 0);
+    const f = u0 > 0 ? (u0 + du) / u0 : 1;
+    const sl = p.sheet.startupLoss;
+    return {
+      ...p, stockValue: p.stockValue * f,
+      sheet: {
+        ...p.sheet,
+        stockValue: { ...p.sheet.stockValue, value: p.sheet.stockValue.value === null ? null : p.sheet.stockValue.value * f, basis: 'model' as const },
+        startupLoss: { ...sl, value: sl.value === null ? null : sl.value * materialRatio[p.sku], basis: 'model' as const },
+      },
+    };
+  });
+  const rmValue = components.reduce((s, c) => s + c.stockValue, 0);
+  const fgValue = products.reduce((s, p) => s + p.stockValue, 0);
+  return { sc: { ...sc, components, products, stockValue: { ...sc.stockValue, components: rmValue, products: fgValue, total: rmValue + fgValue } }, materialRatio };
 }

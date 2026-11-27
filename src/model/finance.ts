@@ -108,8 +108,9 @@ export function simulateFinance(data: Round0Data, ops: OpsResults, sc?: ScResult
     }
     const lb = lineBasis(l.group, l.label);
     rows.push({ id: `r${i++}`, group: l.group, label, r0: l.value, value, modeled, basis: lb?.basis, why: lb?.why });
-    // Dòng mới (chi phí Ops không có trong P&L R0) chèn ngay sau Mixer variable costs
-    if (/^Mixer variable/i.test(l.label)) {
+    // Dòng mới (SMED, Increase speed, Solve breakdowns training — không có trong P&L R0): game R1 xếp vào INDIRECT
+    // (nhóm riêng ngay sau Distribution costs: "Solve breakdowns training 4.000, SMED 10.000"), không vào Production costs.
+    if (/^Distribution costs$/i.test(l.label)) {
       for (const c of ops.costs.filter((c) => c.group === 'production' && !OPS_LINE_MAP.some((m) => m.ids.includes(c.id)))) {
         const lbn = lineBasis(l.group, c.label);
         rows.push({ id: c.id, group: l.group, label: `${c.label} (dòng mới)`, r0: 0, value: c.value, modeled: true, isNew: true, basis: lbn?.basis ?? 'rule', why: lbn?.why });

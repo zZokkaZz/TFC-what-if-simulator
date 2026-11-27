@@ -62,8 +62,10 @@ describe('2. Lot size NL giảm → cảnh báo phí vận chuyển & đơn hàn
     expect(w.roi.length).toBeGreaterThan(0);
     expect(w.roi.every((x) => x.delta !== null)).toBe(true);
     const row = (re: RegExp) => r.finance.rows.find((x) => re.test(x.label))!;
-    // số chuyến ×2 → phí đơn hàng nhập ×2 (neo R0 × tỷ lệ số chuyến)
-    expect(row(/^Inbound orders$/).value).toBeCloseTo(row(/^Inbound orders$/).r0! * 2, 6);
+    // phí đơn hàng nhập = R0 × tỷ lệ số chuyến (cỡ đơn có phần cộng thêm cố định — hiệu chỉnh R1 — nên số chuyến tăng < ×2)
+    const trips = (x: typeof r) => x.purchasing.deliveriesPerRound;
+    expect(row(/^Inbound orders$/).value).toBeCloseTo(row(/^Inbound orders$/).r0! * (trips(r) / trips(b)), 6);
+    expect(trips(r) / trips(b)).toBeGreaterThan(1.5);
     expect(r.purchasing.transportCost).toBeGreaterThan(b.purchasing.transportCost);
   });
   it('lot size tăng hoặc không đổi → không có cảnh báo này', () => {

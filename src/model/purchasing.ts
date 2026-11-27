@@ -53,13 +53,16 @@ export function listedTerms(data: Round0Data, c: ComponentKey, supplier: string)
   return data.purchasing.market.find((s) => s.component === c && s.supplier === supplier) ?? null;
 }
 
-/** Chênh lệch TB (reliability cam kết − thực tế) của 5 NCC R0 — dùng ước lượng reliability NCC mới. */
+/** Chênh lệch (reliability cam kết − thực tế) của 5 NCC R0 — lấy TRUNG VỊ (không phải trung bình) để ước lượng reliability NCC mới.
+ *  R1: trung bình 4,7 điểm (bị Trio 9,9 và Seitan 8,5 kéo lên) đoán Philyp/SYI 93,3% trong khi game 96,4% / 98,2%; trung vị 2,7 → 95,3%. */
 export function avgReliabilityGap(data: Round0Data): number {
   const gaps = data.purchasing.contracts.map((k) => {
     const r = data.purchasing.results.find((x) => x.supplier === k.supplier && x.component === k.component);
     return r ? k.agreedReliability - r.reliability : null;
   }).filter((x): x is number => x !== null);
-  return gaps.length ? gaps.reduce((s, x) => s + x, 0) / gaps.length : 0;
+  if (!gaps.length) return 0;
+  const g = [...gaps].sort((a, b) => a - b), m = Math.floor(g.length / 2);
+  return g.length % 2 ? g[m] : (g[m - 1] + g[m]) / 2;
 }
 
 /** Ô đàm phán mặc định khi chọn một NCC (điều kiện niêm yết, chưa đàm phán; các ô "số game" bỏ trống). */
@@ -149,7 +152,8 @@ export function transportModel(data: Round0Data, sup: ActiveSupplier, flow: Comp
     else unitCost = Math.ceil(pallets - 1e-9) * small;
   } else {
     const lu = comp.liquidUnits!;
-    if (tu.includes('tank')) unitCost = Math.ceil(perDelivery / lu.tank - 1e-9) * full;
+    // Tank: phí theo phần xe bồn đã dùng (không làm tròn lên): R1 game Miami lot 4 → 2 tuần, phí vận chuyển gần như không đổi (35.046 → 35.282)
+    if (tu.includes('tank')) unitCost = (perDelivery / lu.tank) * full;
     else if (tu.includes('ibc')) unitCost = Math.ceil(perDelivery / lu.ibc - 1e-9) * small;
     else unitCost = Math.ceil(perDelivery / lu.drum - 1e-9) * small;
   }
